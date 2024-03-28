@@ -11,8 +11,8 @@ async function bootstrap() {
     .addTag('API')
     .build();
   const documentation = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api-documentation', app, documentation);
+  SwaggerModule.setup('/api-documentation', app, documentation);
 
-  await app.listen(80);
+  await app.listen(process.env.PORT || 3000);
 }
 bootstrap();
