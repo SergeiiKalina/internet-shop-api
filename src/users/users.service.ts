@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { User, UserSchema } from './user.model';
+import { User } from './user.model';
+import * as bcrypt from 'bcrypt';
 import { Model } from 'mongoose';
 import { RegistrationDto } from './dto/registrationDto';
 
@@ -13,13 +14,17 @@ export class UsersService {
   }
   async registration(newUser: RegistrationDto) {
     try {
-      const { email } = newUser;
+      const { email, password } = newUser;
       const candidate = await this.userModel.findOne({ email });
 
       if (candidate) {
         throw new Error('This user has registered');
       }
-      const user = await this.userModel.create(newUser);
+      const hashPassword = await bcrypt.hash(password, 3);
+      const user = await this.userModel.create({
+        ...newUser,
+        password: hashPassword,
+      });
       return user;
     } catch (error) {
       throw error;
