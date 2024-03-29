@@ -10,18 +10,25 @@ import { ApiProperty } from '@nestjs/swagger';
 export class RegistrationDto {
   @IsEmail()
   @IsNotEmpty()
-  @ApiProperty()
+  @ApiProperty({ description: 'Email address' })
   email: string;
+
   @IsString()
   @Length(3, 20)
   @IsNotEmpty()
-  @ApiProperty()
+  @ApiProperty({
+    description: 'First name (3-20 characters)',
+  })
   firstName: string;
+
   @IsString()
   @Length(3, 20)
   @IsNotEmpty()
-  @ApiProperty()
+  @ApiProperty({
+    description: 'Last name (3-20 characters)',
+  })
   lastName: string;
+
   @IsString()
   @Length(0, 13)
   @Matches(/^\+38\d{10}$/, {
@@ -29,15 +36,21 @@ export class RegistrationDto {
       'The numberPhone field must start with "+38" and allow an additional 10 digits.',
   })
   @IsNotEmpty()
-  @ApiProperty()
+  @ApiProperty({
+    description: 'Phone number (+38XXXXXXXXXX)',
+  })
   numberPhone: string;
+
   @IsString()
   @Length(6, 20)
   @Matches(/^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/, {
     message:
-      'The password field must contain 6-20 characters: only letters, digits, at least 1 special character, at least 1 uppercase letter.',
+      'Password must contain 6-20 characters: letters, digits, at least 1 special character, at least 1 uppercase letter.',
   })
   @IsNotEmpty()
-  @ApiProperty()
+  @ApiProperty({
+    description:
+      'Password (6-20 characters, must contain at least 1 special character and 1 uppercase letter)',
+  })
   password: string;
 }
