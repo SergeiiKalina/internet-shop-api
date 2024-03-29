@@ -7,7 +7,11 @@ export class User {
   @Prop({ required: true })
   password: string;
   @Prop()
-  name: string;
+  firstName: string;
+  @Prop()
+  lastName: string;
+  @Prop()
+  numberPhone: string;
   @Prop({ default: () => Date.now() })
   registrationDate: Date;
 }
