@@ -1,12 +1,12 @@
 import { Controller } from '@nestjs/common';
-import { UsersService } from './users.service';
+import { AuthService } from './auth.service';
 import { Get, Post, Body, Res, UsePipes, ValidationPipe } from '@nestjs/common';
 import { Response } from 'express';
 import { RegistrationDto } from './dto/registrationDto';
 
-@Controller('users')
-export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+@Controller('auth')
+export class AuthController {
+  constructor(private readonly usersService: AuthService) {}
 
   @Get()
   async getAllUsers() {

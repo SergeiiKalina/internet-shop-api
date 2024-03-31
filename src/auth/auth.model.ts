@@ -12,6 +12,8 @@ export class User {
   lastName: string;
   @Prop()
   numberPhone: string;
+  @Prop()
+  activationLink: string;
   @Prop({ default: () => Date.now() })
   registrationDate: Date;
 }
