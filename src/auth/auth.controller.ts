@@ -9,8 +9,9 @@ export class AuthController {
   constructor(private readonly usersService: AuthService) {}
 
   @Get()
-  async getAllUsers() {
-    return this.usersService.getAllUsers();
+  async getAllUsers(@Res() res: Response) {
+    res.sendFile('C:/Users/PC/Desktop/internet-shop/src/auth/index.html');
+    //;)
   }
   @Post('registration')
   @UsePipes(new ValidationPipe())
