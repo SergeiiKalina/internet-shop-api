@@ -6,6 +6,8 @@ export class User {
   email: string;
   @Prop({ required: true })
   password: string;
+  @Prop({ default: false })
+  isActivated: boolean;
   @Prop()
   firstName: string;
   @Prop()
