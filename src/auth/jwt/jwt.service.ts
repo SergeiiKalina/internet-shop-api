@@ -41,4 +41,30 @@ export class JwtService {
     const token = await this.jwtModel.create({ user: userId, refreshJwt });
     return token;
   }
+
+  async validateRefreshToken(token: string) {
+    try {
+      const userData = await jsonwebtoken.verify(
+        token,
+        process.env.JWT_REFRESH_SECRET_KEY,
+      );
+
+      if (typeof userData !== 'string') {
+        return userData._doc as jsonwebtoken.JwtPayload;
+      }
+    } catch (error) {
+      return null;
+    }
+  }
+  async findJwt(refreshJwt: string) {
+    try {
+      const tokenData = await this.jwtModel.findOne({ refreshJwt });
+      if (!tokenData) {
+        throw new Error('Token not found');
+      }
+      return tokenData;
+    } catch (error) {
+      return null;
+    }
+  }
 }

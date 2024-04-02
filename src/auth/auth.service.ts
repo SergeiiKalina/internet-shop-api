@@ -43,4 +43,43 @@ export class AuthService {
 
     return { ...tokens, user };
   }
+
+  async refreshJwt(refreshJwt: string) {
+    try {
+      if (!refreshJwt) {
+        throw new Error("User isn't authorized");
+      }
+
+      const userData = await this.jwtService.validateRefreshToken(refreshJwt);
+
+      const tokenFromDb = await this.jwtService.findJwt(refreshJwt);
+      if (!userData || !tokenFromDb) {
+        throw new Error("User isn't authorized");
+      }
+
+      const user = await this.userModel.findById(userData._id);
+
+      if (!user) {
+        throw new Error('User not found');
+      }
+
+      const tokens = await this.jwtService.generationJwt({ ...user });
+
+      await this.jwtService.safeJwt(user.id, tokens.refreshJwt);
+      return { ...tokens, user };
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  async activate(link: string) {
+    const user = await this.userModel.findOne({ activationLink: link });
+    if (!user) {
+      throw new Error('This link is not correct');
+    }
+
+    user.isActivated = true;
+
+    await user.save();
+  }
 }
