@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
+
 import { MongooseModule } from '@nestjs/mongoose';
 import { AuthModule } from './auth/auth.module';
 import { MailerModule } from '@nestjs-modules/mailer';
@@ -8,6 +7,9 @@ import { User, UserSchema } from './auth/auth.model';
 import { EjsAdapter } from '@nestjs-modules/mailer/dist/adapters/ejs.adapter';
 import { ConfigModule } from '@nestjs/config';
 import { Jwt, JwtSchema } from './auth/jwt/jwt.model';
+import { UsersModule } from './users/users.module';
+import { AppService } from './app.service';
+import { AppController } from './app.controller';
 
 @Module({
   imports: [
@@ -43,6 +45,8 @@ import { Jwt, JwtSchema } from './auth/jwt/jwt.model';
       }),
     }),
     AuthModule,
+    UsersModule,
+    User
   ],
   controllers: [AppController],
   providers: [AppService],

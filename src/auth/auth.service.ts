@@ -16,9 +16,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
-  async getAllUsers() {
-    return this.userModel.find().exec();
-  }
+  
   async registration(newUser: RegistrationDto) {
     const { email, password } = newUser;
     const candidate = await this.userModel.findOne({ email });
@@ -43,4 +41,29 @@ export class AuthService {
 
     return { ...tokens, user };
   }
-}
+
+  // async validateUser(email:string, password:string): Promise<any>{
+  //   const user = this.findOne(email);
+  //   if (user && user.password === password) {
+  //     const { password, ...result } = user; // Remove password from user object before returning
+  //     return result;
+  //   }
+  //   return null;
+  // }
+
+
+
+  // async login(email:string, password:string): Promise<any>{
+    
+  //   const user = this.findOne(email)
+
+  //   if(user){
+  //     const token = this.jwtService.generationJwt(user)
+  //     return {user, token}
+  //   }
+
+  }
+
+
+
+

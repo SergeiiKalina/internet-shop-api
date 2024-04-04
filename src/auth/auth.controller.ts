@@ -3,16 +3,14 @@ import { AuthService } from './auth.service';
 import { Get, Post, Body, Res, UsePipes, ValidationPipe } from '@nestjs/common';
 import { Response } from 'express';
 import { RegistrationDto } from './dto/registrationDto';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('auth')
 @Controller('auth')
 export class AuthController {
   constructor(private readonly usersService: AuthService) {}
 
-  @Get()
-  async getAllUsers(@Res() res: Response) {
-    res.sendFile('C:/Users/PC/Desktop/internet-shop/src/auth/index.html');
-    //;)
-  }
+  
   @Post('registration')
   @UsePipes(new ValidationPipe())
   async registration(@Body() newUser: RegistrationDto, @Res() res: Response) {
