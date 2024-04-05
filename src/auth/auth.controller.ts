@@ -27,6 +27,7 @@ export class AuthController {
   async registration(@Body() newUser: RegistrationDto, @Res() res: Response) {
     try {
       const user = await this.usersService.registration(newUser);
+
       res.cookie('refreshToken', user.refreshJwt, {
         maxAge: 30 * 24 * 60 * 60 * 1000,
         httpOnly: true,

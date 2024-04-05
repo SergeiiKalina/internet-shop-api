@@ -6,14 +6,14 @@ import { v4 as uuidv4 } from 'uuid';
 import { Model } from 'mongoose';
 import { RegistrationDto } from './dto/registrationDto';
 import { Mailer } from './mailer/mailer.service';
-import { JwtService } from './jwt/jwt.service';
+import { TokenService } from './jwt/jwt.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     @InjectModel(User.name) private userModel: Model<User>,
     private readonly mailerService: Mailer,
-    private readonly jwtService: JwtService,
+    private readonly jwtService: TokenService,
   ) {}
 
   async getAllUsers() {
