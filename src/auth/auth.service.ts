@@ -9,7 +9,7 @@ import { Mailer } from './mailer/mailer.service';
 import { UsersService } from 'src/users/users.service';
 import { TokenService } from './jwt/jwt.service';
 import { JwtService } from '@nestjs/jwt';
-import { AuthLoginDto } from './dto/login.dto';
+import { AuthEmailLoginDto } from './dto/login.dto';
 import { compare } from 'bcrypt';
 @Injectable()
 export class AuthService {
@@ -56,37 +56,37 @@ export class AuthService {
   //   return null;
   // }
 
-  async login(dto: AuthLoginDto)
-  {
-      const user = await this.validateUser(dto);
+  async login(dto: AuthEmailLoginDto) {
+    const user = await this.validateUser(dto);
 
-      const payload = { email: user.email, sub: user.firstName };
+    const payload = { email: user.email, sub: user.id }; // Using user ID as subject
 
-      return {
-          user,
-          backend_tokens: {
-              access_token: await this.jwtService.signAsync(payload, { expiresIn: '20s', secret: process.env.JWT_SECRET }),
-              refresh_token: await this.jwtService.signAsync(payload, { expiresIn: '7d', secret: process.env.JWT_REFRESH_TOKEN }),
-          }
-      };
-  }
+    return {
+        user,
+        backend_tokens: {
+            access_token: await this.jwtService.signAsync(payload, { expiresIn: '20m', secret: process.env.JWT_SECRET }), // Change expiresIn value as needed
+            refresh_token: await this.jwtService.signAsync(payload, { expiresIn: '7d', secret: process.env.JWT_REFRESH_TOKEN }),
+        }
+    };
+}
 
-  async validateUser(dto: AuthLoginDto)
-  {
-      const user = await this.usersService.findOne(dto.email);
-      if (!user) {
-          throw new UnauthorizedException('Invalid credentials');
-      }
+async validateUser(dto: AuthEmailLoginDto) {
+    const user = await this.usersService.findByEmail(dto.email);
+    if (!user) {
+        throw new UnauthorizedException('Invalid credentials');
+    }
 
-      const isMatch = await compare(dto.password, user.password);
-      if (!isMatch) {
-          throw new UnauthorizedException('Invalid credentials');
-      }
+    try {
+        const isMatch = await compare(dto.password, user.password);
+        if (!isMatch) {
+            throw new UnauthorizedException('Invalid credentials');
+        }
+    } catch (error) {
+        throw new UnauthorizedException('Invalid credentials');
+    }
 
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { password, ...result } = user;
+    const { password, ...result } = user; // Omitting password from the returned user object
 
-      return result;
-
-  }
+    return result;
+}
 }

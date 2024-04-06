@@ -1,10 +1,11 @@
-import { Controller, Req  } from '@nestjs/common';
+import { Controller, Req, UseGuards  } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { Get, Post, Body, Res, UsePipes, ValidationPipe } from '@nestjs/common';
 import { Response } from 'express';
 import { RegistrationDto } from './dto/registrationDto';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { AuthLoginDto } from './dto/login.dto';
+import { AuthEmailLoginDto } from './dto/login.dto';
+import { AuthGuard } from '@nestjs/passport';
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
@@ -32,7 +33,7 @@ export class AuthController {
   })
   @UsePipes(ValidationPipe)
   @Post('/login')
-  async login(@Body() dto: AuthLoginDto)
+  async login(@Body() dto: AuthEmailLoginDto)
   {
       return this.authService.login(dto);
   }
