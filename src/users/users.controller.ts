@@ -10,6 +10,6 @@ import { Response } from 'express';
 export class UsersController {
     @Get()
     async getAllUsers(@Res() res: Response) {
-      res.sendFile('C:/Users/PC/Desktop/internet-shop/src/auth/index.html');
+     
     }
 }

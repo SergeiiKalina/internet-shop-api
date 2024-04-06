@@ -8,11 +8,9 @@ export class UsersService {
     constructor(
     @InjectModel(User.name) private userModel: Model<User>
     ){}
-
-
-
     async getAllUsers() {
-        return this.userModel.find().exec();
       }
-    
+    async findOne(id: string):Promise<User | null>{
+      return this.userModel.findById(id).exec();
+    }
 }
