@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { User } from './auth.model';
 import * as bcrypt from 'bcrypt';
@@ -6,15 +6,17 @@ import { v4 as uuidv4 } from 'uuid';
 import { Model } from 'mongoose';
 import { RegistrationDto } from './dto/registrationDto';
 import { Mailer } from './mailer/mailer.service';
-import jwt from 'jsonwebtoken';
 import { UsersService } from 'src/users/users.service';
-import { JwtService } from './jwt/jwt.service';
-
+import { TokenService } from './jwt/jwt.service';
+import { JwtService } from '@nestjs/jwt';
+import { AuthLoginDto } from './dto/login.dto';
+import { compare } from 'bcrypt';
 @Injectable()
 export class AuthService {
   constructor(
     @InjectModel(User.name) private userModel: Model<User>,
     private readonly mailerService: Mailer,
+    private readonly TokenService: TokenService,
     private readonly jwtService: JwtService,
     private readonly usersService: UsersService,
   ) {}
@@ -38,34 +40,53 @@ export class AuthService {
       email,
       `${process.env.API_URL}/auth/activate/${activationLink}`,
     );
-    const tokens = await this.jwtService.generationJwt({ ...user });
+    const tokens = await this.TokenService.generationJwt({ ...user });
 
-    await this.jwtService.safeJwt(user.id, tokens.refreshJwt);
+    await this.TokenService.safeJwt(user.id, tokens.refreshJwt);
 
     return { ...tokens, user };
   }
 
-  async validateUser(username: string, password: string): Promise<any> {
-    const user = await this.usersService.findOne(username);
-    if (user && user.password === password) {
-      const { password, ...result } = user;
-      return result;
-    }
-    return null;
+  // async validateUser(userId: string, password: string): Promise<any> {
+  //   const user = await this.usersService.findOne(userId);
+  //   if (user && user.password === password) {
+  //     const { password, ...result } = user;
+  //     return result;
+  //   }
+  //   return null;
+  // }
+
+  async login(dto: AuthLoginDto)
+  {
+      const user = await this.validateUser(dto);
+
+      const payload = { email: user.email, sub: user.firstName };
+
+      return {
+          user,
+          backend_tokens: {
+              access_token: await this.jwtService.signAsync(payload, { expiresIn: '20s', secret: process.env.JWT_SECRET }),
+              refresh_token: await this.jwtService.signAsync(payload, { expiresIn: '7d', secret: process.env.JWT_REFRESH_TOKEN }),
+          }
+      };
   }
 
-  // async signIn(
-  //   username: string,
-  //   pass: string,
-  // ): Promise<{ access_token: string }> {
-  //   const user = await this.usersService.findOne(username);
-  //   if (user?.password !== pass) {
-  //     throw new UnauthorizedException();
-  //   }
-  //   const payload = { sub: user.userId, username: user.username };
-  //   return {
-  //     access_token: await this.jwtService.signAsync(payload),
-  //   };
-  // }
-  
+  async validateUser(dto: AuthLoginDto)
+  {
+      const user = await this.usersService.findOne(dto.email);
+      if (!user) {
+          throw new UnauthorizedException('Invalid credentials');
+      }
+
+      const isMatch = await compare(dto.password, user.password);
+      if (!isMatch) {
+          throw new UnauthorizedException('Invalid credentials');
+      }
+
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { password, ...result } = user;
+
+      return result;
+
+  }
 }

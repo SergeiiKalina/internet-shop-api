@@ -1,9 +1,10 @@
-import { Controller, HttpCode, HttpStatus, Param, Req, UnauthorizedException } from '@nestjs/common';
+import { Controller, Req  } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { Get, Post, Body, Res, UsePipes, ValidationPipe } from '@nestjs/common';
 import { Response } from 'express';
 import { RegistrationDto } from './dto/registrationDto';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { AuthLoginDto } from './dto/login.dto';
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
@@ -26,10 +27,15 @@ export class AuthController {
       return res.status(400).json({ message: error.message });
     }
   }
-
-    @HttpCode(HttpStatus.OK)
-    @Post('login')
-    async signIn(@Req() req) {
-      return req.user;
-    }
+  @ApiOperation({
+    summary: 'Login as a user',
+  })
+  @UsePipes(ValidationPipe)
+  @Post('/login')
+  async login(@Body() dto: AuthLoginDto)
+  {
+      return this.authService.login(dto);
+  }
 }
+
+
