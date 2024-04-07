@@ -19,8 +19,7 @@ export class AuthController {
 
   @Get()
   async getAllUsers(@Res() res: Response) {
-    res.sendFile('C:/Users/PC/Desktop/internet-shop/src/auth/index.html');
-    //;)
+    return this.usersService.getAllUsers();
   }
   @Post('registration')
   @UsePipes(new ValidationPipe())
