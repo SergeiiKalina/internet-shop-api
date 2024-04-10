@@ -56,39 +56,22 @@ export class AuthService {
   //   return null;
   // }
 
-  async login(dto: AuthEmailLoginDto) {
-    const user = await this.validateUser(dto);
+  async login( loginDto: AuthEmailLoginDto ){
+          const { email, password } = loginDto;
+ 
+          const user= await this.userModel.findOne({email})
+ 
+          if(!user){
+           throw new UnauthorizedException('Invalid email or password')
+          } 
+  
+          const isPasswordMatches = await bcrypt.compare(password, user.password)
+  
+          const token= this.jwtService.sign({id: user._id})
+ 
+          return {user, token}; 
+  }
 
-    const payload = { email: user.email, sub: user.id }; // Using user ID as subject
-
-    return {
-        user,
-        backend_tokens: {
-            access_token: await this.jwtService.signAsync(payload, { expiresIn: '20m', secret: process.env.JWT_SECRET }), // Change expiresIn value as needed
-            refresh_token: await this.jwtService.signAsync(payload, { expiresIn: '7d', secret: process.env.JWT_REFRESH_TOKEN }),
-        }
-    };
-}
-
-async validateUser(dto: AuthEmailLoginDto) {
-    const user = await this.usersService.findByEmail(dto.email);
-    if (!user) {
-        throw new UnauthorizedException('Invalid credentials');
-    }
-
-    try {
-        const isMatch = await compare(dto.password, user.password);
-        if (!isMatch) {
-            throw new UnauthorizedException('Invalid credentials');
-        }
-    } catch (error) {
-        throw new UnauthorizedException('Invalid credentials');
-    }
-
-    const { password, ...result } = user; // Omitting password from the returned user object
-
-    return result;
-}
   async refreshJwt(refreshJwt: string) {
     try {
       if (!refreshJwt) {
