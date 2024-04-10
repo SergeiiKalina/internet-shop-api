@@ -9,12 +9,14 @@ import {
   Controller,
   Req,
   Param,
+  UseGuards,
 } from '@nestjs/common';
 import { Response, Request } from 'express';
 import { RegistrationDto } from './dto/registrationDto';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AuthEmailLoginDto } from './dto/login.dto';
 import { AuthGuard } from '@nestjs/passport';
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
@@ -40,12 +42,28 @@ export class AuthController {
   @ApiOperation({
     summary: 'Login as a user',
   })
-  @UsePipes(ValidationPipe)
+
   @Post('/login')
-  async login(@Body() dto: AuthEmailLoginDto)
-  {
-      return this.authService.login(dto);
+  async login(@Body() dto: AuthEmailLoginDto) { 
+    return this.authService.login(dto); 
   }
+
+
+  
+@ApiBearerAuth()
+@UseGuards(JwtAuthGuard)
+@Post('logout')
+async logout(@Res() res: Response) {
+  try {
+      res.clearCookie('jwt');
+      return { message: 'Logout successful' };
+  } catch (error) {
+    
+      return { error: 'Logout failed', message: error.message };
+  }
+}
+
+  
   @Get('refresh')
   async refreshJwt(@Req() req: Request, @Res() res: Response) {
     const refreshJwt = req.cookies.refreshToken;
@@ -68,5 +86,4 @@ export class AuthController {
     return res.redirect(process.env.API_URL);
   }
 }
-
 
