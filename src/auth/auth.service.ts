@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { User } from './auth.model';
 import * as bcrypt from 'bcrypt';
@@ -60,7 +60,9 @@ export class AuthService {
           const { email, password } = loginDto;
  
           const user= await this.userModel.findOne({email})
- 
+
+          const payload = { email: user.email, sub: user.id }; // Using user ID as subject
+
           if(!user){
            throw new UnauthorizedException('Invalid email or password')
           } 
@@ -69,8 +71,18 @@ export class AuthService {
   
           const token= this.jwtService.sign({id: user._id})
  
-          return {user, token}; 
+          return {
+            user, 
+            token,
+            backend_tokens: {
+              access_token: await this.jwtService.signAsync(payload, { expiresIn: '20m', secret: process.env.JWT_SECRET }), // Change expiresIn value as needed
+              refresh_token: await this.jwtService.signAsync(payload, { expiresIn: '7d', secret: process.env.JWT_REFRESH_TOKEN }),
+          }
+        }; 
   }
+
+  
+
 
   async refreshJwt(refreshJwt: string) {
     try {

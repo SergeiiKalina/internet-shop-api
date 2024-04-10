@@ -10,6 +10,7 @@ async function bootstrap() {
     .setTitle('Internet-Shop')
     .setDescription('Api for internet shop')
     .setVersion('1.0')
+    .addBearerAuth()
     .addTag('API')
     .build();
   const documentation = SwaggerModule.createDocument(app, config);

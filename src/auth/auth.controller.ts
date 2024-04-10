@@ -10,6 +10,9 @@ import {
   Req,
   Param,
   UseGuards,
+  Delete,
+  HttpCode,
+  HttpStatus,
 } from '@nestjs/common';
 import { Response, Request } from 'express';
 import { RegistrationDto } from './dto/registrationDto';
@@ -17,6 +20,7 @@ import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AuthEmailLoginDto } from './dto/login.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { User } from './auth.model';
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
@@ -48,21 +52,22 @@ export class AuthController {
     return this.authService.login(dto); 
   }
 
-
+//   try {
+//     res.clearCookie('jwt');
+//     return { message: 'Logout successful' };
+// } catch (error) {
+  
+//     return { error: 'Logout failed', message: error.message };
+// }
   
 @ApiBearerAuth()
+@Get('logout')
+@ApiOperation({ summary: 'logout by user' })
+@HttpCode(HttpStatus.OK)
 @UseGuards(JwtAuthGuard)
-@Post('logout')
-async logout(@Res() res: Response) {
-  try {
-      res.clearCookie('jwt');
-      return { message: 'Logout successful' };
-  } catch (error) {
-    
-      return { error: 'Logout failed', message: error.message };
-  }
+async logout(@Req() req) {
+  req.user = null
 }
-
   
   @Get('refresh')
   async refreshJwt(@Req() req: Request, @Res() res: Response) {
