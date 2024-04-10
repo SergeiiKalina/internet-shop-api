@@ -27,6 +27,14 @@ export class TokenService {
     }
   }
 
+  async validateAccessToken(accessToken: string) {
+    const userData = await this.jwtService.verifyAsync(accessToken);
+    if (userData) {
+      return userData;
+    }
+    return null;
+  }
+
   async safeJwt(userId, refreshJwt) {
     const tokenData = await this.jwtModel.findOne({ user: userId });
 

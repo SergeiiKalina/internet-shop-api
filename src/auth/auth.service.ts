@@ -89,4 +89,42 @@ async validateUser(dto: AuthEmailLoginDto) {
 
     return result;
 }
+  async refreshJwt(refreshJwt: string) {
+    try {
+      if (!refreshJwt) {
+        throw new Error("User isn't authorized");
+      }
+
+      const userData = await this.TokenService.validateRefreshToken(refreshJwt);
+
+      const tokenFromDb = await this.TokenService.findJwt(refreshJwt);
+      if (!userData || !tokenFromDb) {
+        throw new Error("User isn't authorized");
+      }
+
+      const user = await this.userModel.findById(userData._id);
+
+      if (!user) {
+        throw new Error('User not found');
+      }
+
+      const tokens = await this.TokenService.generationJwt({ ...user });
+
+      await this.TokenService.safeJwt(user.id, tokens.refreshJwt);
+      return { ...tokens, user };
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  async activate(link: string) {
+    const user = await this.userModel.findOne({ activationLink: link });
+    if (!user) {
+      throw new Error('This link is not correct');
+    }
+
+    user.isActivated = true;
+
+    await user.save();
+  }
 }

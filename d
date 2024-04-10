@@ -1,0 +1,95 @@
+[33mcommit 24c7023ca46f072f1052af2328490369cf1da38c[m[33m ([m[1;36mHEAD[m[33m)[m
+Author: Morgan <otovmid@gmail.com>
+Date:   Wed Apr 10 14:01:59 2024 +0300
+
+    update/3-auth-in-pocessing
+
+[33mcommit 1e912a3c30d0f6a3de7dd2474f9a254b5fcdf21e[m[33m ([m[1;31morigin/#3-endpoint-for-login[m[33m, [m[1;32m#3-endpoint-for-login[m[33m)[m
+Author: Morgan <otovmid@gmail.com>
+Date:   Sat Apr 6 22:09:23 2024 +0300
+
+    feature/3-made-user-auth(now we can authentication)
+
+[33mcommit 6a802f5e52a8d0b3beb38331e5ffe367525c991f[m
+Author: Morgan <otovmid@gmail.com>
+Date:   Sat Apr 6 21:44:42 2024 +0300
+
+    #3-made-auth
+
+[33mcommit 54523c050a6ebc675b283415f7cc58a30f6f39f7[m
+Author: Morgan <otovmid@gmail.com>
+Date:   Sat Apr 6 20:57:35 2024 +0300
+
+    save
+
+[33mcommit 7b276d9a8d09bab76e2cbf460b232059df89ae5b[m
+Author: Morgan <otovmid@gmail.com>
+Date:   Thu Apr 4 20:38:57 2024 +0300
+
+    feature/3-create-users-module(update users structure)
+
+[33mcommit 07d3c31d239f39f424ce4729d61d336e39d33681[m[33m ([m[1;31morigin/#1-endpoint-registration[m[33m)[m
+Author: Sergeii Kalyna <setserg02@gmail.com>
+Date:   Mon Apr 1 21:49:22 2024 +0300
+
+    )
+
+[33mcommit 9bed782d3afe8f2de8d7a261970cb04a2ff2fa80[m
+Author: Sergeii Kalyna <setserg02@gmail.com>
+Date:   Mon Apr 1 10:24:58 2024 +0300
+
+    add flag isActivated
+
+[33mcommit fc8c2a905769314ea8ac6b46ce7d0c79b4c77103[m
+Author: Sergeii Kalyna <setserg02@gmail.com>
+Date:   Mon Apr 1 10:17:25 2024 +0300
+
+    add cookie
+
+[33mcommit 1e6c13f6f9bd34f60ea2532cd0bf9bd77d419bba[m
+Author: Sergeii Kalyna <setserg02@gmail.com>
+Date:   Sun Mar 31 23:10:53 2024 +0300
+
+    add endpoint registration
+
+[33mcommit acbc4c8d35aeca3dfdbc176fe5368d2bf78eb351[m
+Author: Sergeii Kalyna <setserg02@gmail.com>
+Date:   Fri Mar 29 11:28:02 2024 +0200
+
+    update dto with swagger
+
+[33mcommit f59ea4d0d4c5b7b5a94ce989fcd9589009ee851c[m
+Author: Sergeii Kalyna <setserg02@gmail.com>
+Date:   Fri Mar 29 11:06:35 2024 +0200
+
+    rewrite dto add swagger ApiProperty
+
+[33mcommit d0c9d9aea535e3b12b652a14670043fe3e81f3d3[m
+Author: Sergeii Kalyna <setserg02@gmail.com>
+Date:   Fri Mar 29 10:52:22 2024 +0200
+
+    add hash password
+
+[33mcommit c4380c4a2786e46ea5cdbeee126f59f94d60d537[m
+Author: Sergeii Kalyna <setserg02@gmail.com>
+Date:   Fri Mar 29 10:48:14 2024 +0200
+
+    add endpoint registration and validation fields
+
+[33mcommit cbee29780788f8e268ac5b9f541754de5beb8744[m
+Author: Sergeii Kalyna <setserg02@gmail.com>
+Date:   Thu Mar 28 12:41:31 2024 +0200
+
+    fixed bug with swagger
+
+[33mcommit 2e6a3ebb9cd10e8585d6e7961f50e5eab6eae7da[m
+Author: Sergeii Kalyna <setserg02@gmail.com>
+Date:   Thu Mar 28 12:16:39 2024 +0200
+
+    add vercel
+
+[33mcommit 340589c92b0b6720b24650daed2587eac5381320[m
+Author: Sergeii Kalyna <setserg02@gmail.com>
+Date:   Thu Mar 28 11:36:01 2024 +0200
+
+    init project and connect db
