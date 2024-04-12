@@ -67,14 +67,16 @@ export class AuthService {
            throw new UnauthorizedException('Invalid email or password')
           } 
   
-          const isPasswordMatches = await bcrypt.compare(password, user.password)
+          const isPasswordMatches = await bcrypt.compare(password, user.password);
+
+          if (!isPasswordMatches) {
+              throw new UnauthorizedException('Invalid email or password');
+          }
   
-          const token= this.jwtService.sign({id: user._id})
- 
           return {
             user, 
-            token,
             backend_tokens: {
+              token: await this.jwtService.sign({id: user._id}),
               access_token: await this.jwtService.signAsync(payload, { expiresIn: '20m', secret: process.env.JWT_SECRET }), // Change expiresIn value as needed
               refresh_token: await this.jwtService.signAsync(payload, { expiresIn: '7d', secret: process.env.JWT_REFRESH_TOKEN }),
           }

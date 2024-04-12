@@ -66,7 +66,7 @@ export class AuthController {
 @HttpCode(HttpStatus.OK)
 @UseGuards(JwtAuthGuard)
 async logout(@Req() req) {
-  req.user = null
+  req.logout
 }
   
   @Get('refresh')
