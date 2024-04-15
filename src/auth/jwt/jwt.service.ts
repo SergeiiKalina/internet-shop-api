@@ -35,7 +35,7 @@ export class TokenService {
     return null;
   }
 
-  async safeJwt(userId, refreshJwt) {
+  async safeJwt(userId: string, refreshJwt: string) {
     const tokenData = await this.jwtModel.findOne({ user: userId });
 
     if (tokenData) {

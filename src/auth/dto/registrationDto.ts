@@ -14,10 +14,10 @@ export class RegistrationDto {
   email: string;
 
   @IsString()
-  @Length(3, 20)
+  @Length(2, 20)
   @IsNotEmpty()
   @ApiProperty({
-    description: 'First name (3-20 characters)',
+    description: 'First name (2-20 characters)',
   })
   firstName: string;
 
