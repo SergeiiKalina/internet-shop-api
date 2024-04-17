@@ -6,6 +6,11 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.use(cookieParser());
+  app.enableCors({
+    origin: 'http://localhost:3000',
+    methods: 'GET, POST, PUT, DELETE, PATCH',
+    credentials: true,
+  });
   const config = new DocumentBuilder()
     .setTitle('Internet-Shop')
     .setDescription('Api for internet shop')
