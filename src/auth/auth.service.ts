@@ -1,4 +1,9 @@
-import { BadRequestException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { User } from './auth.model';
 import * as bcrypt from 'bcrypt';
@@ -21,7 +26,6 @@ export class AuthService {
     private readonly usersService: UsersService,
   ) {}
 
-  
   async registration(newUser: RegistrationDto) {
     const { email, password } = newUser;
     const candidate = await this.userModel.findOne({ email });
@@ -56,35 +60,38 @@ export class AuthService {
   //   return null;
   // }
 
-  async login( loginDto: AuthEmailLoginDto ){
-          const { email, password } = loginDto;
- 
-          const user= await this.userModel.findOne({email})
+  async login(loginDto: AuthEmailLoginDto) {
+    const { email, password } = loginDto;
 
-          const payload = { email: user.email, sub: user.id }; // Using user ID as subject
+    const user = await this.userModel.findOne({ email });
 
-          if(!user){
-           throw new UnauthorizedException('Invalid email or password')
-          } 
-  
-          const isPasswordMatches = await bcrypt.compare(password, user.password);
+    const payload = { email: user.email, sub: user.id }; // Using user ID as subject
 
-          if (!isPasswordMatches) {
-              throw new UnauthorizedException('Invalid email or password');
-          }
-  
-          return {
-            user, 
-            backend_tokens: {
-              token: await this.jwtService.sign({id: user._id}),
-              access_token: await this.jwtService.signAsync(payload, { expiresIn: '20m', secret: process.env.JWT_SECRET }), // Change expiresIn value as needed
-              refresh_token: await this.jwtService.signAsync(payload, { expiresIn: '7d', secret: process.env.JWT_REFRESH_TOKEN }),
-          }
-        }; 
+    if (!user) {
+      throw new UnauthorizedException('Invalid email or password');
+    }
+
+    const isPasswordMatches = await bcrypt.compare(password, user.password);
+
+    if (!isPasswordMatches) {
+      throw new UnauthorizedException('Invalid email or password');
+    }
+
+    return {
+      user,
+      backend_tokens: {
+        token: await this.jwtService.sign({ id: user._id }),
+        access_token: await this.jwtService.signAsync(payload, {
+          expiresIn: '1d',
+          secret: process.env.JWT_SECRET,
+        }), // Change expiresIn value as needed
+        refresh_token: await this.jwtService.signAsync(payload, {
+          expiresIn: '7d',
+          secret: process.env.JWT_REFRESH_TOKEN,
+        }),
+      },
+    };
   }
-
-  
-
 
   async refreshJwt(refreshJwt: string) {
     try {
