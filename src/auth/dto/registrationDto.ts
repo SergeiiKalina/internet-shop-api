@@ -22,7 +22,7 @@ export class RegistrationDto {
   firstName: string;
 
   @IsString()
-  @Length(3, 20)
+  @Length(2, 20)
   @IsNotEmpty()
   @ApiProperty({
     description: 'Last name (3-20 characters)',
