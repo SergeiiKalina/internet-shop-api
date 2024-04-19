@@ -10,14 +10,26 @@ import { ApiProperty } from '@nestjs/swagger';
 export class RegistrationDto {
   @IsEmail()
   @IsNotEmpty()
-  @ApiProperty({ description: 'Email address' })
+  @ApiProperty({
+    description:
+      'Email address must contain only Latin characters and this symbol (. _  + -)',
+  })
+  @Length(10, 50)
+  @Matches(/^[a-zA-Z0-9._+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/i, {
+    message:
+      'Email address must contain only Latin characters and this symbol (. _  + -)',
+  })
   email: string;
 
   @IsString()
   @Length(2, 20)
   @IsNotEmpty()
   @ApiProperty({
-    description: 'First name (2-20 characters)',
+    description:
+      'First name (2-20 characters) and must contain only Cyrillic, Latin characters, and dashes.',
+  })
+  @Matches(/^[а-яА-ЯёЁa-zA-Z\-]+$/, {
+    message: 'Name must contain only Cyrillic, Latin characters, and dashes.',
   })
   firstName: string;
 
@@ -25,7 +37,12 @@ export class RegistrationDto {
   @Length(2, 20)
   @IsNotEmpty()
   @ApiProperty({
-    description: 'Last name (3-20 characters)',
+    description:
+      'Last name (2-20 characters) and must contain only Cyrillic, Latin characters, and dashes.',
+  })
+  @Matches(/^[а-яА-ЯёЁa-zA-Z\-]+$/, {
+    message:
+      'Last name must contain only Cyrillic, Latin characters, and dashes.',
   })
   lastName: string;
 
