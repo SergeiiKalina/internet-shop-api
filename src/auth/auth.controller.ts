@@ -102,10 +102,4 @@ export class AuthController {
       data: req.user,
     };
   }
-
-  @Get('sdnsd')
-  @UseGuards(AuthGuard('facebook'))
-  async fuckHors() {
-    return 'I Fuck hors';
-  }
 }
