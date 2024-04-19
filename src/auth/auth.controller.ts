@@ -26,7 +26,6 @@ import { User } from './auth.model';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  
   @Post('registration')
   @UsePipes(new ValidationPipe())
   async registration(@Body() newUser: RegistrationDto, @Res() res: Response) {
@@ -46,29 +45,28 @@ export class AuthController {
   @ApiOperation({
     summary: 'Login as a user',
   })
-
   @Post('/login')
-  async login(@Body() dto: AuthEmailLoginDto) { 
-    return this.authService.login(dto); 
+  async login(@Body() dto: AuthEmailLoginDto) {
+    return this.authService.login(dto);
   }
 
-//   try {
-//     res.clearCookie('jwt');
-//     return { message: 'Logout successful' };
-// } catch (error) {
-  
-//     return { error: 'Logout failed', message: error.message };
-// }
-  
-@ApiBearerAuth()
-@Get('logout')
-@ApiOperation({ summary: 'logout by user' })
-@HttpCode(HttpStatus.OK)
-@UseGuards(JwtAuthGuard)
-async logout(@Req() req) {
-  req.logout
-}
-  
+  //   try {
+  //     res.clearCookie('jwt');
+  //     return { message: 'Logout successful' };
+  // } catch (error) {
+
+  //     return { error: 'Logout failed', message: error.message };
+  // }
+
+  @ApiBearerAuth()
+  @Get('logout')
+  @ApiOperation({ summary: 'logout by user' })
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtAuthGuard)
+  async logout(@Req() req) {
+    req.logout;
+  }
+
   @Get('refresh')
   async refreshJwt(@Req() req: Request, @Res() res: Response) {
     const refreshJwt = req.cookies.refreshToken;
@@ -90,5 +88,24 @@ async logout(@Req() req) {
     await this.authService.activate(link);
     return res.redirect(process.env.API_URL);
   }
-}
+  @Get('facebook')
+  @UseGuards(AuthGuard('facebook'))
+  async facebookLogin(): Promise<any> {
+    return HttpStatus.OK;
+  }
 
+  @Get('/facebook/redirect')
+  @UseGuards(AuthGuard('facebook'))
+  async facebookLoginRedirect(@Req() req: Request): Promise<any> {
+    return {
+      statusCode: HttpStatus.OK,
+      data: req.user,
+    };
+  }
+
+  @Get('sdnsd')
+  @UseGuards(AuthGuard('facebook'))
+  async fuckHors() {
+    return 'I Fuck hors';
+  }
+}
