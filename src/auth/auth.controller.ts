@@ -10,7 +10,6 @@ import {
   Req,
   Param,
   UseGuards,
-  Delete,
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
@@ -20,11 +19,16 @@ import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AuthEmailLoginDto } from './dto/login.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
-import { User } from './auth.model';
+import axios from 'axios';
+import { ConfigService } from '@nestjs/config';
+import { FacebookTokenStrategy } from './strategys/facebookToken.strategy';
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly configService: ConfigService,
+  ) {}
 
   @Post('registration')
   @UsePipes(new ValidationPipe())

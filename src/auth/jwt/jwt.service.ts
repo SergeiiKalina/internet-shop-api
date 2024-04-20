@@ -71,4 +71,8 @@ export class TokenService {
       return null;
     }
   }
+
+  async validateFacebookToken(token: string) {
+    const matchToken = this.jwtService.verify(token);
+  }
 }

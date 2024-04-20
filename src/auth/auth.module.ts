@@ -12,6 +12,7 @@ import { PassportModule } from '@nestjs/passport';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtStrategy } from './strategys/jwt.stategys';
 import { FacebookStrategy } from './strategys/facebook.strategy';
+import { FacebookTokenStrategy } from './strategys/facebookToken.strategy';
 
 @Module({
   imports: [
@@ -47,6 +48,7 @@ import { FacebookStrategy } from './strategys/facebook.strategy';
     UsersService,
     JwtStrategy,
     FacebookStrategy,
+    FacebookTokenStrategy,
   ],
   exports: [JwtStrategy, PassportModule],
 })

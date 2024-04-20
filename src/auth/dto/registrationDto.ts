@@ -28,7 +28,7 @@ export class RegistrationDto {
     description:
       'First name (2-20 characters) and must contain only Cyrillic, Latin characters, and dashes.',
   })
-  @Matches(/^[а-яА-ЯёЁa-zA-Z\-]+$/, {
+  @Matches(/^[а-яА-ЯёЁa-zA-ZіІїЇєЄґҐ\-]+$/, {
     message: 'Name must contain only Cyrillic, Latin characters, and dashes.',
   })
   firstName: string;
@@ -40,7 +40,7 @@ export class RegistrationDto {
     description:
       'Last name (2-20 characters) and must contain only Cyrillic, Latin characters, and dashes.',
   })
-  @Matches(/^[а-яА-ЯёЁa-zA-Z\-]+$/, {
+  @Matches(/^[а-яА-ЯёЁa-zA-ZіІїЇєЄґҐ\-]+$/, {
     message:
       'Last name must contain only Cyrillic, Latin characters, and dashes.',
   })
