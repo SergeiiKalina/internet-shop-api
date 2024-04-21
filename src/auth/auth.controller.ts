@@ -100,10 +100,10 @@ export class AuthController {
 
   @Get('/facebook/redirect')
   @UseGuards(AuthGuard('facebook'))
-  async facebookLoginRedirect(@Req() req: Request): Promise<any> {
-    return {
-      statusCode: HttpStatus.OK,
-      data: req.user,
-    };
+  async facebookLoginRedirect(@Req() req: Request, @Res() res): Promise<any> {
+    res.redirect(
+      `${this.configService.get('API_URL_GIT')}?userData=${JSON.stringify(req.user)}`,
+    );
+    return HttpStatus.OK;
   }
 }
