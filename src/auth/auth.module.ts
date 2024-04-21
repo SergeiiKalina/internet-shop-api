@@ -9,8 +9,10 @@ import { Jwt, JwtSchema } from './jwt/jwt.model';
 import { JwtModule, JwtService } from '@nestjs/jwt';
 import { UsersService } from 'src/users/users.service';
 import { PassportModule } from '@nestjs/passport';
-import { ConfigModule,  ConfigService } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtStrategy } from './strategys/jwt.stategys';
+import { FacebookStrategy } from './strategys/facebook.strategy';
+import { FacebookTokenStrategy } from './strategys/facebookToken.strategy';
 
 @Module({
   imports: [
@@ -36,9 +38,18 @@ import { JwtStrategy } from './strategys/jwt.stategys';
       secret: process.env.JWT_ACCESS_SECRET_KEY,
       signOptions: { expiresIn: '60s' },
     }),
+    ConfigModule,
   ],
   controllers: [AuthController],
-  providers: [AuthService, Mailer, TokenService, UsersService, JwtStrategy],
+  providers: [
+    AuthService,
+    Mailer,
+    TokenService,
+    UsersService,
+    JwtStrategy,
+    FacebookStrategy,
+    FacebookTokenStrategy,
+  ],
   exports: [JwtStrategy, PassportModule],
 })
 export class AuthModule {}

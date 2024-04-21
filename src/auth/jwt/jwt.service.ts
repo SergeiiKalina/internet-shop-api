@@ -35,7 +35,7 @@ export class TokenService {
     return null;
   }
 
-  async safeJwt(userId, refreshJwt) {
+  async safeJwt(userId: string, refreshJwt: string) {
     const tokenData = await this.jwtModel.findOne({ user: userId });
 
     if (tokenData) {
@@ -70,5 +70,9 @@ export class TokenService {
     } catch (error) {
       return null;
     }
+  }
+
+  async validateFacebookToken(token: string) {
+    const matchToken = this.jwtService.verify(token);
   }
 }

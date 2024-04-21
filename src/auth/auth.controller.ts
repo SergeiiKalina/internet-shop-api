@@ -10,7 +10,6 @@ import {
   Req,
   Param,
   UseGuards,
-  Delete,
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
@@ -20,13 +19,17 @@ import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AuthEmailLoginDto } from './dto/login.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
-import { User } from './auth.model';
+import axios from 'axios';
+import { ConfigService } from '@nestjs/config';
+import { FacebookTokenStrategy } from './strategys/facebookToken.strategy';
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly configService: ConfigService,
+  ) {}
 
-  
   @Post('registration')
   @UsePipes(new ValidationPipe())
   async registration(@Body() newUser: RegistrationDto, @Res() res: Response) {
@@ -46,29 +49,20 @@ export class AuthController {
   @ApiOperation({
     summary: 'Login as a user',
   })
-
   @Post('/login')
-  async login(@Body() dto: AuthEmailLoginDto) { 
-    return this.authService.login(dto); 
+  async login(@Body() dto: AuthEmailLoginDto) {
+    return this.authService.login(dto);
   }
 
-//   try {
-//     res.clearCookie('jwt');
-//     return { message: 'Logout successful' };
-// } catch (error) {
-  
-//     return { error: 'Logout failed', message: error.message };
-// }
-  
-@ApiBearerAuth()
-@Get('logout')
-@ApiOperation({ summary: 'logout by user' })
-@HttpCode(HttpStatus.OK)
-@UseGuards(JwtAuthGuard)
-async logout(@Req() req) {
-  req.logout
-}
-  
+  @ApiBearerAuth()
+  @Get('logout')
+  @ApiOperation({ summary: 'logout by user' })
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtAuthGuard)
+  async logout(@Req() req) {
+    req.logout;
+  }
+
   @Get('refresh')
   async refreshJwt(@Req() req: Request, @Res() res: Response) {
     const refreshJwt = req.cookies.refreshToken;
@@ -90,5 +84,28 @@ async logout(@Req() req) {
     await this.authService.activate(link);
     return res.redirect(process.env.API_URL);
   }
-}
+  @Get('facebook')
+  @UseGuards(AuthGuard('facebook'))
+  async facebookLogin(): Promise<any> {
+    return HttpStatus.OK;
+  }
 
+  @Get('/facebook/redirect')
+  @UseGuards(AuthGuard('facebook'))
+  async facebookLoginRedirect(@Req() req: Request, @Res() res): Promise<any> {
+    res.redirect(
+      `${this.configService.get('API_URL_GIT')}?userData=${JSON.stringify(req.user)}`,
+    );
+    return HttpStatus.OK;
+  }
+
+  @Get()
+    @UseGuards(AuthGuard('google'))
+    async googleAuth(@Req() req) {}
+  
+    // @Post('redirect')
+    // @UseGuards(AuthGuard('google'))
+    // googleAuthRedirect(@Req() req ) {
+    //   return this.GoogleAuthService.googleLogin(req)
+    // }
+}

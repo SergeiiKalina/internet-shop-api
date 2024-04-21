@@ -10,8 +10,6 @@ import { Jwt, JwtSchema } from './auth/jwt/jwt.model';
 import { UsersModule } from './users/users.module';
 import { AppService } from './app.service';
 import { AppController } from './app.controller';
-import { GoogleAuthModule } from './google-auth/google-auth.module';
-
 @Module({
   imports: [
     MongooseModule.forRoot(
@@ -48,7 +46,6 @@ import { GoogleAuthModule } from './google-auth/google-auth.module';
     AuthModule,
     UsersModule,
     User,
-    GoogleAuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
