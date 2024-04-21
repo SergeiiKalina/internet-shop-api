@@ -47,15 +47,6 @@ export class AuthService {
     return { ...tokens, user };
   }
 
-  // async validateUser(userId: string, password: string): Promise<any> {
-  //   const user = await this.usersService.findOne(userId);
-  //   if (user && user.password === password) {
-  //     const { password, ...result } = user;
-  //     return result;
-  //   }
-  //   return null;
-  // }
-
   async login( loginDto: AuthEmailLoginDto ){
           const { email, password } = loginDto;
  
