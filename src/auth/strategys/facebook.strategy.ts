@@ -11,7 +11,7 @@ export class FacebookStrategy extends PassportStrategy(Strategy, 'facebook') {
       clientSecret: configService.get('APP_SECRET_FACEBOOK'),
       callbackURL: configService.get('API_URL') + '/auth/facebook/redirect',
       scope: 'email',
-      profileFields: ['emails', 'name'],
+      profileFields: ['emails', 'name', 'picture', 'displayName'],
     });
   }
 
