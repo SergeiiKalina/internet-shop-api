@@ -19,9 +19,9 @@ import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AuthEmailLoginDto } from './dto/login.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
-import axios from 'axios';
 import { ConfigService } from '@nestjs/config';
 import { FacebookTokenStrategy } from './strategys/facebookToken.strategy';
+
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
@@ -29,6 +29,12 @@ export class AuthController {
     private readonly authService: AuthService,
     private readonly configService: ConfigService,
   ) {}
+
+  @Get('as')
+  @UseGuards(FacebookTokenStrategy)
+  async as(@Req() req: Request) {
+    return req.user;
+  }
 
   @Post('registration')
   @UsePipes(new ValidationPipe())
@@ -102,7 +108,7 @@ export class AuthController {
   @UseGuards(AuthGuard('facebook'))
   async facebookLoginRedirect(@Req() req: Request, @Res() res): Promise<any> {
     res.redirect(
-      `${this.configService.get('API_URL_GIT')}?userData=${JSON.stringify(req.user)}`,
+      `http://localhost:3000/marketplace/?userData=${JSON.stringify(req.user)}`,
     );
     return HttpStatus.OK;
   }
