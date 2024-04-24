@@ -104,11 +104,9 @@ export class AuthController {
     return HttpStatus.OK;
   }
   
-  @Get('/auth/google/redirect')
+  @Get('google/redirect')
   @UseGuards(AuthGuard('google'))
-  async googleAuthRedirect(@Req() req: Request, @Res() res): Promise<void> {
-    res.redirect(
-      `${this.configService.get('API_URL_GIT')}?userData=${JSON.stringify(req.user)}`,
-    );
+  async googleAuthRedirect(@Req() req: Request, @Res() res) {
+    return this.authService.googleLogin(req)
   }
 }
