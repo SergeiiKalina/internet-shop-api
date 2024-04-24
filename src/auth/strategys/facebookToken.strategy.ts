@@ -13,3 +13,4 @@ export class FacebookTokenStrategy implements CanActivate {
     return matchesToken.data.data.is_valid;
   }
 }
+ 

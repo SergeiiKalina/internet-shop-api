@@ -19,9 +19,8 @@ import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AuthEmailLoginDto } from './dto/login.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
-import axios from 'axios';
 import { ConfigService } from '@nestjs/config';
-import { FacebookTokenStrategy } from './strategys/facebookToken.strategy';
+
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
@@ -99,13 +98,17 @@ export class AuthController {
     return HttpStatus.OK;
   }
 
-  @Get()
-    @UseGuards(AuthGuard('google'))
-    async googleAuth(@Req() req) {}
+  @Get('google')
+  @UseGuards(AuthGuard('google'))
+  async googleAuth(): Promise<any> {
+    return HttpStatus.OK;
+  }
   
-    // @Post('redirect')
-    // @UseGuards(AuthGuard('google'))
-    // googleAuthRedirect(@Req() req ) {
-    //   return this.GoogleAuthService.googleLogin(req)
-    // }
+  @Get('/auth/google/redirect')
+  @UseGuards(AuthGuard('google'))
+  async googleAuthRedirect(@Req() req: Request, @Res() res): Promise<void> {
+    res.redirect(
+      `${this.configService.get('API_URL_GIT')}?userData=${JSON.stringify(req.user)}`,
+    );
+  }
 }

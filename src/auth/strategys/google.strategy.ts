@@ -3,17 +3,20 @@ import { Strategy, VerifyCallback } from 'passport-google-oauth20';
 import { config } from 'dotenv';
 
 import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 
 config()
 
 @Injectable()
-export class GoogleAuthService extends PassportStrategy(Strategy, 'google') {
+export class GoogleAuthStrategy extends PassportStrategy(Strategy, 'google') {
+  
 
-    constructor() {
+  constructor(private readonly configService: ConfigService) {
+
       super({
-        clientID: process.env.GOOGLE_CLIENT_ID,
-        clientSecret: process.env.GOOGLE_SECRET,
-        callbackURL: 'http://localhost:8080/auth/google/login',
+        clientID: configService.get('APP_ID_GOOGLE'),
+        clientSecret: configService.get('APP_SECRET_GOOGLE'),
+        callbackURL: configService.get('API_URL') + '/auth/google/redirect',
         scope: ['email', 'profile'],
       });
     }
@@ -25,19 +28,12 @@ export class GoogleAuthService extends PassportStrategy(Strategy, 'google') {
         firstName: name.givenName,
         lastName: name.familyName,
         accessToken,
-        refreshToken
+      
       }
-      done(null, user);
+      const payload = {
+        user,
+        accessToken,
+      };
+      done(null, payload);
     }
-
-    async googleLogin(req) {
-        if (!req.user) {
-          return 'No user from google'
-        }
-    
-        return {
-          message: 'User information from google',
-          user: req.user
-        }
-      }
   }

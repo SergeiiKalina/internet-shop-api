@@ -5,11 +5,12 @@ import { AuthModule } from './auth/auth.module';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { User, UserSchema } from './auth/auth.model';
 import { EjsAdapter } from '@nestjs-modules/mailer/dist/adapters/ejs.adapter';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { Jwt, JwtSchema } from './auth/jwt/jwt.model';
 import { UsersModule } from './users/users.module';
 import { AppService } from './app.service';
 import { AppController } from './app.controller';
+import { GoogleAuthStrategy } from './auth/strategys/google.strategy';
 @Module({
   imports: [
     MongooseModule.forRoot(

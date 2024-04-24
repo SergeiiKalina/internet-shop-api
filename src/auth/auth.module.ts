@@ -13,6 +13,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtStrategy } from './strategys/jwt.stategys';
 import { FacebookStrategy } from './strategys/facebook.strategy';
 import { FacebookTokenStrategy } from './strategys/facebookToken.strategy';
+import { GoogleAuthStrategy } from './strategys/google.strategy';
 
 @Module({
   imports: [
@@ -49,6 +50,8 @@ import { FacebookTokenStrategy } from './strategys/facebookToken.strategy';
     JwtStrategy,
     FacebookStrategy,
     FacebookTokenStrategy,
+    GoogleAuthStrategy, 
+    ConfigService,
   ],
   exports: [JwtStrategy, PassportModule],
 })
