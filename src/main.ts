@@ -8,9 +8,9 @@ async function bootstrap() {
   app.use(cookieParser());
   app.enableCors({
     origin: [
-      'http://localhost:3000',
       'https://internet-shop-api.onrender.com',
       'https://yevhenii-sulim.github.io',
+      'http://localhost:3000',
     ],
     methods: 'GET, POST, PUT, DELETE, PATCH',
     credentials: true,
