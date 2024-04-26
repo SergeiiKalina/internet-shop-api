@@ -9,8 +9,8 @@ async function bootstrap() {
   app.enableCors({
     origin: [
       'http://localhost:3000',
-      process.env.API_URL,
-      process.env.API_URL_GIT,
+      'https://internet-shop-api.onrender.com',
+      'https://yevhenii-sulim.github.io',
     ],
     methods: 'GET, POST, PUT, DELETE, PATCH',
     credentials: true,
