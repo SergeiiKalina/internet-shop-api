@@ -30,12 +30,6 @@ export class AuthController {
     private readonly configService: ConfigService,
   ) {}
 
-  @Get('as')
-  @UseGuards(FacebookTokenStrategy)
-  async as(@Req() req: Request) {
-    return req.user;
-  }
-
   @Post('registration')
   @UsePipes(new ValidationPipe())
   async registration(@Body() newUser: RegistrationDto, @Res() res: Response) {
