@@ -12,7 +12,11 @@ export class ProductsService {
     private readonly imageService: ImageService,
   ) {}
 
-  async create(createProductDto: CreateProductDto, file: Express.Multer.File) {
+  async create(
+    createProductDto: CreateProductDto,
+    file: Express.Multer.File,
+    id,
+  ) {
     const image = await this.imageService.uploadPhoto(file);
     if (!image) {
       throw new BadRequestException(
@@ -24,6 +28,7 @@ export class ProductsService {
     const product = await this.productModel.create({
       ...{ ...createProductDto, eco, discount },
       img: image.data.url,
+      producer: id,
     });
 
     if (!product) {

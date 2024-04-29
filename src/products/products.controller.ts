@@ -9,6 +9,7 @@ import {
   FileTypeValidator,
   Get,
   UseGuards,
+  Req,
 } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
@@ -49,7 +50,10 @@ export class ProductsController {
     )
     file: Express.Multer.File,
     @Body() newProducts: CreateProductDto,
+    @Req() req,
   ) {
-    return this.productsService.create(newProducts, file);
+    const id = req.user.id;
+
+    return this.productsService.create(newProducts, file, id);
   }
 }

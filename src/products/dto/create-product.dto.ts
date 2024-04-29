@@ -4,6 +4,8 @@ import {
   IsBoolean,
   IsDate,
   IsIn,
+  IsMongoId,
+  IsNotEmpty,
   IsNumber,
   IsOptional,
   IsString,
@@ -48,6 +50,10 @@ export class CreateProductDto {
   @IsArray()
   @IsOptional()
   category: string[];
+  @ApiProperty({ description: 'Subcategory of the product', type: String })
+  @IsString()
+  @IsOptional()
+  subCategory?: string;
   @ApiProperty({
     type: 'string',
     format: 'binary',
