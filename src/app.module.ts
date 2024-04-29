@@ -7,9 +7,10 @@ import { User, UserSchema } from './auth/auth.model';
 import { EjsAdapter } from '@nestjs-modules/mailer/dist/adapters/ejs.adapter';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { Jwt, JwtSchema } from './auth/jwt/jwt.model';
-import { UsersModule } from './users/users.module';
+import { UserModule } from './user/user.module';
 import { AppService } from './app.service';
 import { AppController } from './app.controller';
+import { ProductsModule } from './products/products.module';
 import { GoogleAuthStrategy } from './auth/strategys/google.strategy';
 @Module({
   imports: [
@@ -45,8 +46,9 @@ import { GoogleAuthStrategy } from './auth/strategys/google.strategy';
       }),
     }),
     AuthModule,
-    UsersModule,
+    UserModule,
     User,
+    ProductsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

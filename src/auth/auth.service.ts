@@ -11,7 +11,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { Model } from 'mongoose';
 import { RegistrationDto } from './dto/registrationDto';
 import { Mailer } from './mailer/mailer.service';
-import { UsersService } from 'src/users/users.service';
+import { UserService } from 'src/user/user.service';
 import { TokenService } from './jwt/jwt.service';
 import { JwtService } from '@nestjs/jwt';
 import { AuthEmailLoginDto } from './dto/login.dto';
@@ -23,7 +23,7 @@ export class AuthService {
     private readonly mailerService: Mailer,
     private readonly TokenService: TokenService,
     private readonly jwtService: JwtService,
-    private readonly usersService: UsersService,
+    private readonly userService: UserService,
   ) {}
 
   async registration(newUser: RegistrationDto) {
