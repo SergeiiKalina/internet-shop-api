@@ -35,8 +35,8 @@ export class ProductsController {
   }
 
   @Get(':id')
-  async getProduct(@Param('id') id: number) {
-    return this.productsService.getProduct(id);
+  async getProduct(@Param('id') id: string) {
+    return this.productsService.getProduct(+id);
   }
 
   @Post('create')
@@ -88,7 +88,7 @@ export class ProductsController {
   }
 
   @Delete(':id')
-  async delete(@Param('id') id: number) {
-    return this.productsService.delete(id);
+  async delete(@Param('id') id: string) {
+    return this.productsService.delete(+id);
   }
 }
