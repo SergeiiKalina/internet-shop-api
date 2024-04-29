@@ -3,7 +3,6 @@ import {
   IsArray,
   IsBoolean,
   IsDate,
-  IsIn,
   IsNumber,
   IsOptional,
   IsString,
@@ -17,19 +16,17 @@ export class CreateProductDto {
   @IsString()
   price: string;
   @ApiProperty({
-    type: String,
+    type: Boolean,
     description: 'Whether the product is eco-friendly',
   })
-  @IsString()
-  @IsIn(['on', 'off'])
-  eco: string;
+  @IsBoolean()
+  eco: boolean;
   @ApiProperty({
-    type: String,
+    type: Boolean,
     description: 'Whether the product has discount',
   })
-  @IsIn(['on', 'off'])
-  @IsString()
-  discount: string;
+  @IsBoolean()
+  discount: boolean;
   @ApiProperty({
     type: String,
     description: 'Description of the discount item',
@@ -48,6 +45,10 @@ export class CreateProductDto {
   @IsArray()
   @IsOptional()
   category: string[];
+  @ApiProperty({ description: 'Subcategory of the product', type: String })
+  @IsString()
+  @IsOptional()
+  subCategory?: string;
   @ApiProperty({
     type: 'string',
     format: 'binary',
