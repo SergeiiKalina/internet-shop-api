@@ -7,7 +7,7 @@ import { Mailer } from './mailer/mailer.service';
 import { TokenService } from './jwt/jwt.service';
 import { Jwt, JwtSchema } from './jwt/jwt.model';
 import { JwtModule, JwtService } from '@nestjs/jwt';
-import { UsersService } from 'src/users/users.service';
+import { UserService } from 'src/user/user.service';
 import { PassportModule } from '@nestjs/passport';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtStrategy } from './strategys/jwt.stategys';
@@ -45,7 +45,7 @@ import { FacebookTokenStrategy } from './strategys/facebookToken.strategy';
     AuthService,
     Mailer,
     TokenService,
-    UsersService,
+    UserService,
     JwtStrategy,
     FacebookStrategy,
     FacebookTokenStrategy,
