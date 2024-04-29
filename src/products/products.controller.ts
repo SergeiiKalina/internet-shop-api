@@ -17,7 +17,12 @@ import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
-import { ApiOperation } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiConsumes,
+  ApiOperation,
+} from '@nestjs/swagger';
 import { UpdateProductDto } from './dto/update-product.dto';
 
 const MAX_PROFILE_PICTURE_SIZE_IN_BYTES = 5 * 1024 * 1024;
@@ -43,6 +48,26 @@ export class ProductsController {
   @ApiOperation({
     summary: 'Only authorized users',
   })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        title: { type: 'string' },
+        price: { type: 'string' },
+        eco: { type: 'boolean' },
+        discount: { type: 'boolean' },
+        discountItem: { type: 'string' },
+        category: { type: 'string' },
+        subCategory: { type: 'string' },
+        file: {
+          type: 'string',
+          format: 'binary',
+        },
+      },
+    },
+  })
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @UseInterceptors(FileInterceptor('file'))
   async create(

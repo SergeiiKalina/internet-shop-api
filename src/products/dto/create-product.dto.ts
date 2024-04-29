@@ -42,9 +42,9 @@ export class CreateProductDto {
     description: 'Array of categories for the product',
   })
   @IsString({ each: true })
-  @IsArray()
+  // @IsArray()
   @IsOptional()
-  category: string[];
+  category: string;
   @ApiProperty({ description: 'Subcategory of the product', type: String })
   @IsString()
   @IsOptional()
