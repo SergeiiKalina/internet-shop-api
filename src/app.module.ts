@@ -10,6 +10,7 @@ import { Jwt, JwtSchema } from './auth/jwt/jwt.model';
 import { UsersModule } from './users/users.module';
 import { AppService } from './app.service';
 import { AppController } from './app.controller';
+import { ProductsModule } from './products/products.module';
 
 @Module({
   imports: [
@@ -46,7 +47,8 @@ import { AppController } from './app.controller';
     }),
     AuthModule,
     UsersModule,
-    User
+    User,
+    ProductsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

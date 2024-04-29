@@ -49,7 +49,7 @@ export class AuthController {
   @ApiOperation({
     summary: 'Login as a user',
   })
-  @Post('/login')
+  @Post('login')
   async login(@Body() dto: AuthEmailLoginDto) {
     return this.authService.login(dto);
   }
