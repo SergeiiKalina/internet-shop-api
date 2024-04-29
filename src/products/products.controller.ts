@@ -44,7 +44,7 @@ export class ProductsController {
     summary: 'Only authorized users',
   })
   @UseGuards(JwtAuthGuard)
-  @UseInterceptors(FileInterceptor('img'))
+  @UseInterceptors(FileInterceptor('file'))
   async create(
     @UploadedFile(
       new ParseFilePipe({
