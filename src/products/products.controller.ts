@@ -61,7 +61,7 @@ export class ProductsController {
         category: { type: 'string' },
         subCategory: { type: 'string' },
         state: { type: 'string', default: 'Нове' },
-        size: { type: 'string' || 'null', default: null },
+        size: { type: 'string' || null, default: null },
         describe: { type: 'string' },
         file: {
           type: 'string',

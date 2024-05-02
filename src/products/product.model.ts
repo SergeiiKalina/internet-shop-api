@@ -22,7 +22,7 @@ export class Product {
   @Prop({ default: 0 })
   visit: number;
   @Prop({ required: true })
-  category?: string[];
+  category?: string;
   @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'User', required: true })
   producer: string;
   @Prop()
