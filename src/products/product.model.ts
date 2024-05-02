@@ -17,6 +17,8 @@ export class Product {
   discountItem: string;
   @Prop({ default: () => Date.now() })
   createDate: Date;
+  @Prop({ default: () => [] })
+  comments: string[];
   @Prop({ default: 0 })
   visit: number;
   @Prop({ required: true })
@@ -27,6 +29,12 @@ export class Product {
   subCategory: string;
   @Prop({ required: true })
   img: string;
+  @Prop({ required: true, default: 'Нове' })
+  state: string;
+  @Prop({ default: null })
+  size: string;
+  @Prop({ required: true })
+  describe: string;
 }
 
 export const ProductSchema = SchemaFactory.createForClass(Product);

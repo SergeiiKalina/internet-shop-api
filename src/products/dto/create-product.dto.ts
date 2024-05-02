@@ -57,4 +57,10 @@ export class CreateProductDto {
   @IsString()
   @IsOptional()
   img?: string;
+  @IsString()
+  state?: string;
+  @IsString()
+  size?: string;
+  @IsString()
+  describe?: string;
 }

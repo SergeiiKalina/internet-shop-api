@@ -55,11 +55,14 @@ export class ProductsController {
       properties: {
         title: { type: 'string' },
         price: { type: 'string' },
-        eco: { type: 'boolean' },
-        discount: { type: 'boolean' },
+        eco: { type: 'boolean', default: true },
+        discount: { type: 'boolean', default: true },
         discountItem: { type: 'string' },
         category: { type: 'string' },
         subCategory: { type: 'string' },
+        state: { type: 'string', default: 'Нове' },
+        size: { type: 'string' || 'null', default: null },
+        describe: { type: 'string' },
         file: {
           type: 'string',
           format: 'binary',
