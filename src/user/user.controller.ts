@@ -14,4 +14,8 @@ export class UserController {
   async getUser(@Param('id') id: string) {
     return this.userService.getUser(id);
   }
+  @Get('profile/:userId')
+  async getGuestUserInfo(@Param('userId') userId: string) {
+    return await this.userService.getGuestsUserInfo(userId)
+  }
 }
