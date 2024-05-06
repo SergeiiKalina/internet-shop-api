@@ -41,7 +41,7 @@ export class ProductsController {
 
   @Get(':id')
   async getProduct(@Param('id') id: string) {
-    return this.productsService.getProduct(+id);
+    return this.productsService.getProduct(id);
   }
 
   @Post('create')

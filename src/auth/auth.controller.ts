@@ -15,7 +15,7 @@ import {
 } from '@nestjs/common';
 import { Response, Request } from 'express';
 import { RegistrationDto } from './dto/registrationDto';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AuthEmailLoginDto } from './dto/login.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
@@ -47,6 +47,15 @@ export class AuthController {
   }
   @ApiOperation({
     summary: 'Login as a user',
+  })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        email: { type: 'string', default: 'setserg02@gmail.com' },
+        password: { type: 'string', default: '12345aA!' },
+      },
+    },
   })
   @Post('login')
   async login(@Body() dto: AuthEmailLoginDto) {
@@ -103,7 +112,7 @@ export class AuthController {
   async googleAuth(): Promise<any> {
     return HttpStatus.OK;
   }
-  
+
   @Get('google/redirect')
   @UseGuards(AuthGuard('google'))
   async googleAuthRedirect(@Req() req: Request, @Res() res) {
@@ -111,5 +120,5 @@ export class AuthController {
       `${this.configService.get('API_URL_GIT')}?userData=${JSON.stringify(req.user)}`,
     );
     return HttpStatus.OK;
-  } 
+  }
 }

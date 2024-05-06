@@ -5,11 +5,15 @@ import { Product } from './product.model';
 import { Model } from 'mongoose';
 import { ImageService } from './images-service/images.service';
 import { UpdateProductDto } from './dto/update-product.dto';
+import { User } from 'src/auth/auth.model';
+import { Comment } from 'src/comment/comment.model';
 
 @Injectable()
 export class ProductsService {
   constructor(
     @InjectModel(Product.name) private productModel: Model<Product>,
+    @InjectModel(User.name) private userModel: Model<User>,
+    @InjectModel(Comment.name) private commentModel: Model<Comment>,
     private readonly imageService: ImageService,
   ) {}
 
@@ -74,12 +78,38 @@ export class ProductsService {
     return this.productModel.find().exec();
   }
 
-  async getProduct(id: number) {
+  async getProduct(id: string) {
     const product = await this.productModel.findById(id);
+
     if (!product) {
       throw new BadRequestException('Something is wrong');
     }
-    return product;
+    const user = await this.userModel.findById(product.producer);
+    if (!user) {
+      throw new BadRequestException('Something is wrong');
+    }
+    const { password, ...userWithoutPass } = user.toObject();
+    let arrComments = [];
+    let updatedComments = [];
+    for (let i = 0; i < product.comments.length; i++) {
+      let comment = await this.commentModel.findById(product.comments[i]);
+      if (!comment) {
+        continue;
+      }
+      const author = await this.userModel.findById(comment.author);
+      const { password, ...authorWithoutPass } = author.toObject();
+      arrComments.push({ ...comment.toObject(), author: authorWithoutPass });
+      updatedComments.push(comment._id);
+    }
+
+    product.comments = updatedComments;
+    await product.save();
+
+    return {
+      ...product.toObject(),
+      producer: userWithoutPass,
+      comments: arrComments,
+    };
   }
   async delete(id: number) {
     const deleteProduct = this.productModel.findByIdAndDelete(id);

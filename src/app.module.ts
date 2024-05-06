@@ -12,6 +12,7 @@ import { AppService } from './app.service';
 import { AppController } from './app.controller';
 import { ProductsModule } from './products/products.module';
 import { GoogleAuthStrategy } from './auth/strategys/google.strategy';
+import { CommentModule } from './comment/comment.module';
 @Module({
   imports: [
     MongooseModule.forRoot(
@@ -49,6 +50,7 @@ import { GoogleAuthStrategy } from './auth/strategys/google.strategy';
     UserModule,
     User,
     ProductsModule,
+    CommentModule,
   ],
   controllers: [AppController],
   providers: [AppService],
