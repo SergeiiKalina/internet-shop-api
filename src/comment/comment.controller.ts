@@ -1,0 +1,61 @@
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseGuards,
+  Req,
+} from '@nestjs/common';
+import { CommentService } from './comment.service';
+import { CreateCommentDto } from './dto/create-comment.dto';
+import { UpdateCommentDto } from './dto/update-comment.dto';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+
+@Controller('comment')
+export class CommentController {
+  constructor(private readonly commentService: CommentService) {}
+
+  @Post()
+  @UseGuards(JwtAuthGuard)
+  async create(@Body() createCommentDto: CreateCommentDto, @Req() req) {
+    return await this.commentService.create(createCommentDto, req.user.id);
+  }
+
+  @Get()
+  findAll() {
+    return this.commentService.findAll();
+  }
+
+  @Post('like')
+  @UseGuards(JwtAuthGuard)
+  async like(@Body() { commentId }: { commentId: string }, @Req() req) {
+    const userId = req.user.id;
+
+    return this.commentService.like(commentId, userId);
+  }
+  @Post('dislike')
+  @UseGuards(JwtAuthGuard)
+  async dislike(@Body() { commentId }: { commentId: string }, @Req() req) {
+    const userId = req.user.id;
+
+    return this.commentService.dislike(commentId, userId);
+  }
+
+  @Get(':id')
+  findOne(@Param('id') id: string) {
+    return this.commentService.findOne(id);
+  }
+
+  @Patch(':id')
+  update(@Param('id') id: string, @Body() updateCommentDto: UpdateCommentDto) {
+    return this.commentService.update(+id, updateCommentDto);
+  }
+
+  @Delete(':id')
+  remove(@Param('id') id: string) {
+    return this.commentService.remove(+id);
+  }
+}

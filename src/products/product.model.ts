@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Schema as MongooseSchema } from 'mongoose';
+import { Comment, CommentSchema } from 'src/comment/comment.model';
 
 export type ProductDocument = Product & Document;
 
@@ -17,7 +18,11 @@ export class Product {
   discountItem: string;
   @Prop({ default: () => Date.now() })
   createDate: Date;
-  @Prop({ default: () => [] })
+  @Prop({
+    default: () => [],
+    type: [MongooseSchema.Types.ObjectId],
+    ref: 'Comment',
+  })
   comments: string[];
   @Prop({ default: 0 })
   visit: number;

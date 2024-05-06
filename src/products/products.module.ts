@@ -4,12 +4,16 @@ import { ProductsController } from './products.controller';
 import { ImageService } from './images-service/images.service';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Product, ProductSchema } from './product.model';
-import { MulterModule } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
+import { Comment, CommentSchema } from 'src/comment/comment.model';
+import { User, UserSchema } from 'src/auth/auth.model';
 
 @Module({
   imports: [
-    MongooseModule.forFeature([{ name: Product.name, schema: ProductSchema }]),
+    MongooseModule.forFeature([
+      { name: Product.name, schema: ProductSchema },
+      { name: Comment.name, schema: CommentSchema },
+      { name: User.name, schema: UserSchema },
+    ]),
   ],
   controllers: [ProductsController],
   providers: [ProductsService, ImageService],
