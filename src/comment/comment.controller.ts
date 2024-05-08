@@ -24,16 +24,10 @@ export class CommentController {
     return await this.commentService.create(createCommentDto, req.user.id);
   }
 
-  @Get()
-  findAll() {
-    return this.commentService.findAll();
-  }
-
   @Post('like')
   @UseGuards(JwtAuthGuard)
   async like(@Body() { commentId }: { commentId: string }, @Req() req) {
     const userId = req.user.id;
-
     return this.commentService.like(commentId, userId);
   }
   @Post('dislike')
@@ -42,11 +36,6 @@ export class CommentController {
     const userId = req.user.id;
 
     return this.commentService.dislike(commentId, userId);
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.commentService.findOne(id);
   }
 
   @Patch(':id')

@@ -8,7 +8,7 @@ async function bootstrap() {
   app.use(cookieParser());
   app.enableCors({
     origin: [
-      'https://internet-shop-api.onrender.com',
+      'https://internet-shop-api-production.up.railway.app',
       'https://yevhenii-sulim.github.io',
       'http://localhost:3000',
     ],

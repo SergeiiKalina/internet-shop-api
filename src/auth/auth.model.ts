@@ -22,6 +22,8 @@ export class User {
   registrationDate: Date;
   @Prop({ default: null }) // Example: Default value can be null if the user has never logged out
   lastLogout: Date;
+  @Prop({ default: 0 })
+  rating: number;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

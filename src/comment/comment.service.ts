@@ -85,14 +85,6 @@ export class CommentService {
     return comment;
   }
 
-  findAll() {
-    return `This action returns all comment`;
-  }
-
-  async findOne(id: string) {
-    return await this.commentModel.findById(id);
-  }
-
   update(id: number, updateCommentDto: UpdateCommentDto) {
     return `This action updates a #${id} comment`;
   }
