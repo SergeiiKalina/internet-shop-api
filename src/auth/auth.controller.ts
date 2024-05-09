@@ -20,6 +20,8 @@ import { AuthEmailLoginDto } from './dto/login.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { ConfigService } from '@nestjs/config';
+import { ForgotPasswordDto } from './dto/forgotPassword.dto';
+import { ChangePasswordDto } from './dto/changePassword.dto';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -120,5 +122,23 @@ export class AuthController {
       `${this.configService.get('API_URL_GIT')}?userData=${JSON.stringify(req.user)}`,
     );
     return HttpStatus.OK;
+  }
+
+  @Post('forgotPassword')
+  async forgotPassword(
+    @Body(new ValidationPipe()) forgotPassword: ForgotPasswordDto,
+  ) {
+    return this.authService.forgotPassword(forgotPassword);
+  }
+
+  @Post('changePassword')
+  @UseGuards(JwtAuthGuard)
+  async changePassword(
+    @Body(new ValidationPipe()) changePasswordDto: ChangePasswordDto,
+    @Req() req,
+  ) {
+    const userId = req.user.id;
+
+    return this.authService.changePassword(changePasswordDto, userId);
   }
 }

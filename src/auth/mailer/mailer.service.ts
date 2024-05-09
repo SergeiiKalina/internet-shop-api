@@ -6,7 +6,7 @@ import { MailerService } from '@nestjs-modules/mailer';
 export class Mailer {
   constructor(private readonly mailerService: MailerService) {}
 
-  public sendMail(to: string, link: string): void {
+  public sendMailActivate(to: string, link: string): void {
     this.mailerService
       .sendMail({
         to,
@@ -16,6 +16,25 @@ export class Mailer {
         html: `<h2>${link}</h2>`,
       })
 
+      .catch((e) => {
+        console.log(e);
+      });
+  }
+
+  public sendMailForgotPassword(
+    to: string,
+    link: string,
+    userName: string,
+  ): void {
+    this.mailerService
+      .sendMail({
+        to,
+        from: 'Marketplace',
+        subject: 'Testing Nest MailerModule ✔',
+        text: 'Forgot password',
+        html: `<h1>Hello ${userName}</h1>
+      <p>Please click this <a href=${link} ><h3>Link</h3></a> that change password</p>`,
+      })
       .catch((e) => {
         console.log(e);
       });

@@ -1,7 +1,6 @@
 import {
   BadRequestException,
   Injectable,
-  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
@@ -15,7 +14,9 @@ import { UserService } from 'src/user/user.service';
 import { TokenService } from './jwt/jwt.service';
 import { JwtService } from '@nestjs/jwt';
 import { AuthEmailLoginDto } from './dto/login.dto';
-import { compare } from 'bcrypt';
+import { ForgotPasswordDto } from './dto/forgotPassword.dto';
+import { ConfigService } from '@nestjs/config';
+import { ChangePasswordDto } from './dto/changePassword.dto';
 @Injectable()
 export class AuthService {
   constructor(
@@ -24,6 +25,7 @@ export class AuthService {
     private readonly TokenService: TokenService,
     private readonly jwtService: JwtService,
     private readonly userService: UserService,
+    private readonly configService: ConfigService,
   ) {}
 
   async registration(newUser: RegistrationDto) {
@@ -40,7 +42,7 @@ export class AuthService {
       password: hashPassword,
       activationLink,
     });
-    await this.mailerService.sendMail(
+    await this.mailerService.sendMailActivate(
       email,
       `${process.env.API_URL}/auth/activate/${activationLink}`,
     );
@@ -72,10 +74,13 @@ export class AuthService {
       user,
       backend_tokens: {
         token: await this.jwtService.sign({ id: user._id }),
-        access_token: await this.jwtService.signAsync(payload, {
-          expiresIn: '1d',
-          secret: process.env.JWT_SECRET,
-        }), // Change expiresIn value as needed
+        access_token: await this.jwtService.signAsync(
+          { ...payload, id: user._id },
+          {
+            expiresIn: '1d',
+            secret: process.env.JWT_SECRET,
+          },
+        ), // Change expiresIn value as needed
         refresh_token: await this.jwtService.signAsync(payload, {
           expiresIn: '7d',
           secret: process.env.JWT_REFRESH_TOKEN,
@@ -122,5 +127,32 @@ export class AuthService {
 
     await user.save();
   }
-  
+
+  async forgotPassword(forgotPassword: ForgotPasswordDto) {
+    const user = await this.userService.findByEmail(forgotPassword.email);
+
+    if (!user) {
+      throw new BadRequestException('User with this email not found');
+    }
+    const forgotPasswordToken = await this.jwtService.signAsync({
+      id: user._id,
+      email: user.email,
+    });
+    const forgotLink = `${this.configService.get('API_URL_GIT')}auth/activate?token=${forgotPasswordToken}`;
+
+    await this.mailerService.sendMailForgotPassword(
+      forgotPassword.email,
+      forgotLink,
+      user.firstName,
+    );
+    return true;
+  }
+
+  async changePassword(changePasswordDto: ChangePasswordDto, userId: string) {
+    const password = await bcrypt.hash(changePasswordDto.password, 3);
+    const user = await this.userModel.findById(userId);
+    user.password = password;
+    await user.save();
+    return user;
+  }
 }
