@@ -6,9 +6,15 @@ export class ImageService {
   constructor() {}
 
   async uploadPhoto(file: Express.Multer.File) {
+    if (!file || !file.buffer) {
+      throw new Error('Invalid file provided. Please upload a valid image.');
+    }
     const formData = new FormData();
-    const blob = new Blob([file.buffer], { type: file.mimetype });
-    formData.append('image', blob, file.originalname);
+    formData.append(
+      'image',
+      new Blob([file.buffer], { type: file.mimetype }),
+      Date.now() + '-' + Math.round(Math.random() * 1e9),
+    );
 
     try {
       const response = await axios.post(
