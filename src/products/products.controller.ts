@@ -24,6 +24,7 @@ import {
   ApiOperation,
 } from '@nestjs/swagger';
 import { UpdateProductDto } from './dto/update-product.dto';
+import { SharpPipe } from './pipes/sharp.pipe';
 
 const MAX_PROFILE_PICTURE_SIZE_IN_BYTES = 5 * 1024 * 1024;
 
@@ -74,22 +75,12 @@ export class ProductsController {
   @UseGuards(JwtAuthGuard)
   @UseInterceptors(FileInterceptor('file'))
   async create(
-    @UploadedFile(
-      new ParseFilePipe({
-        validators: [
-          new MaxFileSizeValidator({
-            maxSize: MAX_PROFILE_PICTURE_SIZE_IN_BYTES,
-          }),
-          new FileTypeValidator({ fileType: 'image/*' }),
-        ],
-      }),
-    )
+    @UploadedFile(SharpPipe)
     file: Express.Multer.File,
     @Body() newProducts: CreateProductDto,
     @Req() req,
   ) {
     const id = req.user.id;
-
     return this.productsService.create(newProducts, file, id);
   }
 

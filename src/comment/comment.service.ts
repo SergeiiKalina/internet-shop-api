@@ -6,12 +6,14 @@ import { Comment } from './comment.model';
 import { Model } from 'mongoose';
 import { Product } from 'src/products/product.model';
 import { CreateProductDto } from 'src/products/dto/create-product.dto';
+import { User } from 'src/auth/auth.model';
 
 @Injectable()
 export class CommentService {
   constructor(
     @InjectModel(Comment.name) private readonly commentModel: Model<Comment>,
     @InjectModel(Product.name) private readonly productModel: Model<Product>,
+    @InjectModel(User.name) private readonly userModel: Model<User>,
   ) {}
   async create(createCommentDto: CreateCommentDto, id: string) {
     const commentInstance = await this.commentModel.create({
@@ -24,9 +26,14 @@ export class CommentService {
       throw new Error('Product not found');
     }
 
+    const user = await this.userModel.findById(id);
+    if (!user) {
+      throw new Error('User not authorize');
+    }
+    const { password, ...restUser } = user.toObject();
     await product.comments.push(commentInstance.id);
     product.save();
-    return product;
+    return { ...commentInstance.toObject(), author: restUser };
   }
 
   async like(commentId: string, userId: string) {
@@ -34,6 +41,9 @@ export class CommentService {
     if (!comment) {
       throw new BadRequestException('Not found this comment');
     }
+
+    const author = await this.userModel.findById(comment.author);
+    const { _id, firstName, ...authorRest } = author.toObject();
     const likesArray = comment.like;
     const dislikesArray = comment.dislike;
     const likeIndex = likesArray.indexOf(userId);
@@ -54,7 +64,10 @@ export class CommentService {
 
     await comment.save();
 
-    return comment;
+    return {
+      ...comment.toObject(),
+      author: { _id, firstName },
+    };
   }
 
   async dislike(commentId: string, userId: string) {
@@ -62,6 +75,9 @@ export class CommentService {
     if (!comment) {
       throw new BadRequestException('Not found this comment');
     }
+    const author = await this.userModel.findById(comment.author);
+    const { _id, firstName, ...authorRest } = author.toObject();
+
     const likesArray = comment.like;
     const dislikesArray = comment.dislike;
     const likeIndex = likesArray.indexOf(userId);
@@ -82,15 +98,10 @@ export class CommentService {
 
     await comment.save();
 
-    return comment;
-  }
-
-  findAll() {
-    return `This action returns all comment`;
-  }
-
-  async findOne(id: string) {
-    return await this.commentModel.findById(id);
+    return {
+      ...comment.toObject(),
+      author: { _id, firstName },
+    };
   }
 
   update(id: number, updateCommentDto: UpdateCommentDto) {
