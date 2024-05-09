@@ -41,6 +41,9 @@ export class CommentService {
     if (!comment) {
       throw new BadRequestException('Not found this comment');
     }
+
+    const author = await this.userModel.findById(comment.author);
+    const { _id, firstName, ...authorRest } = author.toObject();
     const likesArray = comment.like;
     const dislikesArray = comment.dislike;
     const likeIndex = likesArray.indexOf(userId);
@@ -61,7 +64,10 @@ export class CommentService {
 
     await comment.save();
 
-    return comment;
+    return {
+      ...comment.toObject(),
+      author: { _id, firstName },
+    };
   }
 
   async dislike(commentId: string, userId: string) {
@@ -69,6 +75,9 @@ export class CommentService {
     if (!comment) {
       throw new BadRequestException('Not found this comment');
     }
+    const author = await this.userModel.findById(comment.author);
+    const { _id, firstName, ...authorRest } = author.toObject();
+
     const likesArray = comment.like;
     const dislikesArray = comment.dislike;
     const likeIndex = likesArray.indexOf(userId);
@@ -89,7 +98,10 @@ export class CommentService {
 
     await comment.save();
 
-    return comment;
+    return {
+      ...comment.toObject(),
+      author: { _id, firstName },
+    };
   }
 
   update(id: number, updateCommentDto: UpdateCommentDto) {
