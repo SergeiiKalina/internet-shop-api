@@ -42,9 +42,15 @@ export class AuthService {
       password: hashPassword,
       activationLink,
     });
-    await this.mailerService.sendMailActivate(
+    await this.mailerService.sendMail(
       email,
       `${process.env.API_URL}/auth/activate/${activationLink}`,
+      user.firstName,
+      'Щоб підтвердити свою електронну адресу вам потрібно натиснути нижче!',
+      {
+        start: 'Не робили запит на активацію Email? ',
+        link: 'yevhenii-sulim.github.io/marketplace/',
+      },
     );
     const tokens = await this.TokenService.generationJwt({ ...user });
 
@@ -140,10 +146,15 @@ export class AuthService {
     });
     const forgotLink = `${this.configService.get('API_URL_GIT')}auth/activate?token=${forgotPasswordToken}`;
 
-    await this.mailerService.sendMailForgotPassword(
+    await this.mailerService.sendMail(
       forgotPassword.email,
       forgotLink,
       user.firstName,
+      'Щоб змінити пароль вам потрібно натиснути нижче!',
+      {
+        start: 'Не робили запит на зміну паролю?',
+        link: 'yevhenii-sulim.github.io/marketplace/',
+      },
     );
     return true;
   }

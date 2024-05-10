@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
-
+import { join } from 'path';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AuthModule } from './auth/auth.module';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { User, UserSchema } from './auth/auth.model';
-import { EjsAdapter } from '@nestjs-modules/mailer/dist/adapters/ejs.adapter';
+import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { ConfigModule } from '@nestjs/config';
 import { Jwt, JwtSchema } from './auth/jwt/jwt.model';
 import { UserModule } from './user/user.module';
@@ -42,8 +42,8 @@ import { memoryStorage } from 'multer';
           from: '"nest-modules" <modules@nestjs.com>',
         },
         template: {
-          dir: __dirname + '/templates',
-          adapter: new EjsAdapter(),
+          dir: join(__dirname, './templates'),
+          adapter: new HandlebarsAdapter(),
           options: {
             strict: true,
           },

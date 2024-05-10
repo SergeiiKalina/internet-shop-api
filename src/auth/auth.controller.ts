@@ -92,7 +92,7 @@ export class AuthController {
     const link = param.link;
 
     await this.authService.activate(link);
-    return res.redirect(process.env.API_URL);
+    return res.redirect(process.env.API_URL_GIT);
   }
   @Get('facebook')
   @UseGuards(AuthGuard('facebook'))

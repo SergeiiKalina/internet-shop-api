@@ -6,34 +6,26 @@ import { MailerService } from '@nestjs-modules/mailer';
 export class Mailer {
   constructor(private readonly mailerService: MailerService) {}
 
-  public sendMailActivate(to: string, link: string): void {
-    this.mailerService
-      .sendMail({
-        to,
-        from: process.env.SMTP_USER,
-        subject: 'Testing Nest MailerModule ✔',
-        text: 'welcome',
-        html: `<h2>${link}</h2>`,
-      })
-
-      .catch((e) => {
-        console.log(e);
-      });
-  }
-
-  public sendMailForgotPassword(
+  public sendMail(
     to: string,
     link: string,
     userName: string,
+    info: string,
+    footerInfo: { start: string; link: string },
   ): void {
     this.mailerService
       .sendMail({
         to,
         from: 'Marketplace',
         subject: 'Testing Nest MailerModule ✔',
-        text: 'Forgot password',
-        html: `<h1>Hello ${userName}</h1>
-      <p>Please click this <a href=${link} ><h3>Link</h3></a> that change password</p>`,
+        template: './mail',
+        context: {
+          userName,
+          link,
+          info,
+          footerInfoStart: footerInfo.start,
+          footerInfoLink: footerInfo.link,
+        },
       })
       .catch((e) => {
         console.log(e);
