@@ -30,10 +30,13 @@ export class CustomValidationPipe implements PipeTransform {
   }
 
   private formatErrors(errors: any[]) {
-    const formattedErrors = {};
+    const formattedErrors = { errors: [] };
     errors.forEach((error) => {
       const { property, constraints } = error;
-      formattedErrors[property] = Object.values(constraints);
+      formattedErrors.errors.push({
+        field: property,
+        message: Object.values(constraints),
+      });
     });
     return formattedErrors;
   }
