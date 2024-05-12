@@ -74,9 +74,25 @@ export class ProductsService {
     return product;
   }
 
-  async getAllProducts(): Promise<Product[]> {
-    return this.productModel.find().exec();
+  async getAllProducts(
+    page: number,
+    limit: number,
+  ): Promise<Product[]> {
+    
+    const startIndex = (page - 1) * limit;
+    
+    const paginatedProducts = await this.productModel
+    .find()
+    .skip(startIndex)
+    .limit(limit)
+    .exec();
+
+    const endIndex = page * limit;
+    const paginatedPosts = paginatedProducts.slice(startIndex, endIndex);
+    return paginatedPosts;
   }
+
+
 
   async getProduct(id: string) {
     const product = await this.productModel.findById(id);

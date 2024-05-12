@@ -12,6 +12,8 @@ import {
   Req,
   Delete,
   Param,
+  Query,
+  Patch,
 } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
@@ -25,6 +27,7 @@ import {
 } from '@nestjs/swagger';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { SharpPipe } from './pipes/sharp.pipe';
+import { Product } from './product.model';
 
 const MAX_PROFILE_PICTURE_SIZE_IN_BYTES = 5 * 1024 * 1024;
 
@@ -32,19 +35,23 @@ const MAX_PROFILE_PICTURE_SIZE_IN_BYTES = 5 * 1024 * 1024;
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
+
+
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({
     summary: 'Get all Products',
   })
-  @Get()
-  async getAllProducts() {
-    return this.productsService.getAllProducts();
-  }
-
   @Get(':id')
-  async getProduct(@Param('id') id: string) {
-    return this.productsService.getProduct(id);
+  async getAllProducts(
+    @Query('page') page: number = 1,
+    @Query('limit') limit: number = 10,
+  ): Promise<Product[]> {
+    return this.productsService.getAllProducts(page, limit);
   }
 
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
   @Post('create')
   @ApiOperation({
     summary: 'Only authorized users',
@@ -84,7 +91,9 @@ export class ProductsController {
     return this.productsService.create(newProducts, file, id);
   }
 
-  @Post('update')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @Patch('update')
   @UseGuards(JwtAuthGuard)
   @UseInterceptors(FileInterceptor('img'))
   async updateProduct(
@@ -105,7 +114,9 @@ export class ProductsController {
     const userId = req.user.id;
     return this.productsService.updateProduct(newProducts, file, userId);
   }
-
+  
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
   @Delete(':id')
   async delete(@Param('id') id: string) {
     return this.productsService.delete(+id);
