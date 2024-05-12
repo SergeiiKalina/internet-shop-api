@@ -22,6 +22,7 @@ import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { ConfigService } from '@nestjs/config';
 import { ForgotPasswordDto } from './dto/forgotPassword.dto';
 import { ChangePasswordDto } from './dto/changePassword.dto';
+import { CustomValidationPipe } from './pipes/registrationValidationPipe';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -32,8 +33,10 @@ export class AuthController {
   ) {}
 
   @Post('registration')
-  @UsePipes(new ValidationPipe())
-  async registration(@Body() newUser: RegistrationDto, @Res() res: Response) {
+  async registration(
+    @Body(new CustomValidationPipe()) newUser: RegistrationDto,
+    @Res() res: Response,
+  ) {
     try {
       const user = await this.authService.registration(newUser);
       res.cookie('refreshToken', user.refreshJwt, {
@@ -92,7 +95,7 @@ export class AuthController {
     const link = param.link;
 
     await this.authService.activate(link);
-    return res.redirect(process.env.API_URL);
+    return res.redirect(process.env.API_URL_GIT);
   }
   @Get('facebook')
   @UseGuards(AuthGuard('facebook'))
