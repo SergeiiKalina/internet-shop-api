@@ -59,7 +59,7 @@ export class ProductsController {
   @ApiOperation({
     summary: 'Get product',
   })
-  @Get('GetProduct/:id')
+  @Get(':id')
   async GetProduct(
    @Param('id') id: string,
  ){
