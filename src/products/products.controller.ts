@@ -48,7 +48,7 @@ export class ProductsController {
   @ApiQuery({ name: 'page', required: false, type: Number, description: 'Page number (default: 1)' })
   @ApiQuery({ name: 'limit', required: false, type: Number, description: 'Items per page (default: 10)' })
   @ApiResponse({ status: 200, description: 'Returns all products' })
-  @Get(':id')
+  @Get()
   async getAllProducts(
     @Query('page') page: number = 1,
     @Query('limit') limit: number = 10,
