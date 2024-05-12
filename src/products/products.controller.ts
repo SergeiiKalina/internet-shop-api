@@ -28,6 +28,7 @@ import {
 import { UpdateProductDto } from './dto/update-product.dto';
 import { SharpPipe } from './pipes/sharp.pipe';
 import { Product } from './product.model';
+import { AuthGuard } from '@nestjs/passport';
 
 const MAX_PROFILE_PICTURE_SIZE_IN_BYTES = 5 * 1024 * 1024;
 
@@ -37,8 +38,7 @@ export class ProductsController {
 
 
 
-  @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
+
   @ApiOperation({
     summary: 'Get all Products',
   })
@@ -50,8 +50,7 @@ export class ProductsController {
     return this.productsService.getAllProducts(page, limit);
   }
 
-  @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
+
   @Post('create')
   @ApiOperation({
     summary: 'Only authorized users',
@@ -91,10 +90,8 @@ export class ProductsController {
     return this.productsService.create(newProducts, file, id);
   }
 
-  @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
+
   @Patch('update')
-  @UseGuards(JwtAuthGuard)
   @UseInterceptors(FileInterceptor('img'))
   async updateProduct(
     @UploadedFile(
@@ -115,8 +112,6 @@ export class ProductsController {
     return this.productsService.updateProduct(newProducts, file, userId);
   }
   
-  @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
   @Delete(':id')
   async delete(@Param('id') id: string) {
     return this.productsService.delete(+id);
