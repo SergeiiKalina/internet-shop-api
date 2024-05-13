@@ -22,8 +22,6 @@ import { ConfigService } from '@nestjs/config';
 import { ForgotPasswordDto } from './dto/forgotPassword.dto';
 import { ChangePasswordDto } from './dto/changePassword.dto';
 import { CustomValidationPipe } from './pipes/registrationValidationPipe';
-import { UserService } from 'src/user/user.service';
-import { TokenService } from './jwt/jwt.service';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -31,8 +29,6 @@ export class AuthController {
   constructor(
     private readonly authService: AuthService,
     private readonly configService: ConfigService,
-    private readonly userService: UserService,
-    private readonly tokenService: TokenService,
   ) {}
 
   @Post('registration')
@@ -100,6 +96,7 @@ export class AuthController {
     await this.authService.activate(link);
     return res.redirect(process.env.API_URL_GIT);
   }
+
   @Get('facebook')
   @UseGuards(AuthGuard('facebook'))
   async facebookLogin(): Promise<any> {
@@ -125,9 +122,12 @@ export class AuthController {
 
   @Get('google/redirect')
   @UseGuards(AuthGuard('google'))
-  async googleAuthRedirect(@Req() req: Request, @Res() res) {
+  async googleAuthRedirect(@Req() req, @Res() res) {
+    const user = req.user.user;
+
+    const userOfDb = await this.authService.loginWithGoogle(user);
     res.redirect(
-      `${this.configService.get('API_URL_GIT')}?userData=${JSON.stringify(req.user)}`,
+      `${this.configService.get('API_URL_GIT')}?userData=${JSON.stringify(userOfDb)}`,
     );
     return HttpStatus.OK;
   }

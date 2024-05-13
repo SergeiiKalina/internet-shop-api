@@ -198,4 +198,37 @@ export class AuthService {
       return { ...tokens, user: restUser };
     }
   }
+
+  async loginWithGoogle(user: {
+    email: string;
+    name: string;
+    firstName: string;
+    lastName: string;
+  }) {
+    const userDb = await this.userService.findByEmail(user.email);
+
+    if (!userDb) {
+      const newUser = await this.registration({
+        ...user,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        numberPhone: '+380000000000',
+        password: randomBytes(8).toString('hex'),
+      });
+      const { password, isActivated, activationLink, lastLogout, ...restUser } =
+        newUser.user.toObject();
+      return { ...newUser, user: { ...restUser } };
+    }
+
+    if (userDb) {
+      const userFromDb = await this.userService.findByEmail(user.email);
+      const { password, isActivated, activationLink, lastLogout, ...restUser } =
+        userFromDb.toObject();
+      const tokens = await this.tokenService.generationJwt({
+        ...restUser,
+        id: restUser._id,
+      });
+      return { ...tokens, user: restUser };
+    }
+  }
 }
