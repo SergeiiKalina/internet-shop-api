@@ -67,6 +67,13 @@ export class ProductsService {
     @InjectModel(Comment.name) private commentModel: Model<Comment>,
     private readonly imageService: ImageService,
   ) {}
+ 
+  
+  async searchProducts(title: string): Promise<Product[]> {
+    const regex = new RegExp(`^${title}`, 'i'); // Case-insensitive search for names starting with 'firstLetter'
+    return this.productModel.find({ title: regex }).exec();
+  }
+
 
   async create(
     createProductDto: CreateProductDto,
