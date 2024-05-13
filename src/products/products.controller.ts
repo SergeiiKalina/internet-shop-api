@@ -12,6 +12,8 @@ import {
   Req,
   Delete,
   Param,
+  Query,
+  Patch,
 } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
@@ -22,9 +24,12 @@ import {
   ApiBody,
   ApiConsumes,
   ApiOperation,
+  ApiQuery,
+  ApiResponse,
 } from '@nestjs/swagger';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { SharpPipe } from './pipes/sharp.pipe';
+import { Product } from './product.model';
 import { ProductSwaggerDto } from './dto/dtoForSwaggerCreateProduct.dto';
 
 const MAX_PROFILE_PICTURE_SIZE_IN_BYTES = 5 * 1024 * 1024;
@@ -36,13 +41,33 @@ export class ProductsController {
   @ApiOperation({
     summary: 'Get all Products',
   })
+  @ApiOperation({ summary: 'Get all Products' })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+    description: 'Page number (default: 1)',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    description: 'Items per page (default: 10)',
+  })
+  @ApiResponse({ status: 200, description: 'Returns all products' })
   @Get()
-  async getAllProducts() {
-    return this.productsService.getAllProducts();
+  async getAllProducts(
+    @Query('page') page: number = 1,
+    @Query('limit') limit: number = 10,
+  ): Promise<Product[]> {
+    return this.productsService.getAllProducts(page, limit);
   }
 
+  @ApiOperation({
+    summary: 'Get product',
+  })
   @Get(':id')
-  async getProduct(@Param('id') id: string) {
+  async GetProduct(@Param('id') id: string) {
     return this.productsService.getProduct(id);
   }
 
@@ -67,8 +92,7 @@ export class ProductsController {
     return this.productsService.create(newProducts, file, id);
   }
 
-  @Post('update')
-  @UseGuards(JwtAuthGuard)
+  @Patch('update')
   @UseInterceptors(FileInterceptor('img'))
   async updateProduct(
     @UploadedFile(
