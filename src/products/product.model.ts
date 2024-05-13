@@ -8,13 +8,13 @@ export class Product {
   @Prop({ required: true })
   title: string;
   @Prop({ required: true })
-  price: string;
+  price: number;
   @Prop({ default: false })
   eco: boolean;
   @Prop({ default: false })
   discount: boolean;
   @Prop()
-  discountItem: string;
+  discountPrice: number;
   @Prop({ default: () => Date.now() })
   createDate: Date;
   @Prop({
@@ -39,6 +39,10 @@ export class Product {
   size: string;
   @Prop({ required: true })
   describe: string;
+  @Prop({ required: true })
+  engCategory: string;
+  @Prop({ required: true })
+  engSubcategory: string;
 }
 
 export const ProductSchema = SchemaFactory.createForClass(Product);

@@ -25,6 +25,7 @@ import {
 } from '@nestjs/swagger';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { SharpPipe } from './pipes/sharp.pipe';
+import { ProductSwaggerDto } from './dto/dtoForSwaggerCreateProduct.dto';
 
 const MAX_PROFILE_PICTURE_SIZE_IN_BYTES = 5 * 1024 * 1024;
 
@@ -51,25 +52,7 @@ export class ProductsController {
   })
   @ApiConsumes('multipart/form-data')
   @ApiBody({
-    schema: {
-      type: 'object',
-      properties: {
-        title: { type: 'string' },
-        price: { type: 'string' },
-        eco: { type: 'boolean', default: true },
-        discount: { type: 'boolean', default: true },
-        discountItem: { type: 'string' },
-        category: { type: 'string' },
-        subCategory: { type: 'string' },
-        state: { type: 'string', default: 'Нове' },
-        size: { type: 'string' || null, default: null },
-        describe: { type: 'string' },
-        file: {
-          type: 'string',
-          format: 'binary',
-        },
-      },
-    },
+    type: ProductSwaggerDto,
   })
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)

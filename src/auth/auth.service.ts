@@ -17,12 +17,13 @@ import { AuthEmailLoginDto } from './dto/login.dto';
 import { ForgotPasswordDto } from './dto/forgotPassword.dto';
 import { ConfigService } from '@nestjs/config';
 import { ChangePasswordDto } from './dto/changePassword.dto';
+import { randomBytes } from 'crypto';
 @Injectable()
 export class AuthService {
   constructor(
     @InjectModel(User.name) private userModel: Model<User>,
     private readonly mailerService: Mailer,
-    private readonly TokenService: TokenService,
+    private readonly tokenService: TokenService,
     private readonly jwtService: JwtService,
     private readonly userService: UserService,
     private readonly configService: ConfigService,
@@ -52,9 +53,12 @@ export class AuthService {
         link: 'yevhenii-sulim.github.io/marketplace/',
       },
     );
-    const tokens = await this.TokenService.generationJwt({ ...user });
+    const tokens = await this.tokenService.generationJwt({
+      ...user,
+      id: user._id,
+    });
 
-    await this.TokenService.safeJwt(user.id, tokens.refreshJwt);
+    await this.tokenService.safeJwt(user.id, tokens.refreshJwt);
 
     return { ...tokens, user };
   }
@@ -101,9 +105,9 @@ export class AuthService {
         throw new Error("User isn't authorized");
       }
 
-      const userData = await this.TokenService.validateRefreshToken(refreshJwt);
+      const userData = await this.tokenService.validateRefreshToken(refreshJwt);
 
-      const tokenFromDb = await this.TokenService.findJwt(refreshJwt);
+      const tokenFromDb = await this.tokenService.findJwt(refreshJwt);
       if (!userData || !tokenFromDb) {
         throw new Error("User isn't authorized");
       }
@@ -114,9 +118,9 @@ export class AuthService {
         throw new Error('User not found');
       }
 
-      const tokens = await this.TokenService.generationJwt({ ...user });
+      const tokens = await this.tokenService.generationJwt({ ...user });
 
-      await this.TokenService.safeJwt(user.id, tokens.refreshJwt);
+      await this.tokenService.safeJwt(user.id, tokens.refreshJwt);
       return { ...tokens, user };
     } catch (error) {
       console.error(error);
@@ -165,5 +169,33 @@ export class AuthService {
     user.password = password;
     await user.save();
     return user;
+  }
+
+  async loginWithFacebook(user: { email: string; name: string }) {
+    const userDb = await this.userService.findByEmail(user.email);
+
+    if (!userDb) {
+      const newUser = await this.registration({
+        ...user,
+        firstName: user.name.split(' ')[0],
+        lastName: user.name.split(' ')[1],
+        numberPhone: '+380000000000',
+        password: randomBytes(8).toString('hex'),
+      });
+      const { password, isActivated, activationLink, lastLogout, ...restUser } =
+        newUser.user.toObject();
+      return { ...newUser, user: { ...restUser } };
+    }
+
+    if (userDb) {
+      const userFromDb = await this.userService.findByEmail(user.email);
+      const { password, isActivated, activationLink, lastLogout, ...restUser } =
+        userFromDb.toObject();
+      const tokens = await this.tokenService.generationJwt({
+        ...restUser,
+        id: restUser._id,
+      });
+      return { ...tokens, user: restUser };
+    }
   }
 }

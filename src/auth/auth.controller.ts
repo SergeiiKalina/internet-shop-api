@@ -4,7 +4,6 @@ import {
   Post,
   Body,
   Res,
-  UsePipes,
   ValidationPipe,
   Controller,
   Req,
@@ -23,6 +22,8 @@ import { ConfigService } from '@nestjs/config';
 import { ForgotPasswordDto } from './dto/forgotPassword.dto';
 import { ChangePasswordDto } from './dto/changePassword.dto';
 import { CustomValidationPipe } from './pipes/registrationValidationPipe';
+import { UserService } from 'src/user/user.service';
+import { TokenService } from './jwt/jwt.service';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -30,6 +31,8 @@ export class AuthController {
   constructor(
     private readonly authService: AuthService,
     private readonly configService: ConfigService,
+    private readonly userService: UserService,
+    private readonly tokenService: TokenService,
   ) {}
 
   @Post('registration')
@@ -105,9 +108,11 @@ export class AuthController {
 
   @Get('/facebook/redirect')
   @UseGuards(AuthGuard('facebook'))
-  async facebookLoginRedirect(@Req() req: Request, @Res() res): Promise<any> {
+  async facebookLoginRedirect(@Req() req, @Res() res): Promise<any> {
+    const user = req.user.user;
+    const userOfDb = await this.authService.loginWithFacebook(user);
     res.redirect(
-      `${this.configService.get('API_URL_GIT')}?userData=${JSON.stringify(req.user)}`,
+      `${this.configService.get('API_URL_GIT')}?userData=${JSON.stringify(userOfDb)}`,
     );
     return HttpStatus.OK;
   }

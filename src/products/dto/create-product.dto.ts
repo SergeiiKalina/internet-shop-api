@@ -14,7 +14,7 @@ export class CreateProductDto {
   title: string;
   @ApiProperty({ type: String, description: 'Price of the product' })
   @IsString()
-  price: string;
+  price: number;
   @ApiProperty({
     type: Boolean,
     description: 'Whether the product is eco-friendly',
@@ -32,7 +32,7 @@ export class CreateProductDto {
     description: 'Description of the discount item',
   })
   @IsString()
-  discountItem: string;
+  discountPrice: number;
   @IsDate()
   createDate?: Date = new Date();
   @IsNumber()

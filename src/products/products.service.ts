@@ -8,6 +8,57 @@ import { UpdateProductDto } from './dto/update-product.dto';
 import { User } from 'src/auth/auth.model';
 import { Comment } from 'src/comment/comment.model';
 
+const categoryDictionary = {
+  подарункові_товари: {
+    engName: 'gift',
+    subcategories: {
+      cувеніри: 'souvenirs',
+      подарункові_набори: 'gift_sets',
+      святкова_тематика: 'festive_theme',
+    },
+  },
+  вишивка: {
+    engName: 'embroidery',
+    subcategories: {
+      сорочки: 'shirts',
+      плаття: 'dress',
+      блузки: 'blouses',
+    },
+  },
+  аксесуари: {
+    engName: 'accessories',
+    subcategories: {
+      сумки: 'handbags',
+      пояси: 'belts',
+      портмоне: 'purse',
+      хустки: 'handkerchiefs',
+      окуляри: 'glass',
+    },
+  },
+  взуття_з_натуральних_матеріалів: {
+    engName: 'eco',
+    subcategories: {
+      зимове: 'winter',
+      літнє: 'summer',
+    },
+  },
+  натуральна_косметика: {
+    engName: 'natural_cosmetics',
+    subcategories: {
+      мило: 'soap',
+      парфюмерія: 'perfumery',
+    },
+  },
+  товари_з_перероблених_матеріалів: {
+    engName: 'recycled_materials',
+    subcategories: {
+      перероблений_денім: 'recycled_denim',
+      востановленний_секонд_хэнд: 'second_hand',
+    },
+  },
+  'подарую+віддам': { engName: 'for_free' },
+};
+
 @Injectable()
 export class ProductsService {
   constructor(
@@ -29,8 +80,14 @@ export class ProductsService {
       );
     }
 
+    const engNamesCategories = await this.createEngNameForCategories(
+      createProductDto.category,
+      createProductDto.subCategory,
+    );
+
     const product = await this.productModel.create({
-      ...{ ...createProductDto },
+      ...createProductDto,
+      ...engNamesCategories,
       img: image.data.url,
       producer: id,
     });
@@ -115,5 +172,30 @@ export class ProductsService {
     const deleteProduct = this.productModel.findByIdAndDelete(id);
 
     return deleteProduct;
+  }
+
+  async createEngNameForCategories(
+    nameCategory: string,
+    nameSubcategory: string,
+  ) {
+    const category =
+      categoryDictionary[
+        nameCategory.charAt(0).toLowerCase() +
+          nameCategory.split(' ').join('_').slice(1)
+      ];
+    const engCategory =
+      categoryDictionary[
+        nameCategory.charAt(0).toLowerCase() +
+          nameCategory.split(' ').join('_').slice(1)
+      ].engName;
+
+    const engSubcategory = category.subcategories['cувеніри'];
+
+    console.log(
+      nameSubcategory.charAt(0).toLowerCase() +
+        nameSubcategory.split(' ').join('_').slice(1),
+    );
+
+    return { engCategory, engSubcategory };
   }
 }
