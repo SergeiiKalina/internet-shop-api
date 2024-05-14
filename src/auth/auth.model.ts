@@ -1,4 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Schema as MongooseSchema } from 'mongoose';
 
 export type UserDocument = User & Document;
 
@@ -24,6 +25,8 @@ export class User {
   lastLogout: Date;
   @Prop({ default: 0 })
   rating: number;
+  @Prop({ default: [], type: [MongooseSchema.Types.ObjectId], ref: 'Product' })
+  basket: string[];
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

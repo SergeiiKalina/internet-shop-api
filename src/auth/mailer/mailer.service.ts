@@ -12,12 +12,13 @@ export class Mailer {
     userName: string,
     info: string,
     footerInfo: { start: string; link: string },
+    subject: string,
   ): void {
     this.mailerService
       .sendMail({
         to,
         from: 'Marketplace',
-        subject: 'Testing Nest MailerModule ✔',
+        subject,
         template: './mail',
         context: {
           userName,

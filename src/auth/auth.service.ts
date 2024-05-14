@@ -52,6 +52,7 @@ export class AuthService {
         start: 'Не робили запит на активацію Email? ',
         link: 'yevhenii-sulim.github.io/marketplace/',
       },
+      'Підтвердіть свій Email',
     );
     const tokens = await this.tokenService.generationJwt({
       ...user,
@@ -159,6 +160,7 @@ export class AuthService {
         start: 'Не робили запит на зміну паролю?',
         link: 'yevhenii-sulim.github.io/marketplace/',
       },
+      'Підтвердіть зміну паролю',
     );
     return true;
   }

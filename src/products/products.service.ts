@@ -12,7 +12,7 @@ const categoryDictionary = {
   подарункові_товари: {
     engName: 'gift',
     subcategories: {
-      cувеніри: 'souvenirs',
+      сувеніри: 'souvenirs',
       подарункові_набори: 'gift_sets',
       святкова_тематика: 'festive_theme',
     },
@@ -131,25 +131,19 @@ export class ProductsService {
     return product;
   }
 
-  async getAllProducts(
-    page: number,
-    limit: number,
-  ): Promise<Product[]> {
-    
+  async getAllProducts(page: number, limit: number): Promise<Product[]> {
     const startIndex = (page - 1) * limit;
-    
+
     const paginatedProducts = await this.productModel
-    .find()
-    .skip(startIndex)
-    .limit(limit)
-    .exec();
+      .find()
+      .skip(startIndex)
+      .limit(limit)
+      .exec();
 
     const endIndex = page * limit;
     const paginatedPosts = paginatedProducts.slice(startIndex, endIndex);
     return paginatedPosts;
   }
-
-
 
   async getProduct(id: string) {
     const product = await this.productModel.findById(id);
@@ -205,12 +199,11 @@ export class ProductsService {
           nameCategory.split(' ').join('_').slice(1)
       ].engName;
 
-    const engSubcategory = category.subcategories['cувеніри'];
-
-    console.log(
-      nameSubcategory.charAt(0).toLowerCase() +
-        nameSubcategory.split(' ').join('_').slice(1),
-    );
+    const engSubcategory =
+      category.subcategories[
+        nameSubcategory.charAt(0).toLowerCase() +
+          nameSubcategory.split(' ').join('_').slice(1)
+      ];
 
     return { engCategory, engSubcategory };
   }
