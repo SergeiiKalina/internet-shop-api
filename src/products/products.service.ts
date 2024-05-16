@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateProductDto } from './dto/create-product.dto';
 import { InjectModel } from '@nestjs/mongoose';
-import { Product } from './product.model';
+import { Product, ProductDocument } from './product.model';
 import { Model } from 'mongoose';
 import { ImageService } from './images-service/images.service';
 import { UpdateProductDto } from './dto/update-product.dto';
@@ -74,6 +74,7 @@ export class ProductsService {
     id: string,
   ) {
     const image = await this.imageService.uploadPhoto(file);
+
     if (!image) {
       throw new BadRequestException(
         'Something is wrong with the image loading',
@@ -85,11 +86,20 @@ export class ProductsService {
       createProductDto.subCategory,
     );
 
+    const { color, size, state, brand, eco, ...restProduct } = createProductDto;
+
     const product = await this.productModel.create({
-      ...createProductDto,
+      ...restProduct,
       ...engNamesCategories,
       img: image.data.url,
       producer: id,
+      parameters: {
+        color,
+        size,
+        state,
+        brand,
+        eco,
+      },
     });
 
     if (!product) {
@@ -152,6 +162,7 @@ export class ProductsService {
       throw new BadRequestException('Something is wrong');
     }
     const user = await this.userModel.findById(product.producer);
+
     if (!user) {
       throw new BadRequestException('Something is wrong');
     }

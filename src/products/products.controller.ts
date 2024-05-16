@@ -30,7 +30,6 @@ import {
 import { UpdateProductDto } from './dto/update-product.dto';
 import { SharpPipe } from './pipes/sharp.pipe';
 import { Product } from './product.model';
-import { ProductSwaggerDto } from './dto/dtoForSwaggerCreateProduct.dto';
 
 const MAX_PROFILE_PICTURE_SIZE_IN_BYTES = 5 * 1024 * 1024;
 
@@ -67,7 +66,7 @@ export class ProductsController {
     summary: 'Get product',
   })
   @Get(':id')
-  async GetProduct(@Param('id') id: string) {
+  async getProduct(@Param('id') id: string) {
     return this.productsService.getProduct(id);
   }
 
@@ -77,7 +76,7 @@ export class ProductsController {
   })
   @ApiConsumes('multipart/form-data')
   @ApiBody({
-    type: ProductSwaggerDto,
+    type: CreateProductDto,
   })
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
@@ -85,11 +84,12 @@ export class ProductsController {
   async create(
     @UploadedFile(SharpPipe)
     file: Express.Multer.File,
-    @Body() newProducts: CreateProductDto,
+    @Body()
+    newProduct: CreateProductDto,
     @Req() req,
   ) {
     const id = req.user.id;
-    return this.productsService.create(newProducts, file, id);
+    return this.productsService.create(newProduct, file, id);
   }
 
   @Patch('update')
