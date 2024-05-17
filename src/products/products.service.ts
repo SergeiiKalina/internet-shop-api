@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateProductDto } from './dto/create-product.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Product, ProductDocument } from './product.model';
@@ -204,6 +208,10 @@ export class ProductsService {
         nameCategory.charAt(0).toLowerCase() +
           nameCategory.split(' ').join('_').slice(1)
       ];
+
+    if (!category) {
+      throw new NotFoundException('Такої категорії не існує в каталогу');
+    }
     const engCategory =
       categoryDictionary[
         nameCategory.charAt(0).toLowerCase() +
@@ -215,6 +223,9 @@ export class ProductsService {
         nameSubcategory.charAt(0).toLowerCase() +
           nameSubcategory.split(' ').join('_').slice(1)
       ];
+    if (!engSubcategory) {
+      throw new NotFoundException('Такої під категорії не існує в каталогу');
+    }
 
     return { engCategory, engSubcategory };
   }
