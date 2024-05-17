@@ -3,7 +3,7 @@ import { join } from 'path';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AuthModule } from './auth/auth.module';
 import { MailerModule } from '@nestjs-modules/mailer';
-import { User, UserSchema } from './auth/auth.model';
+import { User, UserSchema } from './auth/user.model';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { ConfigModule } from '@nestjs/config';
 import { Jwt, JwtSchema } from './auth/jwt/jwt.model';
@@ -14,6 +14,7 @@ import { ProductsModule } from './products/products.module';
 import { CommentModule } from './comment/comment.module';
 import { MulterModule } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
+import { BasketModule } from './basket/basket.module';
 @Module({
   imports: [
     MongooseModule.forRoot(
@@ -55,6 +56,7 @@ import { memoryStorage } from 'multer';
     User,
     ProductsModule,
     CommentModule,
+    BasketModule,
   ],
   controllers: [AppController],
   providers: [AppService],

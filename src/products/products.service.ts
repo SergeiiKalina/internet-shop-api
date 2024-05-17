@@ -5,7 +5,7 @@ import { Product, ProductDocument } from './product.model';
 import { Model } from 'mongoose';
 import { ImageService } from './images-service/images.service';
 import { UpdateProductDto } from './dto/update-product.dto';
-import { User } from 'src/auth/auth.model';
+import { User } from 'src/auth/user.model';
 import { Comment } from 'src/comment/comment.model';
 
 const categoryDictionary = {
@@ -217,5 +217,9 @@ export class ProductsService {
       ];
 
     return { engCategory, engSubcategory };
+  }
+
+  async findProductById(id: string) {
+    return await this.productModel.findById(id);
   }
 }

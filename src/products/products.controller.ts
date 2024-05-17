@@ -14,6 +14,7 @@ import {
   Param,
   Query,
   Patch,
+  ValidationPipe,
 } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
@@ -24,15 +25,16 @@ import {
   ApiBody,
   ApiConsumes,
   ApiOperation,
+  ApiParam,
   ApiQuery,
   ApiResponse,
+  ApiTags,
 } from '@nestjs/swagger';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { SharpPipe } from './pipes/sharp.pipe';
 import { Product } from './product.model';
 
-const MAX_PROFILE_PICTURE_SIZE_IN_BYTES = 5 * 1024 * 1024;
-
+@ApiTags('product')
 @Controller('products')
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
@@ -78,13 +80,23 @@ export class ProductsController {
   @ApiBody({
     type: CreateProductDto,
   })
+  @ApiResponse({ status: 200, description: 'return product' })
+  @ApiOperation({ summary: 'Create new product' })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad request. Invalid input data.',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized. User needs to be authenticated.',
+  })
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @UseInterceptors(FileInterceptor('file'))
   async create(
     @UploadedFile(SharpPipe)
     file: Express.Multer.File,
-    @Body()
+    @Body(new ValidationPipe())
     newProduct: CreateProductDto,
     @Req() req,
   ) {
@@ -93,20 +105,30 @@ export class ProductsController {
   }
 
   @Patch('update')
-  @UseInterceptors(FileInterceptor('img'))
+  @ApiOperation({
+    summary: 'Only authorized users',
+  })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    type: UpdateProductDto,
+  })
+  @ApiResponse({ status: 200, description: 'return product' })
+  @ApiOperation({ summary: 'update product' })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad request. Invalid input data.',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized. User needs to be authenticated.',
+  })
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @UseInterceptors(FileInterceptor('file'))
   async updateProduct(
-    @UploadedFile(
-      new ParseFilePipe({
-        validators: [
-          new MaxFileSizeValidator({
-            maxSize: MAX_PROFILE_PICTURE_SIZE_IN_BYTES,
-          }),
-          new FileTypeValidator({ fileType: 'image/*' }),
-        ],
-      }),
-    )
+    @UploadedFile(SharpPipe)
     file: Express.Multer.File,
-    @Body() newProducts: UpdateProductDto,
+    @Body(new ValidationPipe()) newProducts: UpdateProductDto,
     @Req() req,
   ) {
     const userId = req.user.id;
@@ -114,6 +136,24 @@ export class ProductsController {
   }
 
   @Delete(':id')
+  @ApiParam({
+    name: 'id',
+    required: true,
+    type: String,
+    description: 'Id product',
+  })
+  @ApiResponse({ status: 200, description: 'return deleted product' })
+  @ApiOperation({ summary: 'delete product' })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad request. Invalid input data.',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized. User needs to be authenticated.',
+  })
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
   async delete(@Param('id') id: string) {
     return this.productsService.delete(+id);
   }

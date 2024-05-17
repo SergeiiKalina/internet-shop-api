@@ -3,6 +3,15 @@ import { Schema as MongooseSchema } from 'mongoose';
 
 export type UserDocument = User & Document;
 
+export class IBasketProduct {
+  productId: string;
+  quantity: number;
+  constructor(productId, quantity) {
+    this.productId = productId;
+    this.quantity = quantity;
+  }
+}
+
 @Schema()
 export class User {
   @Prop({ unique: true, required: true })
@@ -25,8 +34,18 @@ export class User {
   lastLogout: Date;
   @Prop({ default: 0 })
   rating: number;
+  @Prop({
+    default: () => [],
+    type: [
+      {
+        productId: { type: MongooseSchema.Types.ObjectId },
+        quantity: { type: Number },
+      },
+    ],
+  })
+  basket: IBasketProduct[];
   @Prop({ default: [], type: [MongooseSchema.Types.ObjectId], ref: 'Product' })
-  basket: string[];
+  favorites: string[];
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

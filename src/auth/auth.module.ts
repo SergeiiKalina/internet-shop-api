@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { MongooseModule } from '@nestjs/mongoose';
-import { User, UserSchema } from './auth.model';
+import { User, UserSchema } from './user.model';
 import { Mailer } from './mailer/mailer.service';
 import { TokenService } from './jwt/jwt.service';
 import { Jwt, JwtSchema } from './jwt/jwt.model';
@@ -50,7 +50,7 @@ import { GoogleAuthStrategy } from './strategys/google.strategy';
     JwtStrategy,
     FacebookStrategy,
     FacebookTokenStrategy,
-    GoogleAuthStrategy, 
+    GoogleAuthStrategy,
     ConfigService,
   ],
   exports: [JwtStrategy, PassportModule],

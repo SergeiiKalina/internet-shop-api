@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { User } from '../auth.model';
+import { User } from '../user.model';
 import { Schema as MongooseSchema } from 'mongoose';
 
 @Schema()

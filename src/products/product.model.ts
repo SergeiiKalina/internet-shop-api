@@ -31,7 +31,6 @@ export class Product {
   title: string;
   @Prop({ required: true })
   price: number;
-
   @Prop({ default: false })
   discount: boolean;
   @Prop({ default: 0 })
@@ -54,7 +53,6 @@ export class Product {
   subCategory: string;
   @Prop({ required: true })
   img: string;
-
   @Prop({ required: true })
   describe: string;
   @Prop({ required: true })

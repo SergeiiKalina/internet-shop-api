@@ -5,7 +5,7 @@ import { ImageService } from './images-service/images.service';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Product, ProductSchema } from './product.model';
 import { Comment, CommentSchema } from 'src/comment/comment.model';
-import { User, UserSchema } from 'src/auth/auth.model';
+import { User, UserSchema } from 'src/auth/user.model';
 import { FacebookTokenStrategy } from 'src/auth/strategys/facebookToken.strategy';
 import { ConfigModule } from '@nestjs/config';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';

@@ -4,7 +4,7 @@ import { CommentController } from './comment.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Comment, CommentSchema } from './comment.model';
 import { Product, ProductSchema } from 'src/products/product.model';
-import { User, UserSchema } from 'src/auth/auth.model';
+import { User, UserSchema } from 'src/auth/user.model';
 
 @Module({
   imports: [

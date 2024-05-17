@@ -6,7 +6,7 @@ import { Comment } from './comment.model';
 import { Model } from 'mongoose';
 import { Product } from 'src/products/product.model';
 import { CreateProductDto } from 'src/products/dto/create-product.dto';
-import { User } from 'src/auth/auth.model';
+import { User } from 'src/auth/user.model';
 
 @Injectable()
 export class CommentService {
