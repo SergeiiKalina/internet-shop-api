@@ -14,12 +14,14 @@ import { JwtStrategy } from './strategys/jwt.stategys';
 import { FacebookStrategy } from './strategys/facebook.strategy';
 import { FacebookTokenStrategy } from './strategys/facebookToken.strategy';
 import { GoogleAuthStrategy } from './strategys/google.strategy';
+import { Product, ProductSchema } from 'src/products/product.model';
 
 @Module({
   imports: [
     MongooseModule.forFeature([
       { name: User.name, schema: UserSchema },
       { name: Jwt.name, schema: JwtSchema },
+      { name: Product.name, schema: ProductSchema },
     ]),
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.registerAsync({

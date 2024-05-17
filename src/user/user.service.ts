@@ -2,10 +2,14 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { isValidObjectId, Model } from 'mongoose';
 import { User } from 'src/auth/user.model';
+import { Product } from 'src/products/product.model';
 
 @Injectable()
 export class UserService {
-  constructor(@InjectModel(User.name) private userModel: Model<User>) {}
+  constructor(
+    @InjectModel(User.name) private userModel: Model<User>,
+    @InjectModel(Product.name) private readonly productModel: Model<Product>,
+  ) {}
   async getAllUsers() {
     return this.userModel.find().exec();
   }
@@ -16,7 +20,21 @@ export class UserService {
     return await this.userModel.findOne({ email }).exec();
   }
   async getUser(id: string) {
-    return await this.userModel.findById(id);
+    const user = await this.userModel.findById(id);
+    const newBasket = [];
+    const newFavorite = [];
+    for (let i = 0; i < user.basket.length; i++) {
+      const product = await this.productModel.findById(
+        user.basket[i].productId,
+      );
+      newBasket.push(product);
+    }
+
+    for (let i = 0; i < user.favorites.length; i++) {
+      const product = await this.productModel.findById(user.favorites[i]);
+      newFavorite.push(product);
+    }
+    return { ...user.toObject(), basket: newBasket, favorites: newFavorite };
   }
   async getGuestsUserInfo(userId: string) {
     if (!isValidObjectId(userId)) {

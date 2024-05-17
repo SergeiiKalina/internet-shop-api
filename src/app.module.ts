@@ -15,6 +15,7 @@ import { CommentModule } from './comment/comment.module';
 import { MulterModule } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
 import { BasketModule } from './basket/basket.module';
+import { FavoriteModule } from './favorite/favorite.module';
 @Module({
   imports: [
     MongooseModule.forRoot(
@@ -57,6 +58,7 @@ import { BasketModule } from './basket/basket.module';
     ProductsModule,
     CommentModule,
     BasketModule,
+    FavoriteModule,
   ],
   controllers: [AppController],
   providers: [AppService],
