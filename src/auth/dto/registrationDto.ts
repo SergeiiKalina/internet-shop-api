@@ -48,10 +48,9 @@ export class RegistrationDto {
   lastName: string;
 
   @IsString()
-  @Length(0, 13)
-  @Matches(/^\+38\d{10}$/, {
+  @Matches(/^\s*\+38\s*\d\s*\d\s*\d\s*\d\s*\d\s*\d\s*\d\s*\d\s*\d\s*\d\s*$/, {
     message:
-      'The numberPhone field must start with "+38" and allow an additional 10 digits.',
+      'The numberPhone field must start with "+38" followed by 10 digits, with optional spaces anywhere.',
   })
   @IsNotEmpty()
   @ApiProperty({
