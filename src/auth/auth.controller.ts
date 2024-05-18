@@ -62,7 +62,7 @@ export class AuthController {
     },
   })
   @Post('login')
-  async login(@Body() dto: AuthEmailLoginDto) {
+  async login(@Body(new CustomValidationPipe()) dto: AuthEmailLoginDto) {
     return this.authService.login(dto);
   }
 
