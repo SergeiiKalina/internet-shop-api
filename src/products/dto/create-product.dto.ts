@@ -136,9 +136,12 @@ export class CreateProductDto {
   describe: string;
 
   @ApiProperty({
-    description: 'Img of the product',
-    type: [String],
-    format: 'binary',
+    type: 'array',
+    items: {
+      type: 'string',
+      format: 'binary',
+    },
+    description: 'Array of product images',
   })
   file: any[];
 }
