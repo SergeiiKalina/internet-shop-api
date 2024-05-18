@@ -48,11 +48,8 @@ export class AuthService {
       `${process.env.API_URL}/auth/activate/${activationLink}`,
       user.firstName,
       'Щоб підтвердити свою електронну адресу вам потрібно натиснути нижче!',
-      {
-        start: 'Не робили запит на активацію Email? ',
-        link: 'yevhenii-sulim.github.io/marketplace/',
-      },
       'Підтвердіть свій Email',
+      'Підтвердити адресу',
     );
     const tokens = await this.tokenService.generationJwt({
       ...user,
@@ -156,11 +153,8 @@ export class AuthService {
       forgotLink,
       user.firstName,
       'Щоб змінити пароль вам потрібно натиснути нижче!',
-      {
-        start: 'Не робили запит на зміну паролю?',
-        link: 'yevhenii-sulim.github.io/marketplace/',
-      },
       'Підтвердіть зміну паролю',
+      'Підтвердити зміну паролю',
     );
     return true;
   }

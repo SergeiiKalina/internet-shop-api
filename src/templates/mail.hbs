@@ -1,8 +1,9 @@
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Jost:ital,wght@0,100..900;1,100..900&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&display=swap');
  
 .button_link{
-  font-family: Jost, sans-serif;
+  font-family: Nunito Sans, sans-serif;
   font-style: normal;
   background: #43C550;
     color: #fff;
@@ -17,16 +18,17 @@
 }
 
 .footer_link{
-  font-family: Jost, sans-serif;
+  font-family: Nunito Sans, sans-serif;
   font-size: 18px;
 margin-top: 48px;
 }
 .link{
+ 
   font-weight: 700;
   color: #0670EB;
 }
   </style>
-      <div style="display: flex; align-items: center;  font-family: Jost, sans-serif;">
+      <div style="display: flex; align-items: center;  font-family: Jost, sans-serif; font-weight: 700;">
         <div>
           <img src="https://i.ibb.co/PwGySw5/Logo.png" alt="logo" width="60"/>
         </div>
@@ -34,15 +36,15 @@ margin-top: 48px;
       </div>
     </header>
     <main>
-      <p style="font-size: 18px; font-weight: 400;  font-family: Jost, sans-serif; margin: 32px 0 12px 0;">Добрий день, {{userName}}!</p>
+      <p style="font-size: 18px; font-weight: 400;   font-family: Nunito Sans, sans-serif; margin: 32px 0 12px 0;">Добрий день, {{userName}}!</p>
       <h2 style="font-size: 32px; font-weight: 400;  font-family: Jost, sans-serif; margin: 0;">Вітаємо вас на Deal!</h2>
-      <p style="font-size: 18px; font-weight: 400;  font-family: Jost, sans-serif; margin: 24px 0 32px 0;">
+      <p style="font-size: 18px; font-weight: 400;  font-family: Nunito Sans, sans-serif; margin: 24px 0 32px 0;">
    {{info}}
       </p>
     </main>
-    <a class="button_link"  href="{{link}}">Підтвердити адресу</a>
+    <a class="button_link"  href="{{link}}">{{textButton}}</a>
     <p class="footer_link">
-{{footerInfoStart}}<a href="{{footerInfoLink}}" class="link">Натисніть тут</a> , щоб вилучити цю електронну адресу.
+      Не створювали обліковий запис? Проігноруйте це повідомлення.
     </p>
     <footer style="display: flex; height: 64px; background-color: #BBEAC0; align-items: center;">
     <p style="display:flex; align-items:center; margin-left: 16px; font-size: 16px; font-family: Jost, sans-serif;">© Розробка "Team Challenge" 2024. Усі права захищені.</p>

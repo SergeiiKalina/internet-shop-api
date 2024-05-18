@@ -11,8 +11,8 @@ export class Mailer {
     link: string,
     userName: string,
     info: string,
-    footerInfo: { start: string; link: string },
     subject: string,
+    textButton: string,
   ): void {
     this.mailerService
       .sendMail({
@@ -24,8 +24,7 @@ export class Mailer {
           userName,
           link,
           info,
-          footerInfoStart: footerInfo.start,
-          footerInfoLink: footerInfo.link,
+          textButton,
         },
       })
       .catch((e) => {
