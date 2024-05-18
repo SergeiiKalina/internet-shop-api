@@ -15,10 +15,11 @@ import {
   Query,
   Patch,
   ValidationPipe,
+  UploadedFiles,
 } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import {
   ApiBearerAuth,
@@ -31,7 +32,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { UpdateProductDto } from './dto/update-product.dto';
-import { SharpPipe } from './pipes/sharp.pipe';
+import { SharpPipe } from './pipes/sharpForFewFile.pipe';
 import { Product } from './product.model';
 
 @ApiTags('product')
@@ -92,16 +93,16 @@ export class ProductsController {
   })
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(FilesInterceptor('file', 10))
   async create(
-    @UploadedFile(SharpPipe)
-    file: Express.Multer.File,
-    @Body(new ValidationPipe())
+    @UploadedFiles(SharpPipe)
+    files: Express.Multer.File[],
+    @Body()
     newProduct: CreateProductDto,
     @Req() req,
   ) {
     const id = req.user.id;
-    return this.productsService.create(newProduct, file, id);
+    return this.productsService.create(newProduct, files, id);
   }
 
   @Patch('update')

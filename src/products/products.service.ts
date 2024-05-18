@@ -1,67 +1,14 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateProductDto } from './dto/create-product.dto';
 import { InjectModel } from '@nestjs/mongoose';
-import { Product, ProductDocument } from './product.model';
+import { Product } from './product.model';
 import { Model } from 'mongoose';
 import { ImageService } from './images-service/images.service';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { User } from 'src/auth/user.model';
 import { Comment } from 'src/comment/comment.model';
-
-const categoryDictionary = {
-  подарункові_товари: {
-    engName: 'gift',
-    subcategories: {
-      сувеніри: 'souvenirs',
-      подарункові_набори: 'gift_sets',
-      святкова_тематика: 'festive_theme',
-    },
-  },
-  вишивка: {
-    engName: 'embroidery',
-    subcategories: {
-      сорочки: 'shirts',
-      плаття: 'dress',
-      блузки: 'blouses',
-    },
-  },
-  аксесуари: {
-    engName: 'accessories',
-    subcategories: {
-      сумки: 'handbags',
-      пояси: 'belts',
-      портмоне: 'purse',
-      хустки: 'handkerchiefs',
-      окуляри: 'glass',
-    },
-  },
-  взуття_з_натуральних_матеріалів: {
-    engName: 'eco',
-    subcategories: {
-      зимове: 'winter',
-      літнє: 'summer',
-    },
-  },
-  натуральна_косметика: {
-    engName: 'natural_cosmetics',
-    subcategories: {
-      мило: 'soap',
-      парфюмерія: 'perfumery',
-    },
-  },
-  товари_з_перероблених_матеріалів: {
-    engName: 'recycled_materials',
-    subcategories: {
-      перероблений_денім: 'recycled_denim',
-      востановленний_секонд_хэнд: 'second_hand',
-    },
-  },
-  'подарую+віддам': { engName: 'for_free' },
-};
+import { Category } from 'src/category/categoty.model';
+import { SubCategory } from 'src/category/subCategory.model';
 
 @Injectable()
 export class ProductsService {
@@ -69,33 +16,40 @@ export class ProductsService {
     @InjectModel(Product.name) private productModel: Model<Product>,
     @InjectModel(User.name) private userModel: Model<User>,
     @InjectModel(Comment.name) private commentModel: Model<Comment>,
+    @InjectModel(Category.name) private categoryModel: Model<Category>,
+    @InjectModel(SubCategory.name) private subCategoryModel: Model<SubCategory>,
     private readonly imageService: ImageService,
   ) {}
 
   async create(
     createProductDto: CreateProductDto,
-    file: Express.Multer.File,
+    files: Express.Multer.File[],
     id: string,
   ) {
-    const image = await this.imageService.uploadPhoto(file);
-
-    if (!image) {
-      throw new BadRequestException(
-        'Something is wrong with the image loading',
-      );
+    const arrayLinkImages = [];
+    for (let i = 0; i < files.length; i++) {
+      const image = await this.imageService.uploadPhoto(files[i]);
+      if (!image) {
+        throw new BadRequestException(
+          'Something is wrong with the image loading',
+        );
+      }
+      arrayLinkImages.push(image.data.url);
     }
-
-    const engNamesCategories = await this.createEngNameForCategories(
-      createProductDto.category,
-      createProductDto.subCategory,
-    );
+    const category = await this.categoryModel.findOne({
+      'mainCategory.ua': createProductDto.category,
+    });
+    const subCategory = await this.subCategoryModel.findOne({
+      'subCategory.ua': createProductDto.subCategory,
+    });
 
     const { color, size, state, brand, eco, ...restProduct } = createProductDto;
 
     const product = await this.productModel.create({
       ...restProduct,
-      ...engNamesCategories,
-      img: image.data.url,
+      category: category.mainCategory,
+      subCategory: subCategory.subCategory,
+      img: arrayLinkImages,
       producer: id,
       parameters: {
         color,
@@ -197,37 +151,6 @@ export class ProductsService {
     const deleteProduct = this.productModel.findByIdAndDelete(id);
 
     return deleteProduct;
-  }
-
-  async createEngNameForCategories(
-    nameCategory: string,
-    nameSubcategory: string,
-  ) {
-    const category =
-      categoryDictionary[
-        nameCategory.charAt(0).toLowerCase() +
-          nameCategory.split(' ').join('_').slice(1)
-      ];
-
-    if (!category) {
-      throw new NotFoundException('Такої категорії не існує в каталогу');
-    }
-    const engCategory =
-      categoryDictionary[
-        nameCategory.charAt(0).toLowerCase() +
-          nameCategory.split(' ').join('_').slice(1)
-      ].engName;
-
-    const engSubcategory =
-      category.subcategories[
-        nameSubcategory.charAt(0).toLowerCase() +
-          nameSubcategory.split(' ').join('_').slice(1)
-      ];
-    if (!engSubcategory) {
-      throw new NotFoundException('Такої під категорії не існує в каталогу');
-    }
-
-    return { engCategory, engSubcategory };
   }
 
   async findProductById(id: string) {

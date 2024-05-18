@@ -137,8 +137,8 @@ export class CreateProductDto {
 
   @ApiProperty({
     description: 'Img of the product',
-    type: 'string',
+    type: [String],
     format: 'binary',
   })
-  file: any;
+  file: any[];
 }

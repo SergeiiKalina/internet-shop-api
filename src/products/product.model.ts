@@ -45,20 +45,17 @@ export class Product {
   comments: string[];
   @Prop({ default: 0 })
   visit: number;
-  @Prop({ required: true })
-  category?: string;
+  @Prop({ required: true, type: Object })
+  category: string;
   @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'User', required: true })
   producer: string;
-  @Prop()
+  @Prop({ required: true, type: Object })
   subCategory: string;
   @Prop({ required: true })
-  img: string;
+  img: string[];
   @Prop({ required: true })
   describe: string;
-  @Prop({ required: true })
-  engCategory: string;
-  @Prop({ required: true })
-  engSubcategory: string;
+
   @Prop({
     required: true,
     type: {

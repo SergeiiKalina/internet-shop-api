@@ -2,7 +2,7 @@ import { BadRequestException, Injectable, PipeTransform } from '@nestjs/common';
 import * as sharp from 'sharp';
 
 @Injectable()
-export class SharpPipe
+export class SharpForOneFile
   implements PipeTransform<Express.Multer.File, Promise<Buffer>>
 {
   async transform(image: Express.Multer.File): Promise<Buffer> {

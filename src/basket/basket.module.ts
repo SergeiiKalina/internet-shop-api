@@ -7,6 +7,8 @@ import { Product, ProductSchema } from 'src/products/product.model';
 import { ProductsService } from 'src/products/products.service';
 import { CommentSchema, Comment } from 'src/comment/comment.model';
 import { ImageService } from 'src/products/images-service/images.service';
+import { Category, CategorySchema } from 'src/category/categoty.model';
+import { SubCategory, SubcategorySchema } from 'src/category/subCategory.model';
 
 @Module({
   imports: [
@@ -14,6 +16,8 @@ import { ImageService } from 'src/products/images-service/images.service';
       { name: User.name, schema: UserSchema },
       { name: Product.name, schema: ProductSchema },
       { name: Comment.name, schema: CommentSchema },
+      { name: Category.name, schema: CategorySchema },
+      { name: SubCategory.name, schema: SubcategorySchema },
     ]),
   ],
   controllers: [BasketController],

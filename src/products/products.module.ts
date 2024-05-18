@@ -10,6 +10,9 @@ import { FacebookTokenStrategy } from 'src/auth/strategys/facebookToken.strategy
 import { ConfigModule } from '@nestjs/config';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { Jwt, JwtSchema } from 'src/auth/jwt/jwt.model';
+import { Category, CategorySchema } from 'src/category/categoty.model';
+import { CategoryModule } from 'src/category/category.module';
+import { SubCategory, SubcategorySchema } from 'src/category/subCategory.model';
 
 @Module({
   imports: [
@@ -18,6 +21,8 @@ import { Jwt, JwtSchema } from 'src/auth/jwt/jwt.model';
       { name: Comment.name, schema: CommentSchema },
       { name: User.name, schema: UserSchema },
       { name: Jwt.name, schema: JwtSchema },
+      { name: Category.name, schema: CategorySchema },
+      { name: SubCategory.name, schema: SubcategorySchema },
     ]),
     ConfigModule,
   ],
