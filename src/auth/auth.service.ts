@@ -31,7 +31,10 @@ export class AuthService {
 
   async registration(newUser: RegistrationDto) {
     const { email, password } = newUser;
-    const candidate = await this.userModel.findOne({ email });
+
+    const candidate = await this.userModel.findOne({
+      email: email.toLowerCase(),
+    });
 
     if (candidate) {
       throw new Error('This user has registered');
@@ -40,11 +43,12 @@ export class AuthService {
     const activationLink = uuidv4();
     const user = await this.userModel.create({
       ...newUser,
+      email: email.toLowerCase(),
       password: hashPassword,
       activationLink,
     });
     await this.mailerService.sendMail(
-      email,
+      email.toLowerCase(),
       `${process.env.API_URL}/auth/activate/${activationLink}`,
       user.firstName,
       'Щоб підтвердити свою електронну адресу вам потрібно натиснути нижче!',
@@ -53,6 +57,7 @@ export class AuthService {
     );
     const tokens = await this.tokenService.generationJwt({
       ...user,
+      email: email.toLowerCase(),
       id: user._id,
     });
 
@@ -64,7 +69,7 @@ export class AuthService {
   async login(loginDto: AuthEmailLoginDto) {
     const { email, password } = loginDto;
 
-    const user = await this.userModel.findOne({ email });
+    const user = await this.userModel.findOne({ email: email.toLowerCase() });
 
     const payload = { email: user.email, sub: user.id }; // Using user ID as subject
 
