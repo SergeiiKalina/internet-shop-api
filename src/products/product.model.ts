@@ -46,11 +46,11 @@ export class Product {
   @Prop({ default: 0 })
   visit: number;
   @Prop({ required: true, type: Object })
-  category: string;
+  category: Record<string, object>;
   @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'User', required: true })
   producer: string;
   @Prop({ required: true, type: Object })
-  subCategory: string;
+  subCategory: Record<string, object>;
   @Prop({ required: true })
   img: string[];
   @Prop({ required: true })

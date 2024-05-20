@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateProductDto } from './dto/create-product.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Product } from './product.model';
@@ -39,6 +43,7 @@ export class ProductsService {
     const category = await this.categoryModel.findOne({
       'mainCategory.ua': createProductDto.category,
     });
+
     const subCategory = await this.subCategoryModel.findOne({
       'subCategory.ua': createProductDto.subCategory,
     });
@@ -139,6 +144,7 @@ export class ProductsService {
     }
 
     product.comments = updatedComments;
+
     await product.save();
 
     return {
@@ -155,5 +161,37 @@ export class ProductsService {
 
   async findProductById(id: string) {
     return await this.productModel.findById(id);
+  }
+
+  async filterBySubcategory(subCategory: string) {
+    const nameSubCategory = await this.subCategoryModel.findOne({
+      'subCategory.en': subCategory,
+    });
+
+    if (!nameSubCategory) {
+      throw new NotFoundException('this subcategory not found');
+    }
+    const allProductWithThisSubCategory = await this.productModel
+      .find({
+        'subCategory.ua': nameSubCategory.subCategory.ua,
+      })
+      .exec();
+    return allProductWithThisSubCategory;
+  }
+
+  async filterByCategory(category: string) {
+    const nameCategory = await this.categoryModel.findOne({
+      'mainCategory.en': category,
+    });
+
+    if (!nameCategory) {
+      throw new NotFoundException('this category not found');
+    }
+    const allProductWithThisCategory = await this.productModel
+      .find({
+        'category.ua': nameCategory.mainCategory.ua,
+      })
+      .exec();
+    return allProductWithThisCategory;
   }
 }

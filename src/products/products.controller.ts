@@ -4,9 +4,6 @@ import {
   Body,
   UseInterceptors,
   UploadedFile,
-  ParseFilePipe,
-  MaxFileSizeValidator,
-  FileTypeValidator,
   Get,
   UseGuards,
   Req,
@@ -157,5 +154,45 @@ export class ProductsController {
   @UseGuards(JwtAuthGuard)
   async delete(@Param('id') id: string) {
     return this.productsService.delete(+id);
+  }
+
+  @ApiParam({
+    name: 'subCategory',
+    required: true,
+    type: String,
+    description: 'product subcategory in eng',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'return all product with this subcategory',
+  })
+  @ApiOperation({ summary: 'return all product with this subcategory' })
+  @ApiResponse({
+    status: 404,
+    description: 'Not Found. this subcategory not found.',
+  })
+  @Get('filterBySubcategory/:subCategory')
+  async filterBySubcategory(@Param('subCategory') subCategory: string) {
+    return this.productsService.filterBySubcategory(subCategory);
+  }
+
+  @ApiParam({
+    name: 'category',
+    required: true,
+    type: String,
+    description: 'product category in eng',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'return all product with this category',
+  })
+  @ApiOperation({ summary: 'return all product with this category' })
+  @ApiResponse({
+    status: 404,
+    description: 'Not Found. this category not found.',
+  })
+  @Get('filterByCategory/:category')
+  async filterByCategory(@Param('category') category: string) {
+    return this.productsService.filterByCategory(category);
   }
 }

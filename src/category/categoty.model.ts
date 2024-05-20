@@ -4,7 +4,7 @@ import { Schema as MongooseSchema } from 'mongoose';
 @Schema()
 export class Category {
   @Prop({ required: true, type: Object, default: {} })
-  mainCategory: Record<string, string>;
+  mainCategory: Record<string, object>;
   @Prop({ required: true, type: [MongooseSchema.Types.ObjectId], default: [] })
   subCategory: string[];
   @Prop({ required: true, type: String })
