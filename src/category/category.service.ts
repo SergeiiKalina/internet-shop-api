@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { InjectModel } from '@nestjs/mongoose';
@@ -16,45 +20,60 @@ export class CategoryService {
     private readonly subCategoryModel: Model<SubCategory>,
     private readonly imageService: ImageService,
   ) {}
-  async create(createCategoryDto: CreateCategoryDto) {
+  async createMainCategory(
+    createCategoryDto: CreateCategoryDto,
+    file: Express.Multer.File,
+  ) {
     const category = await this.categoryModel.findOne({
-      'mainCategory.ua': createCategoryDto.mainCategory.ua,
+      'mainCategory.ua': createCategoryDto.ua,
     });
 
     if (category) {
       throw new BadRequestException('This category already exists');
     }
-    const { subCategory, ...restCategory } = createCategoryDto;
+    const image = await this.imageService.uploadPhoto(file);
 
-    const newCategory = await this.categoryModel.create(restCategory);
-
-    const arraySubcategory = Object.entries(subCategory);
-
-    for (let i = 0; i < arraySubcategory.length; i++) {
-      const subCategoriesForDb = await this.subCategoryModel.create({
-        subCategory: {
-          en: arraySubcategory[i][0],
-          ua: arraySubcategory[i][1],
-        },
-        mainCategory: newCategory.id,
-      });
-
-      await newCategory.subCategory.push(subCategoriesForDb.id);
-      await subCategoriesForDb.save();
-    }
+    const newCategory = await this.categoryModel.create({
+      ...createCategoryDto,
+      mainCategory: { en: createCategoryDto.en, ua: createCategoryDto.ua },
+      img: image.data.url,
+    });
 
     await newCategory.save();
     return newCategory;
   }
 
-  async update(id: string, file: Express.Multer.File) {
+  async createSubcategory(
+    createSubcategoryDto: CreateSubcategoryDto,
+    file: Express.Multer.File,
+  ) {
+    const subcategory = await this.subCategoryModel.findOne({
+      'subCategory.ua': createSubcategoryDto.ua,
+    });
+    if (subcategory) {
+      throw new BadRequestException('This subcategory already exists');
+    }
     const image = await this.imageService.uploadPhoto(file);
 
-    const category = await this.subCategoryModel.findById(id);
+    const mainCategory = await this.categoryModel.findById(
+      createSubcategoryDto.mainCategory,
+    );
+    if (!mainCategory) {
+      throw new NotFoundException('Main-category not found');
+    }
 
-    category.img = image.data.url;
-    category.save();
-    return category;
+    const newSubcategory = await this.subCategoryModel.create({
+      mainCategory: createSubcategoryDto.mainCategory,
+      subCategory: { en: createSubcategoryDto.en, ua: createSubcategoryDto.ua },
+      img: image.data.url,
+    });
+    await newSubcategory.save();
+
+    await mainCategory.subCategory.push(newSubcategory.id);
+
+    await mainCategory.save();
+
+    return newSubcategory;
   }
 
   async getAllCategory() {
@@ -77,5 +96,35 @@ export class CategoryService {
     );
 
     return fullCategories;
+  }
+
+  async deleteCategory(id: string) {
+    const category = await this.categoryModel.findByIdAndDelete(id);
+    if (!category) {
+      throw new NotFoundException('This category not found');
+    }
+    return category;
+  }
+
+  async deleteSubcategory(id: string) {
+    const subcategory = await this.subCategoryModel.findByIdAndDelete(id);
+    if (!subcategory) {
+      throw new NotFoundException('This subcategory not found');
+    }
+    const category = await this.categoryModel.findById(
+      subcategory.mainCategory,
+    );
+    if (!category) {
+      throw new NotFoundException(
+        'No main category for this subcategory was found',
+      );
+    }
+
+    const index = category.subCategory.indexOf(subcategory.id);
+
+    category.subCategory.splice(index, 1);
+
+    await category.save();
+    return subcategory;
   }
 }

@@ -1,12 +1,24 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsObject } from 'class-validator';
+import { IsObject, IsOptional, IsString } from 'class-validator';
 
 export class CreateCategoryDto {
-  // @ApiProperty({ type: Object, description: 'Main category on eng and ua' })
-  @IsObject()
-  mainCategory: Record<string, object>;
-
-  // @ApiProperty({ type: Object, description: 'subCategory on eng and ua' })
-  @IsObject()
-  subCategory: Record<string, object>;
+  @ApiProperty({
+    type: String,
+    description: 'Name category in English on lower case',
+  })
+  @IsString()
+  en: string;
+  @ApiProperty({
+    type: String,
+    description:
+      'Name the category in Ukrainian: the first character is uppercase, and the others are lowercase',
+  })
+  @IsString()
+  ua: string;
+  @ApiProperty({
+    type: 'string',
+    format: 'binary',
+    description: 'Product category image file',
+  })
+  file: any;
 }
