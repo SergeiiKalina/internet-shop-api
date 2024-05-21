@@ -153,7 +153,7 @@ export class ProductsController {
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   async delete(@Param('id') id: string) {
-    return this.productsService.delete(+id);
+    return this.productsService.delete(id);
   }
 
   @ApiParam({

@@ -153,7 +153,7 @@ export class ProductsService {
       comments: arrComments,
     };
   }
-  async delete(id: number) {
+  async delete(id: string) {
     const deleteProduct = this.productModel.findByIdAndDelete(id);
 
     return deleteProduct;
