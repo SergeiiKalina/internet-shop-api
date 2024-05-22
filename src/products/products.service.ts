@@ -24,6 +24,13 @@ export class ProductsService {
     @InjectModel(SubCategory.name) private subCategoryModel: Model<SubCategory>,
     private readonly imageService: ImageService,
   ) {}
+ 
+  
+  async searchProducts(title: string): Promise<Product[]> {
+    const regex = new RegExp(`^${title}`, 'i'); // Case-insensitive search for names starting with 'firstLetter'
+    return this.productModel.find({ title: regex }).exec();
+  }
+
 
   async create(
     createProductDto: CreateProductDto,

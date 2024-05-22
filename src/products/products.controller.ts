@@ -37,6 +37,11 @@ import { Product } from './product.model';
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
+  @Get('search')
+  async searchProductsByFirstLetter(@Query('title') title: string): Promise<Product[]> {
+    return this.productsService.searchProducts(title);
+  }
+
   @ApiOperation({
     summary: 'Get all Products',
   })
