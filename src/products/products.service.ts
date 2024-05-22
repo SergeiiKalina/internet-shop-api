@@ -142,7 +142,7 @@ export class ProductsService {
       arrComments.push({ ...comment.toObject(), author: authorWithoutPass });
       updatedComments.push(comment._id);
     }
-
+    product.visit = product.visit + 1;
     product.comments = updatedComments;
 
     await product.save();
