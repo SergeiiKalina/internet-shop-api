@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Injectable,
+  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
@@ -71,11 +72,10 @@ export class AuthService {
 
     const user = await this.userModel.findOne({ email: email.toLowerCase() });
 
-    const payload = { email: user.email, sub: user.id }; // Using user ID as subject
-
     if (!user) {
-      throw new UnauthorizedException('Invalid email or password');
+      throw new NotFoundException('User not found');
     }
+    const payload = { email: user.email, sub: user.id }; // Using user ID as subject
 
     const isPasswordMatches = await bcrypt.compare(password, user.password);
 
