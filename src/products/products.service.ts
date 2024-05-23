@@ -104,7 +104,7 @@ export class ProductsService {
     return product;
   }
 
-  async getAllProducts(page: number, limit: number): Promise<Product[]> {
+  async getAllProducts(page: number, limit: number = 20): Promise<Product[]> {
     const startIndex = (page - 1) * limit;
 
     const paginatedProducts = await this.productModel
@@ -113,9 +113,7 @@ export class ProductsService {
       .limit(limit)
       .exec();
 
-    const endIndex = page * limit;
-    const paginatedPosts = paginatedProducts.slice(startIndex, endIndex);
-    return paginatedPosts;
+    return paginatedProducts;
   }
 
   async getProduct(id: string) {
