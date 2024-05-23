@@ -4,7 +4,6 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { CreateCategoryDto } from './dto/create-category.dto';
-import { UpdateCategoryDto } from './dto/update-category.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Category } from './categoty.model';
 import { Model } from 'mongoose';
@@ -29,7 +28,7 @@ export class CategoryService {
     });
 
     if (category) {
-      throw new BadRequestException('This category already exists');
+      throw new BadRequestException('Така категорія вже є');
     }
     const image = await this.imageService.uploadPhoto(file);
 
@@ -51,7 +50,7 @@ export class CategoryService {
       'subCategory.ua': createSubcategoryDto.ua,
     });
     if (subcategory) {
-      throw new BadRequestException('This subcategory already exists');
+      throw new BadRequestException('Така підкатегорія вже є');
     }
     const image = await this.imageService.uploadPhoto(file);
 
@@ -59,7 +58,7 @@ export class CategoryService {
       createSubcategoryDto.mainCategory,
     );
     if (!mainCategory) {
-      throw new NotFoundException('Main-category not found');
+      throw new NotFoundException('Батьквську категорію не знайдено');
     }
 
     const newSubcategory = await this.subCategoryModel.create({
@@ -101,7 +100,7 @@ export class CategoryService {
   async deleteCategory(id: string) {
     const category = await this.categoryModel.findByIdAndDelete(id);
     if (!category) {
-      throw new NotFoundException('This category not found');
+      throw new NotFoundException('Цю категорію не знайдено');
     }
     return category;
   }
@@ -109,14 +108,14 @@ export class CategoryService {
   async deleteSubcategory(id: string) {
     const subcategory = await this.subCategoryModel.findByIdAndDelete(id);
     if (!subcategory) {
-      throw new NotFoundException('This subcategory not found');
+      throw new NotFoundException('Цю підкатегорію не знайдено');
     }
     const category = await this.categoryModel.findById(
       subcategory.mainCategory,
     );
     if (!category) {
       throw new NotFoundException(
-        'No main category for this subcategory was found',
+        'Ця підкатегорія не має батьківської категорії',
       );
     }
 

@@ -15,8 +15,7 @@ export class AuthEmailLoginDto {
   @Length(10, 50)
   @IsString()
   @Matches(/^[a-zA-Z0-9._+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/i, {
-    message:
-      'Email address must contain only Latin characters and this symbol (. _  + -)',
+    message: 'Email повинен мати латиньскі літери і спец символи  (. _  + -)',
   })
   email: string;
 
@@ -24,7 +23,7 @@ export class AuthEmailLoginDto {
   @Length(6, 20)
   @Matches(/^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&().])[A-Za-z\d@$!%*?&().]{6,}$/, {
     message:
-      'Password must contain 6-20 characters: letters, digits, at least 1 special character, at least 1 uppercase letter.',
+      'Пароль повинен бути 6-20 символів: літери, цифри, і один спеціальний символ і одна велика літера.',
   })
   @IsNotEmpty()
   @ApiProperty({

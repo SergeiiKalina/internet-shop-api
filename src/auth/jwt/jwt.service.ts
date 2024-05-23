@@ -1,7 +1,7 @@
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Jwt } from './jwt.model';
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
@@ -64,7 +64,7 @@ export class TokenService {
     try {
       const tokenData = await this.jwtModel.findOne({ refreshJwt });
       if (!tokenData) {
-        throw new Error('Token not found');
+        throw new NotFoundException('Токен не знайдено');
       }
       return tokenData;
     } catch (error) {
