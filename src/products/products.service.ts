@@ -13,6 +13,7 @@ import { User } from 'src/auth/user.model';
 import { Comment } from 'src/comment/comment.model';
 import { Category } from 'src/category/categoty.model';
 import { SubCategory } from 'src/category/subCategory.model';
+import { Color } from 'src/color/color.model';
 
 @Injectable()
 export class ProductsService {
@@ -22,6 +23,7 @@ export class ProductsService {
     @InjectModel(Comment.name) private commentModel: Model<Comment>,
     @InjectModel(Category.name) private categoryModel: Model<Category>,
     @InjectModel(SubCategory.name) private subCategoryModel: Model<SubCategory>,
+    @InjectModel(Color.name) private colorModel: Model<Color>,
     private readonly imageService: ImageService,
   ) {}
 
@@ -54,6 +56,16 @@ export class ProductsService {
     });
 
     const { color, size, state, brand, eco, ...restProduct } = createProductDto;
+
+    const checkColor = await this.colorModel.findOne({
+      colorName: color.toLowerCase(),
+    });
+
+    if (!checkColor) {
+      throw new BadRequestException(
+        'Не коректний колір він повинен бути з списку (Білий, Чорний, Сірий, Бежевий,  Червоний, Жовтий, Помаранчевий, Синій, Блакитний, Рожевий, Зелений, Фіолетовий, Золотий, Сріблястий )',
+      );
+    }
 
     const product = await this.productModel.create({
       ...restProduct,

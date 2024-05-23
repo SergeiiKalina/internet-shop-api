@@ -17,6 +17,7 @@ import { memoryStorage } from 'multer';
 import { BasketModule } from './basket/basket.module';
 import { FavoriteModule } from './favorite/favorite.module';
 import { CategoryModule } from './category/category.module';
+import { ColorModule } from './color/color.module';
 
 @Module({
   imports: [
@@ -62,6 +63,7 @@ import { CategoryModule } from './category/category.module';
     BasketModule,
     FavoriteModule,
     CategoryModule,
+    ColorModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -13,6 +13,7 @@ import { Jwt, JwtSchema } from 'src/auth/jwt/jwt.model';
 import { Category, CategorySchema } from 'src/category/categoty.model';
 import { CategoryModule } from 'src/category/category.module';
 import { SubCategory, SubcategorySchema } from 'src/category/subCategory.model';
+import { Color, ColorSchema } from 'src/color/color.model';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { SubCategory, SubcategorySchema } from 'src/category/subCategory.model';
       { name: Jwt.name, schema: JwtSchema },
       { name: Category.name, schema: CategorySchema },
       { name: SubCategory.name, schema: SubcategorySchema },
+      { name: Color.name, schema: ColorSchema },
     ]),
     ConfigModule,
   ],
