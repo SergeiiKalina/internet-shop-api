@@ -5,7 +5,6 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Comment } from './comment.model';
 import { Model } from 'mongoose';
 import { Product } from 'src/products/product.model';
-import { CreateProductDto } from 'src/products/dto/create-product.dto';
 import { User } from 'src/auth/user.model';
 
 @Injectable()
@@ -23,12 +22,12 @@ export class CommentService {
 
     const product = await this.productModel.findById(createCommentDto.product);
     if (!product) {
-      throw new Error('Product not found');
+      throw new Error('Продукт не знайдений');
     }
 
     const user = await this.userModel.findById(id);
     if (!user) {
-      throw new Error('User not authorize');
+      throw new Error('Користувачь не авторизований');
     }
     const { password, ...restUser } = user.toObject();
     await product.comments.push(commentInstance.id);
@@ -39,7 +38,7 @@ export class CommentService {
   async like(commentId: string, userId: string) {
     const comment = await this.commentModel.findById(commentId);
     if (!comment) {
-      throw new BadRequestException('Not found this comment');
+      throw new BadRequestException('Не знайденно цей коментар');
     }
 
     const author = await this.userModel.findById(comment.author);
@@ -73,10 +72,10 @@ export class CommentService {
   async dislike(commentId: string, userId: string) {
     const comment = await this.commentModel.findById(commentId);
     if (!comment) {
-      throw new BadRequestException('Not found this comment');
+      throw new BadRequestException('Не знайденно цей коментар');
     }
     const author = await this.userModel.findById(comment.author);
-    const { _id, firstName, ...authorRest } = author.toObject();
+    const { _id, firstName } = author.toObject();
 
     const likesArray = comment.like;
     const dislikesArray = comment.dislike;

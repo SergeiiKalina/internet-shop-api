@@ -15,7 +15,7 @@ export class FavoriteService {
     const product = await this.productService.findProductById(productId);
 
     if (!product) {
-      throw new BadRequestException('Product not found');
+      throw new BadRequestException('Продукт не знайдений');
     }
 
     const checkProductInBasketIndex = await user.favorites.indexOf(productId);
@@ -31,7 +31,7 @@ export class FavoriteService {
     const product = await this.productService.findProductById(productId);
 
     if (!product) {
-      throw new BadRequestException('Product not found');
+      throw new BadRequestException('Продукт не знайдений');
     }
 
     const checkProductInBasketIndex = await user.favorites.indexOf(productId);

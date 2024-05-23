@@ -38,7 +38,9 @@ export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
   @Get('search')
-  async searchProductsByFirstLetter(@Query('title') title: string): Promise<Product[]> {
+  async searchProductsByFirstLetter(
+    @Query('title') title: string,
+  ): Promise<Product[]> {
     return this.productsService.searchProducts(title);
   }
 
@@ -107,7 +109,7 @@ export class ProductsController {
     return this.productsService.create(newProduct, files, id);
   }
 
-  @Patch('update')
+  @Patch('update/:id')
   @ApiOperation({
     summary: 'Only authorized users',
   })
@@ -127,15 +129,16 @@ export class ProductsController {
   })
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(FilesInterceptor('file', 10))
   async updateProduct(
-    @UploadedFile(SharpPipe)
-    file: Express.Multer.File,
-    @Body(new ValidationPipe()) newProducts: UpdateProductDto,
+    @UploadedFiles(SharpPipe)
+    files: Express.Multer.File[],
+    @Body() newProducts: UpdateProductDto,
+    @Param('id') id: string,
     @Req() req,
   ) {
     const userId = req.user.id;
-    return this.productsService.updateProduct(newProducts, file, userId);
+    return this.productsService.updateProduct(newProducts, files, userId, id);
   }
 
   @Delete(':id')

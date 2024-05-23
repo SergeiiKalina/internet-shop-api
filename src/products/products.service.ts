@@ -24,13 +24,11 @@ export class ProductsService {
     @InjectModel(SubCategory.name) private subCategoryModel: Model<SubCategory>,
     private readonly imageService: ImageService,
   ) {}
- 
-  
+
   async searchProducts(title: string): Promise<Product[]> {
     const regex = new RegExp(`^${title}`, 'i'); // Case-insensitive search for names starting with 'firstLetter'
     return this.productModel.find({ title: regex }).exec();
   }
-
 
   async create(
     createProductDto: CreateProductDto,
@@ -42,7 +40,7 @@ export class ProductsService {
       const image = await this.imageService.uploadPhoto(files[i]);
       if (!image) {
         throw new BadRequestException(
-          'Something is wrong with the image loading',
+          'Щось сталось не так з завантаженням кртинки',
         );
       }
       arrayLinkImages.push(image.data.url);
@@ -74,7 +72,7 @@ export class ProductsService {
 
     if (!product) {
       throw new BadRequestException(
-        'Something is wrong with the create products',
+        'Щось сталось не так з завантаженням продукту',
       );
     }
 
@@ -83,28 +81,41 @@ export class ProductsService {
 
   async updateProduct(
     updateProduct: UpdateProductDto,
-    file: Express.Multer.File,
+    files: Express.Multer.File[],
     userId: string,
+    id: string,
   ) {
-    const { productId, ...rest } = updateProduct;
-    let product = await this.productModel.findById(productId);
+    let product = await this.productModel.findById(id);
     if (!product) {
-      return new BadRequestException('This product not found');
+      return new BadRequestException('Цей продукт не знайдено');
     }
 
-    for (const key in rest) {
-      product[key] = rest[key];
+    for (const key in updateProduct) {
+      product[key] = updateProduct[key];
     }
 
-    const image = await this.imageService.uploadPhoto(file);
-    if (!image) {
-      throw new BadRequestException(
-        'Something is wrong with the image loading',
-      );
+    const arrayLinkImages = [];
+    for (let i = 0; i < files.length; i++) {
+      const image = await this.imageService.uploadPhoto(files[i]);
+      if (!image) {
+        throw new BadRequestException(
+          'Щось сталось не так з завантаженням кртинки',
+        );
+      }
+      arrayLinkImages.push(image.data.url);
     }
+    const category = await this.categoryModel.findOne({
+      'mainCategory.ua': updateProduct.category,
+    });
 
-    product.img = image.data.url;
+    const subCategory = await this.subCategoryModel.findOne({
+      'subCategory.ua': updateProduct.subCategory,
+    });
+
+    product.img = arrayLinkImages;
     product.producer = userId;
+    product.category = category.mainCategory;
+    product.subCategory = subCategory.subCategory;
 
     await product.save();
 
@@ -129,12 +140,12 @@ export class ProductsService {
     const product = await this.productModel.findById(id);
 
     if (!product) {
-      throw new BadRequestException('Something is wrong');
+      throw new BadRequestException('Щось пішло не так');
     }
     const user = await this.userModel.findById(product.producer);
 
     if (!user) {
-      throw new BadRequestException('Something is wrong');
+      throw new BadRequestException('Щось пішло не так');
     }
     const { password, ...userWithoutPass } = user.toObject();
     let arrComments = [];
@@ -176,7 +187,7 @@ export class ProductsService {
     });
 
     if (!nameSubCategory) {
-      throw new NotFoundException('this subcategory not found');
+      throw new NotFoundException('Ця підкатегорія не знайденна');
     }
     const allProductWithThisSubCategory = await this.productModel
       .find({
@@ -192,7 +203,7 @@ export class ProductsService {
     });
 
     if (!nameCategory) {
-      throw new NotFoundException('this category not found');
+      throw new NotFoundException('Ця категорія не знайдена');
     }
     const allProductWithThisCategory = await this.productModel
       .find({

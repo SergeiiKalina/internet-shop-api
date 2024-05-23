@@ -23,7 +23,9 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     const user = await this.userModel.findById(id);
 
     if (!user) {
-      throw new UnauthorizedException('Login first to access this endpoint.');
+      throw new UnauthorizedException(
+        'З Початку війдіть в систему, щоб отримати доступ',
+      );
     }
 
     return user;

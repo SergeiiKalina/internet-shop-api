@@ -38,13 +38,13 @@ export class UserService {
   }
   async getGuestsUserInfo(userId: string) {
     if (!isValidObjectId(userId)) {
-      throw new HttpException('Invalid userId', HttpStatus.NOT_FOUND); // Throw an error for invalid userId format
+      throw new HttpException('Не дійсний ID', HttpStatus.NOT_FOUND); // Throw an error for invalid userId format
     }
 
     const user = await this.findOne(userId);
 
     if (!user) {
-      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+      throw new HttpException('Користувача не знайденно', HttpStatus.NOT_FOUND);
     }
     return {
       firstName: user.firstName,

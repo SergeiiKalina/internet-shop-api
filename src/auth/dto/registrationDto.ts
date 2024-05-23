@@ -17,8 +17,7 @@ export class RegistrationDto {
   })
   @Length(10, 50)
   @Matches(/^[a-zA-Z0-9._+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/i, {
-    message:
-      'Email address must contain only Latin characters and this symbol (. _  + -)',
+    message: 'Email повинен мати латиньскі літери і спец символи  (. _  + -)',
   })
   email: string;
 
@@ -30,7 +29,8 @@ export class RegistrationDto {
       'First name (2-20 characters) and must contain only Cyrillic, Latin characters, and dashes.',
   })
   @Matches(/^[а-яА-ЯёЁa-zA-ZіІїЇєЄґҐ\-]+$/, {
-    message: 'Name must contain only Cyrillic, Latin characters, and dashes.',
+    message:
+      "Ім'я повинне мати латиські або кирилічні символи а довжина від 2 до 20 символів",
   })
   firstName: string;
 
@@ -43,14 +43,13 @@ export class RegistrationDto {
   })
   @Matches(/^[а-яА-ЯёЁa-zA-ZіІїЇєЄґҐ\-]+$/, {
     message:
-      'Last name must contain only Cyrillic, Latin characters, and dashes.',
+      'Прізвище повинне мати латиські або кирилічні символи а довжина від 2 до 20 символів',
   })
   lastName: string;
 
   @IsString()
   @Matches(/^\s*\+38\s*\d\s*\d\s*\d\s*\d\s*\d\s*\d\s*\d\s*\d\s*\d\s*\d\s*$/, {
-    message:
-      'The numberPhone field must start with "+38" followed by 10 digits, with optional spaces anywhere.',
+    message: 'Номер телефону повинен посинатись з "+38" і мати 10 цифр',
   })
   @IsNotEmpty()
   @ApiProperty({
@@ -62,7 +61,7 @@ export class RegistrationDto {
   @Length(6, 20)
   @Matches(/^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&().])[A-Za-z\d@$!%*?&().]{6,}$/, {
     message:
-      'Password must contain 6-20 characters: letters, digits, at least 1 special character, at least 1 uppercase letter.',
+      'Пароль повинен бути 6-20 символів: літери, цифри, і один спеціальний символ і одна велика літера.',
   })
   @IsNotEmpty()
   @ApiProperty({

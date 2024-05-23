@@ -7,7 +7,9 @@ export class ImageService {
 
   async uploadPhoto(file: Express.Multer.File) {
     if (!file || !file.buffer) {
-      throw new Error('Invalid file provided. Please upload a valid image.');
+      throw new Error(
+        'Ви завантажине не картинки, завантажте будьласка картинку',
+      );
     }
     const formData = new FormData();
     formData.append(
@@ -32,7 +34,7 @@ export class ImageService {
 
       return response.data;
     } catch (error) {
-      throw new Error('Failed to upload photo');
+      throw new Error('Помилка завантаження картинок');
     }
   }
 }

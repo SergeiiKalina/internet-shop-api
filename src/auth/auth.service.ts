@@ -38,7 +38,7 @@ export class AuthService {
     });
 
     if (candidate) {
-      throw new Error('This user has registered');
+      throw new Error('Користувач вже зареєстрований');
     }
     const hashPassword = await bcrypt.hash(password, 3);
     const activationLink = uuidv4();
@@ -73,14 +73,16 @@ export class AuthService {
     const user = await this.userModel.findOne({ email: email.toLowerCase() });
 
     if (!user) {
-      throw new NotFoundException('User not found');
+      throw new NotFoundException('Такого користувача не знайденно');
     }
     const payload = { email: user.email, sub: user.id }; // Using user ID as subject
 
     const isPasswordMatches = await bcrypt.compare(password, user.password);
 
     if (!isPasswordMatches) {
-      throw new UnauthorizedException('Invalid email or password');
+      throw new UnauthorizedException(
+        'Неправильний електронна адресса або пароль',
+      );
     }
 
     return {
@@ -105,20 +107,20 @@ export class AuthService {
   async refreshJwt(refreshJwt: string) {
     try {
       if (!refreshJwt) {
-        throw new Error("User isn't authorized");
+        throw new Error('Користувачь не залогінився');
       }
 
       const userData = await this.tokenService.validateRefreshToken(refreshJwt);
 
       const tokenFromDb = await this.tokenService.findJwt(refreshJwt);
       if (!userData || !tokenFromDb) {
-        throw new Error("User isn't authorized");
+        throw new Error('Користувачь не залогінився');
       }
 
       const user = await this.userModel.findById(userData._id);
 
       if (!user) {
-        throw new Error('User not found');
+        throw new Error('Користувача не знайденно ');
       }
 
       const tokens = await this.tokenService.generationJwt({ ...user });
@@ -133,7 +135,7 @@ export class AuthService {
   async activate(link: string) {
     const user = await this.userModel.findOne({ activationLink: link });
     if (!user) {
-      throw new Error('This link is not correct');
+      throw new Error('Це посилання не коректне');
     }
 
     user.isActivated = true;
@@ -145,7 +147,7 @@ export class AuthService {
     const user = await this.userService.findByEmail(forgotPassword.email);
 
     if (!user) {
-      throw new BadRequestException('User with this email not found');
+      throw new BadRequestException('Користувачь з таким емайлом не знайдений');
     }
     const forgotPasswordToken = await this.jwtService.signAsync({
       id: user._id,

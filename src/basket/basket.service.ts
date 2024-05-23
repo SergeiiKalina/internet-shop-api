@@ -5,10 +5,8 @@ import {
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { IBasketProduct, User } from 'src/auth/user.model';
+import { User } from 'src/auth/user.model';
 import { ProductsService } from 'src/products/products.service';
-
-import { UserService } from 'src/user/user.service';
 
 @Injectable()
 export class BasketService {
@@ -20,7 +18,7 @@ export class BasketService {
     const user = await this.userModel.findById(userId);
     const product = await this.productService.findProductById(productId);
     if (!product) {
-      throw new BadRequestException('Product not found');
+      throw new BadRequestException('Продукт не знайдений');
     }
 
     const checkProductInBasketIndex = await user.basket.findIndex(
@@ -47,7 +45,7 @@ export class BasketService {
     const product = await this.productService.findProductById(productId);
 
     if (!product) {
-      throw new NotFoundException('Product not found');
+      throw new NotFoundException('Продукт не знайдений');
     }
 
     const productIndex = user.basket.findIndex(
@@ -55,7 +53,7 @@ export class BasketService {
     );
 
     if (productIndex === -1) {
-      throw new BadRequestException('Product not found in basket');
+      throw new BadRequestException('Продукт не знайдений в коризині');
     }
 
     user.basket.splice(productIndex, 1);
@@ -71,7 +69,7 @@ export class BasketService {
     );
 
     if (productIndex === -1) {
-      throw new BadRequestException('Product not found in basket');
+      throw new BadRequestException('Продукт не знайдений в корзині');
     }
 
     user.basket = [
@@ -92,7 +90,7 @@ export class BasketService {
     );
 
     if (productIndex === -1) {
-      throw new BadRequestException('Product not found in basket');
+      throw new BadRequestException('Продукт не знайдений в корзині');
     }
 
     if (user.basket[productIndex].quantity === 1) {
