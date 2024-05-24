@@ -17,7 +17,7 @@ export class Comment {
   author: string;
   @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'Product', required: true })
   product: string;
-  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'Comment', default: [] })
+  @Prop({ type: [MongooseSchema.Types.ObjectId], ref: 'Comment', default: [] })
   comments: string[];
 }
 
