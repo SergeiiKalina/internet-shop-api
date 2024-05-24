@@ -63,7 +63,7 @@ export class ProductsService {
 
     if (!checkColor) {
       throw new BadRequestException(
-        'Не коректний колір він повинен бути з списку (Білий, Чорний, Сірий, Бежевий,  Червоний, Жовтий, Помаранчевий, Синій, Блакитний, Рожевий, Зелений, Фіолетовий, Золотий, Сріблястий )',
+        'Не коректний колір він повинен бути з списку (Білий, Чорний, Сірий, Бежевий,  Червоний, Жовтий, Помаранчевий, Синій, Блакитний, Рожевий, Зелений, Фіолетовий, Золотий, Сріблястий ) або "Без кольору"',
       );
     }
 
@@ -74,7 +74,7 @@ export class ProductsService {
       img: arrayLinkImages,
       producer: id,
       parameters: {
-        color,
+        color: { name: checkColor.colorName, code: checkColor.color },
         size,
         state,
         brand,
@@ -174,6 +174,16 @@ export class ProductsService {
     }
     product.visit = product.visit + 1;
     product.comments = updatedComments;
+
+    const checkColor = await this.colorModel.findOne({
+      colorName: product.parameters.color.toLowerCase(),
+    });
+
+    if (!checkColor) {
+      product.parameters.color = 'Без кольору';
+    } else {
+      product.parameters.color = checkColor.colorName;
+    }
 
     await product.save();
 

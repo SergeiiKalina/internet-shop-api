@@ -59,7 +59,9 @@ export class Product {
   @Prop({
     required: true,
     type: {
-      color: { type: String },
+      color: {
+        type: String,
+      },
       size: { type: String },
       state: { type: String },
       brand: { type: String },

@@ -11,7 +11,7 @@ export class ColorService {
   ) {}
   async create(colorDto: ColorDto) {
     const color = await this.colorModel.findOne({
-      colorName: colorDto.colorName,
+      colorName: colorDto.colorName.toLowerCase(),
     });
     if (color) {
       throw new BadRequestException('Такий колір вже є');
