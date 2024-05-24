@@ -19,20 +19,46 @@ export class CommentService {
       ...createCommentDto,
       author: id,
     });
-
-    const product = await this.productModel.findById(createCommentDto.product);
-    if (!product) {
-      throw new Error('Продукт не знайдений');
-    }
-
     const user = await this.userModel.findById(id);
     if (!user) {
       throw new Error('Користувачь не авторизований');
     }
-    const { password, ...restUser } = user.toObject();
-    await product.comments.push(commentInstance.id);
-    product.save();
-    return { ...commentInstance.toObject(), author: restUser };
+    const {
+      password,
+      isActivated,
+      numberPhone,
+      activationLink,
+      lastLogout,
+      registrationDate,
+      rating,
+      favorites,
+      basket,
+      ...restUser
+    } = user.toObject();
+    if (createCommentDto.parent) {
+      const parent = await this.commentModel.findById({
+        _id: createCommentDto.parent,
+      });
+
+      if (!parent) {
+        throw new BadRequestException('Цього коментаря не існує');
+      }
+
+      await parent.comments.push(commentInstance.id);
+      await parent.save();
+      return { ...commentInstance.toObject(), author: restUser };
+    } else {
+      const product = await this.productModel.findById(
+        createCommentDto.product,
+      );
+      if (!product) {
+        throw new Error('Продукт не знайдений');
+      }
+
+      await product.comments.push(commentInstance.id);
+      product.save();
+      return { ...commentInstance.toObject(), author: restUser };
+    }
   }
 
   async like(commentId: string, userId: string) {
@@ -103,11 +129,58 @@ export class CommentService {
     };
   }
 
-  update(id: number, updateCommentDto: UpdateCommentDto) {
-    return `This action updates a #${id} comment`;
+  async getFullCommentsAndReplies(id: string) {
+    const comment = await this.commentModel.findById(id).lean();
+    if (!comment) {
+      throw new Error('Comment not found');
+    }
+    await this.returnAllReplies(comment);
+    return comment;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} comment`;
+  private async returnAllReplies(parentComment) {
+    const comments = parentComment.comments;
+    if (!comments || comments.length === 0) {
+      return;
+    }
+
+    const nestedComments = await Promise.all(
+      comments.map(async (commentId) => {
+        const nestedComment = await this.commentModel
+          .findById(commentId)
+          .lean();
+        if (!nestedComment) {
+          return null;
+        }
+        const author = await this.userModel.findById(nestedComment.author);
+        const {
+          password,
+          isActivated,
+          activationLink,
+          lastName,
+          numberPhone,
+          lastLogout,
+          registrationDate,
+          rating,
+          favorites,
+          basket,
+          email,
+          ...restAuthor
+        } = author.toObject();
+
+        await this.returnAllReplies(nestedComment); // Recurse for each nested comment
+        return { ...nestedComment, author: restAuthor }; // Include author information
+      }),
+    );
+
+    parentComment.comments = nestedComments.filter(
+      (comment) => comment !== null,
+    ); // Update the parent comment's comments array with the nested comments
+
+    for (const nestedComment of nestedComments) {
+      if (nestedComment) {
+        await this.returnAllReplies(nestedComment); // Recurse for each nested comment
+      }
+    }
   }
 }

@@ -5,6 +5,8 @@ export type CommentDocument = Comment & Document;
 
 @Schema()
 export class Comment {
+  @Prop({ type: MongooseSchema.Types.ObjectId || null, default: null })
+  parent: string | null;
   @Prop({ required: true })
   body: string;
   @Prop({ default: () => Date.now() })

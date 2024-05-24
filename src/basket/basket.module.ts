@@ -10,6 +10,8 @@ import { ImageService } from 'src/products/images-service/images.service';
 import { Category, CategorySchema } from 'src/category/categoty.model';
 import { SubCategory, SubcategorySchema } from 'src/category/subCategory.model';
 import { Color, ColorSchema } from 'src/color/color.model';
+import { CommentService } from 'src/comment/comment.service';
+import { CommentModule } from 'src/comment/comment.module';
 
 @Module({
   imports: [
@@ -21,6 +23,7 @@ import { Color, ColorSchema } from 'src/color/color.model';
       { name: SubCategory.name, schema: SubcategorySchema },
       { name: Color.name, schema: ColorSchema },
     ]),
+    CommentModule,
   ],
   controllers: [BasketController],
   providers: [BasketService, ProductsService, ImageService],

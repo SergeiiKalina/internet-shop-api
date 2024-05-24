@@ -11,9 +11,9 @@ import { ConfigModule } from '@nestjs/config';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { Jwt, JwtSchema } from 'src/auth/jwt/jwt.model';
 import { Category, CategorySchema } from 'src/category/categoty.model';
-import { CategoryModule } from 'src/category/category.module';
 import { SubCategory, SubcategorySchema } from 'src/category/subCategory.model';
 import { Color, ColorSchema } from 'src/color/color.model';
+import { CommentModule } from 'src/comment/comment.module';
 
 @Module({
   imports: [
@@ -27,6 +27,7 @@ import { Color, ColorSchema } from 'src/color/color.model';
       { name: Color.name, schema: ColorSchema },
     ]),
     ConfigModule,
+    CommentModule,
   ],
   controllers: [ProductsController],
   providers: [

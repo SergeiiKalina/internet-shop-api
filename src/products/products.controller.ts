@@ -68,13 +68,14 @@ export class ProductsController {
   ): Promise<Product[]> {
     page = Number(page);
     limit = Number(limit);
-    
+
     // Переконайтеся, що page і limit мають коректні значення
     if (page < 1) {
       page = 1;
     }
-    if ( limit > 20) { // наприклад, обмеження в 100 продуктів
-      limit = 20
+    if (limit > 20) {
+      // наприклад, обмеження в 100 продуктів
+      limit = 20;
     }
 
     return this.productsService.getAllProducts(page, limit);

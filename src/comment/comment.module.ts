@@ -5,6 +5,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { Comment, CommentSchema } from './comment.model';
 import { Product, ProductSchema } from 'src/products/product.model';
 import { User, UserSchema } from 'src/auth/user.model';
+import { BasketModule } from 'src/basket/basket.module';
 
 @Module({
   imports: [
@@ -16,5 +17,6 @@ import { User, UserSchema } from 'src/auth/user.model';
   ],
   controllers: [CommentController],
   providers: [CommentService],
+  exports: [CommentService],
 })
 export class CommentModule {}

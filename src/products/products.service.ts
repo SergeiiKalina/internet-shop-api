@@ -14,6 +14,7 @@ import { Comment } from 'src/comment/comment.model';
 import { Category } from 'src/category/categoty.model';
 import { SubCategory } from 'src/category/subCategory.model';
 import { Color } from 'src/color/color.model';
+import { CommentService } from 'src/comment/comment.service';
 
 @Injectable()
 export class ProductsService {
@@ -25,6 +26,7 @@ export class ProductsService {
     @InjectModel(SubCategory.name) private subCategoryModel: Model<SubCategory>,
     @InjectModel(Color.name) private colorModel: Model<Color>,
     private readonly imageService: ImageService,
+    private readonly commentService: CommentService,
   ) {}
 
   async searchProducts(title: string): Promise<Product[]> {
@@ -157,17 +159,27 @@ export class ProductsService {
     if (!user) {
       throw new BadRequestException('Щось пішло не так');
     }
-    const { password, ...userWithoutPass } = user.toObject();
+    const {
+      password,
+      isActivated,
+      activationLink,
+      lastLogout,
+      registrationDate,
+      favorites,
+      basket,
+      ...userWithoutPass
+    } = user.toObject();
     let arrComments = [];
     let updatedComments = [];
     for (let i = 0; i < product.comments.length; i++) {
-      let comment = await this.commentModel.findById(product.comments[i]);
+      let comment = await this.commentService.getFullCommentsAndReplies(
+        product.comments[i],
+      );
       if (!comment) {
         continue;
       }
-      const author = await this.userModel.findById(comment.author);
-      const { password, ...authorWithoutPass } = author.toObject();
-      arrComments.push({ ...comment.toObject(), author: authorWithoutPass });
+
+      arrComments.push(comment);
       updatedComments.push(comment._id);
     }
     product.visit = product.visit + 1;
