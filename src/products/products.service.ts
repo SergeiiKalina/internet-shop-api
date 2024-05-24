@@ -59,6 +59,7 @@ export class ProductsService {
 
     const { color, size, state, brand, eco, ...restProduct } = createProductDto;
 
+    console.log(color);
     const checkColor = await this.colorModel.findOne({
       colorName: color.toLowerCase(),
     });
@@ -184,15 +185,18 @@ export class ProductsService {
     }
     product.visit = product.visit + 1;
     product.comments = updatedComments;
-
-    const checkColor = await this.colorModel.findOne({
-      colorName: product.parameters.color.toLowerCase(),
-    });
-
-    if (!checkColor) {
-      product.parameters.color = 'Без кольору';
-    } else {
-      product.parameters.color = checkColor.colorName;
+    if (typeof product.parameters.color === 'string') {
+      const checkColor = await this.colorModel.findOne({
+        colorName: product.parameters.color.toLowerCase(),
+      });
+      if (!checkColor) {
+        product.parameters.color = { name: 'Без кольору', code: 'transparent' };
+      } else {
+        product.parameters.color = {
+          name: checkColor.colorName,
+          code: checkColor.color,
+        };
+      }
     }
 
     await product.save();

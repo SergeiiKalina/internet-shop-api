@@ -4,14 +4,14 @@ import { Document, Schema as MongooseSchema } from 'mongoose';
 export type ProductDocument = Product & Document;
 
 export class IParameter {
-  color: string;
+  color: object | string;
   size: string;
   state: string;
   brand: string;
   eco: boolean;
 
   constructor(
-    color: string = 'Без кольору',
+    color: object | string = { name: 'без кольору', code: 'transparent' },
     size: string = 'Без розміру',
     state: string = 'Нове',
     brand: string = 'Без бренду',
@@ -60,7 +60,7 @@ export class Product {
     required: true,
     type: {
       color: {
-        type: String,
+        type: Object || String,
       },
       size: { type: String },
       state: { type: String },
@@ -68,7 +68,7 @@ export class Product {
       eco: { type: Boolean },
     },
     default: {
-      color: 'Без кольору',
+      color: { name: 'без кольору', code: 'transparent' },
       size: 'Без розміру',
       state: 'Нове',
       brand: 'Без бренду',
