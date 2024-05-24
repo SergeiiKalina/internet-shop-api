@@ -22,4 +22,8 @@ export class ColorService {
     });
     return newColor;
   }
+
+  async getAllColor() {
+    return this.colorModel.find().exec();
+  }
 }
