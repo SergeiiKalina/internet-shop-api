@@ -179,7 +179,6 @@ export class ProductsService {
       if (!comment) {
         continue;
       }
-
       arrComments.push(comment);
       updatedComments.push(comment._id);
     }

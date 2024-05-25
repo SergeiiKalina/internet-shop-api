@@ -168,18 +168,18 @@ export class CommentService {
           ...restAuthor
         } = author.toObject();
 
-        await this.returnAllReplies(nestedComment); // Recurse for each nested comment
-        return { ...nestedComment, author: restAuthor }; // Include author information
+        await this.returnAllReplies(nestedComment);
+        return { ...nestedComment, author: restAuthor };
       }),
     );
 
     parentComment.comments = nestedComments.filter(
       (comment) => comment !== null,
-    ); // Update the parent comment's comments array with the nested comments
+    );
 
     for (const nestedComment of nestedComments) {
       if (nestedComment) {
-        await this.returnAllReplies(nestedComment); // Recurse for each nested comment
+        await this.returnAllReplies(nestedComment);
       }
     }
   }
