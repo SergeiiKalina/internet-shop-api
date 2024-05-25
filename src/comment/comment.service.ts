@@ -134,6 +134,7 @@ export class CommentService {
     if (!comment) {
       throw new Error('Comment not found');
     }
+
     await this.returnAllReplies(comment);
     return comment;
   }

@@ -59,7 +59,6 @@ export class ProductsService {
 
     const { color, size, state, brand, eco, ...restProduct } = createProductDto;
 
-    console.log(color);
     const checkColor = await this.colorModel.findOne({
       colorName: color.toLowerCase(),
     });
@@ -176,10 +175,26 @@ export class ProductsService {
       let comment = await this.commentService.getFullCommentsAndReplies(
         product.comments[i],
       );
+
       if (!comment) {
         continue;
       }
-      arrComments.push(comment);
+      const author = await this.userModel.findById(comment.author);
+      const {
+        password,
+        isActivated,
+        numberPhone,
+        activationLink,
+        lastLogout,
+        registrationDate,
+        rating,
+        favorites,
+        basket,
+        email,
+        lastName,
+        ...restUser
+      } = author.toObject();
+      arrComments.push({ ...comment, author: restUser });
       updatedComments.push(comment._id);
     }
     product.visit = product.visit + 1;
