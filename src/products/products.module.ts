@@ -14,6 +14,8 @@ import { Category, CategorySchema } from 'src/category/categoty.model';
 import { SubCategory, SubcategorySchema } from 'src/category/subCategory.model';
 import { Color, ColorSchema } from 'src/color/color.model';
 import { CommentModule } from 'src/comment/comment.module';
+import { UserService } from 'src/user/user.service';
+import { BasketModule } from 'src/basket/basket.module';
 
 @Module({
   imports: [
@@ -28,6 +30,7 @@ import { CommentModule } from 'src/comment/comment.module';
     ]),
     ConfigModule,
     CommentModule,
+    BasketModule,
   ],
   controllers: [ProductsController],
   providers: [
@@ -35,6 +38,7 @@ import { CommentModule } from 'src/comment/comment.module';
     ImageService,
     FacebookTokenStrategy,
     JwtAuthGuard,
+    UserService,
   ],
 })
 export class ProductsModule {}

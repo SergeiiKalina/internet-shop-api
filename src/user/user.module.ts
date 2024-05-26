@@ -4,6 +4,7 @@ import { UserService } from './user.service';
 import { UserSchema } from 'src/auth/user.model';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Product, ProductSchema } from 'src/products/product.model';
+import { BasketModule } from 'src/basket/basket.module';
 
 @Module({
   imports: [

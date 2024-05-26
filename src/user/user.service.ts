@@ -1,4 +1,9 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { isValidObjectId, Model } from 'mongoose';
 import { User } from 'src/auth/user.model';
@@ -51,5 +56,16 @@ export class UserService {
       lastName: user.lastName,
       numberPhone: user.numberPhone,
     };
+  }
+
+  async getUserWithNeedFields(
+    ids: string | string[],
+    fields: string[],
+  ): Promise<Record<string, any> | Record<string, any>[]> {
+    const idsArray = Array.isArray(ids) ? ids : [ids];
+    return this.userModel
+      .find({ _id: { $in: idsArray } })
+      .select(fields.join(' '))
+      .exec();
   }
 }

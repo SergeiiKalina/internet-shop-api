@@ -15,6 +15,7 @@ import { Category } from 'src/category/categoty.model';
 import { SubCategory } from 'src/category/subCategory.model';
 import { Color } from 'src/color/color.model';
 import { CommentService } from 'src/comment/comment.service';
+import { UserService } from 'src/user/user.service';
 
 @Injectable()
 export class ProductsService {
@@ -27,6 +28,7 @@ export class ProductsService {
     @InjectModel(Color.name) private colorModel: Model<Color>,
     private readonly imageService: ImageService,
     private readonly commentService: CommentService,
+    private readonly userService: UserService,
   ) {}
 
   async searchProducts(title: string): Promise<Product[]> {
@@ -154,49 +156,40 @@ export class ProductsService {
     if (!product) {
       throw new BadRequestException('Щось пішло не так');
     }
-    const user = await this.userModel.findById(product.producer);
+    const user = await this.userService.getUserWithNeedFields(
+      product.producer,
+      ['_id', 'email', 'firstName', 'lastName', 'numberPhone', 'rating'],
+    );
 
-    if (!user) {
-      throw new BadRequestException('Щось пішло не так');
-    }
-    const {
-      password,
-      isActivated,
-      activationLink,
-      lastLogout,
-      registrationDate,
-      favorites,
-      basket,
-      ...userWithoutPass
-    } = user.toObject();
     let arrComments = [];
     let updatedComments = [];
-    for (let i = 0; i < product.comments.length; i++) {
-      let comment = await this.commentService.getFullCommentsAndReplies(
-        product.comments[i],
-      );
 
-      if (!comment) {
-        continue;
+    // Створюємо проміси для отримання коментарів та їх авторів
+    const commentWithAuthorPromises = product.comments.map(
+      async (commentId) => {
+        const comment =
+          await this.commentService.getFullCommentsAndReplies(commentId);
+        if (!comment) return null;
+
+        const author = await this.userService.getUserWithNeedFields(
+          comment.author,
+          ['_id', 'firstName'],
+        );
+        return { comment, author };
+      },
+    );
+
+    // Виконуємо паралельні запити за допомогою Promise.all
+    const commentsWithAuthors = await Promise.all(commentWithAuthorPromises);
+
+    // Обробляємо результати запитів
+    commentsWithAuthors.forEach((item) => {
+      if (item) {
+        arrComments.push({ ...item.comment, author: item.author });
+        updatedComments.push(item.comment._id);
       }
-      const author = await this.userModel.findById(comment.author);
-      const {
-        password,
-        isActivated,
-        numberPhone,
-        activationLink,
-        lastLogout,
-        registrationDate,
-        rating,
-        favorites,
-        basket,
-        email,
-        lastName,
-        ...restUser
-      } = author.toObject();
-      arrComments.push({ ...comment, author: restUser });
-      updatedComments.push(comment._id);
-    }
+    });
+
     product.visit = product.visit + 1;
     product.comments = updatedComments;
     if (typeof product.parameters.color === 'string') {
@@ -217,7 +210,7 @@ export class ProductsService {
 
     return {
       ...product.toObject(),
-      producer: userWithoutPass,
+      producer: user,
       comments: arrComments,
     };
   }

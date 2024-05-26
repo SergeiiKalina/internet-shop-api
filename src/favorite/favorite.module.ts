@@ -11,6 +11,8 @@ import { Category, CategorySchema } from 'src/category/categoty.model';
 import { SubCategory, SubcategorySchema } from 'src/category/subCategory.model';
 import { Color, ColorSchema } from 'src/color/color.model';
 import { CommentModule } from 'src/comment/comment.module';
+import { UserModule } from 'src/user/user.module';
+import { UserService } from 'src/user/user.service';
 
 @Module({
   imports: [
@@ -26,6 +28,6 @@ import { CommentModule } from 'src/comment/comment.module';
   ],
 
   controllers: [FavoriteController],
-  providers: [FavoriteService, ProductsService, ImageService],
+  providers: [FavoriteService, ProductsService, ImageService, UserService],
 })
 export class FavoriteModule {}

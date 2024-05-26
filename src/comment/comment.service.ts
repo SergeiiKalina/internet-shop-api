@@ -1,11 +1,12 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateCommentDto } from './dto/create-comment.dto';
-import { UpdateCommentDto } from './dto/update-comment.dto';
+
 import { InjectModel } from '@nestjs/mongoose';
 import { Comment } from './comment.model';
 import { Model } from 'mongoose';
 import { Product } from 'src/products/product.model';
 import { User } from 'src/auth/user.model';
+import { UserService } from 'src/user/user.service';
 
 @Injectable()
 export class CommentService {
@@ -13,28 +14,18 @@ export class CommentService {
     @InjectModel(Comment.name) private readonly commentModel: Model<Comment>,
     @InjectModel(Product.name) private readonly productModel: Model<Product>,
     @InjectModel(User.name) private readonly userModel: Model<User>,
+    private readonly userService: UserService,
   ) {}
   async create(createCommentDto: CreateCommentDto, id: string) {
     const commentInstance = await this.commentModel.create({
       ...createCommentDto,
       author: id,
     });
-    const user = await this.userModel.findById(id);
-    if (!user) {
-      throw new Error('Користувачь не авторизований');
-    }
-    const {
-      password,
-      isActivated,
-      numberPhone,
-      activationLink,
-      lastLogout,
-      registrationDate,
-      rating,
-      favorites,
-      basket,
-      ...restUser
-    } = user.toObject();
+    const user = await this.userService.getUserWithNeedFields(id, [
+      '_id',
+      'firstName',
+    ]);
+
     if (createCommentDto.parent) {
       const parent = await this.commentModel.findById({
         _id: createCommentDto.parent,
@@ -46,7 +37,7 @@ export class CommentService {
 
       await parent.comments.push(commentInstance.id);
       await parent.save();
-      return { ...commentInstance.toObject(), author: restUser };
+      return { ...commentInstance.toObject(), author: user };
     } else {
       const product = await this.productModel.findById(
         createCommentDto.product,
@@ -57,7 +48,7 @@ export class CommentService {
 
       await product.comments.push(commentInstance.id);
       product.save();
-      return { ...commentInstance.toObject(), author: restUser };
+      return { ...commentInstance.toObject(), author: user };
     }
   }
 
@@ -67,8 +58,10 @@ export class CommentService {
       throw new BadRequestException('Не знайденно цей коментар');
     }
 
-    const author = await this.userModel.findById(comment.author);
-    const { _id, firstName, ...authorRest } = author.toObject();
+    const author = await this.userService.getUserWithNeedFields(
+      comment.author,
+      ['_id', 'firstName'],
+    );
     const likesArray = comment.like;
     const dislikesArray = comment.dislike;
     const likeIndex = likesArray.indexOf(userId);
@@ -91,7 +84,7 @@ export class CommentService {
 
     return {
       ...comment.toObject(),
-      author: { _id, firstName },
+      author,
     };
   }
 
@@ -100,9 +93,11 @@ export class CommentService {
     if (!comment) {
       throw new BadRequestException('Не знайденно цей коментар');
     }
-    const author = await this.userModel.findById(comment.author);
-    const { _id, firstName } = author.toObject();
 
+    const author = await this.userService.getUserWithNeedFields(
+      comment.author,
+      ['_id', 'firstName'],
+    );
     const likesArray = comment.like;
     const dislikesArray = comment.dislike;
     const likeIndex = likesArray.indexOf(userId);
@@ -125,11 +120,11 @@ export class CommentService {
 
     return {
       ...comment.toObject(),
-      author: { _id, firstName },
+      author,
     };
   }
 
-  async getFullCommentsAndReplies(id: string) {
+  async getFullCommentsAndReplies(id) {
     const comment = await this.commentModel.findById(id).lean();
     if (!comment) {
       throw new Error('Comment not found');
@@ -145,40 +140,34 @@ export class CommentService {
       return;
     }
 
-    const nestedComments = await Promise.all(
-      comments.map(async (commentId) => {
-        const nestedComment = await this.commentModel
-          .findById(commentId)
-          .lean();
-        if (!nestedComment) {
-          return null;
-        }
-        const author = await this.userModel.findById(nestedComment.author);
-        const {
-          password,
-          isActivated,
-          activationLink,
-          lastName,
-          numberPhone,
-          lastLogout,
-          registrationDate,
-          rating,
-          favorites,
-          basket,
-          email,
-          ...restAuthor
-        } = author.toObject();
+    const nestedCommentsPromises = comments.map(async (commentId) => {
+      const nestedComment = await this.commentModel.findById(commentId).lean();
+      if (!nestedComment) {
+        return null;
+      }
 
-        await this.returnAllReplies(nestedComment);
-        return { ...nestedComment, author: restAuthor };
-      }),
-    );
+      const authorPromise = this.userService.getUserWithNeedFields(
+        nestedComment.author,
+        ['_id', 'firstName'],
+      );
+
+      return Promise.all([nestedComment, authorPromise]).then(
+        ([comment, author]) => {
+          const nestedCommentWithAuthor = { ...comment, author };
+          return this.returnAllReplies(nestedCommentWithAuthor).then(
+            () => nestedCommentWithAuthor,
+          );
+        },
+      );
+    });
+
+    const nestedComments = await Promise.all(nestedCommentsPromises);
 
     parentComment.comments = nestedComments.filter(
       (comment) => comment !== null,
     );
 
-    for (const nestedComment of nestedComments) {
+    for (let nestedComment of nestedComments) {
       if (nestedComment) {
         await this.returnAllReplies(nestedComment);
       }

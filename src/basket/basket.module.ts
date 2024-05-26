@@ -12,6 +12,8 @@ import { SubCategory, SubcategorySchema } from 'src/category/subCategory.model';
 import { Color, ColorSchema } from 'src/color/color.model';
 import { CommentService } from 'src/comment/comment.service';
 import { CommentModule } from 'src/comment/comment.module';
+import { UserModule } from 'src/user/user.module';
+import { UserService } from 'src/user/user.service';
 
 @Module({
   imports: [
@@ -26,6 +28,6 @@ import { CommentModule } from 'src/comment/comment.module';
     CommentModule,
   ],
   controllers: [BasketController],
-  providers: [BasketService, ProductsService, ImageService],
+  providers: [BasketService, ProductsService, ImageService, UserService],
 })
 export class BasketModule {}

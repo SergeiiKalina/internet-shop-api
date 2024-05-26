@@ -6,6 +6,7 @@ import { Comment, CommentSchema } from './comment.model';
 import { Product, ProductSchema } from 'src/products/product.model';
 import { User, UserSchema } from 'src/auth/user.model';
 import { BasketModule } from 'src/basket/basket.module';
+import { UserService } from 'src/user/user.service';
 
 @Module({
   imports: [
@@ -16,7 +17,7 @@ import { BasketModule } from 'src/basket/basket.module';
     ]),
   ],
   controllers: [CommentController],
-  providers: [CommentService],
+  providers: [CommentService, UserService],
   exports: [CommentService],
 })
 export class CommentModule {}
