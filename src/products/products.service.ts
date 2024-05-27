@@ -174,7 +174,7 @@ export class ProductsService {
         const author = await this.userService.getUserWithNeedFields(
           comment.author,
           ['_id', 'firstName'],
-        )[0];
+        );
         return { comment, author };
       },
     );
@@ -185,7 +185,7 @@ export class ProductsService {
     // Обробляємо результати запитів
     commentsWithAuthors.forEach((item) => {
       if (item) {
-        arrComments.push({ ...item.comment, author: item.author });
+        arrComments.push({ ...item.comment, author: item.author[0] });
         updatedComments.push(item.comment._id);
       }
     });
