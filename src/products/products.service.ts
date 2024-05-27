@@ -156,10 +156,11 @@ export class ProductsService {
     if (!product) {
       throw new BadRequestException('Щось пішло не так');
     }
+
     const user = await this.userService.getUserWithNeedFields(
       product.producer,
       ['_id', 'email', 'firstName', 'lastName', 'numberPhone', 'rating'],
-    )[0];
+    );
 
     let arrComments = [];
     let updatedComments = [];
@@ -210,7 +211,7 @@ export class ProductsService {
 
     return {
       ...product.toObject(),
-      producer: user,
+      producer: user[0],
       comments: arrComments,
     };
   }

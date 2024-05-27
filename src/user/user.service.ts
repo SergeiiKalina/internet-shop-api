@@ -63,6 +63,7 @@ export class UserService {
     fields: string[],
   ): Promise<Record<string, any> | Record<string, any>[]> {
     const idsArray = Array.isArray(ids) ? ids : [ids];
+
     return this.userModel
       .find({ _id: { $in: idsArray } })
       .select(fields.join(' '))
