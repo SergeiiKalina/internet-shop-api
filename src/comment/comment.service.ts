@@ -24,7 +24,7 @@ export class CommentService {
     const user = await this.userService.getUserWithNeedFields(id, [
       '_id',
       'firstName',
-    ]);
+    ])[0];
 
     if (createCommentDto.parent) {
       const parent = await this.commentModel.findById({
@@ -61,7 +61,7 @@ export class CommentService {
     const author = await this.userService.getUserWithNeedFields(
       comment.author,
       ['_id', 'firstName'],
-    );
+    )[0];
     const likesArray = comment.like;
     const dislikesArray = comment.dislike;
     const likeIndex = likesArray.indexOf(userId);
@@ -97,7 +97,7 @@ export class CommentService {
     const author = await this.userService.getUserWithNeedFields(
       comment.author,
       ['_id', 'firstName'],
-    );
+    )[0];
     const likesArray = comment.like;
     const dislikesArray = comment.dislike;
     const likeIndex = likesArray.indexOf(userId);
@@ -153,7 +153,7 @@ export class CommentService {
 
       return Promise.all([nestedComment, authorPromise]).then(
         ([comment, author]) => {
-          const nestedCommentWithAuthor = { ...comment, author };
+          const nestedCommentWithAuthor = { ...comment, author: author[0] };
           return this.returnAllReplies(nestedCommentWithAuthor).then(
             () => nestedCommentWithAuthor,
           );
