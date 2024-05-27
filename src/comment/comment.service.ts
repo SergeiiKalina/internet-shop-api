@@ -61,7 +61,7 @@ export class CommentService {
     const author = await this.userService.getUserWithNeedFields(
       comment.author,
       ['_id', 'firstName'],
-    )[0];
+    );
     const likesArray = comment.like;
     const dislikesArray = comment.dislike;
     const likeIndex = likesArray.indexOf(userId);
@@ -84,7 +84,7 @@ export class CommentService {
 
     return {
       ...comment.toObject(),
-      author,
+      author: author[0],
     };
   }
 
@@ -97,7 +97,7 @@ export class CommentService {
     const author = await this.userService.getUserWithNeedFields(
       comment.author,
       ['_id', 'firstName'],
-    )[0];
+    );
     const likesArray = comment.like;
     const dislikesArray = comment.dislike;
     const likeIndex = likesArray.indexOf(userId);
@@ -120,7 +120,7 @@ export class CommentService {
 
     return {
       ...comment.toObject(),
-      author,
+      author: author[0],
     };
   }
 
