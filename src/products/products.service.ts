@@ -159,7 +159,7 @@ export class ProductsService {
     const user = await this.userService.getUserWithNeedFields(
       product.producer,
       ['_id', 'email', 'firstName', 'lastName', 'numberPhone', 'rating'],
-    );
+    )[0];
 
     let arrComments = [];
     let updatedComments = [];
@@ -174,7 +174,7 @@ export class ProductsService {
         const author = await this.userService.getUserWithNeedFields(
           comment.author,
           ['_id', 'firstName'],
-        );
+        )[0];
         return { comment, author };
       },
     );
