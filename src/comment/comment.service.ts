@@ -24,7 +24,7 @@ export class CommentService {
     const user = await this.userService.getUserWithNeedFields(id, [
       '_id',
       'firstName',
-    ])[0];
+    ]);
 
     if (createCommentDto.parent) {
       const parent = await this.commentModel.findById({
@@ -37,7 +37,7 @@ export class CommentService {
 
       await parent.comments.push(commentInstance.id);
       await parent.save();
-      return { ...commentInstance.toObject(), author: user };
+      return { ...commentInstance.toObject(), author: user[0] };
     } else {
       const product = await this.productModel.findById(
         createCommentDto.product,
@@ -48,7 +48,7 @@ export class CommentService {
 
       await product.comments.push(commentInstance.id);
       product.save();
-      return { ...commentInstance.toObject(), author: user };
+      return { ...commentInstance.toObject(), author: user[0] };
     }
   }
 
