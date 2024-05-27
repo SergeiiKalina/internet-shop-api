@@ -134,17 +134,19 @@ export class ProductsService {
     return product;
   }
 
-  async getAllProducts(page: number, limit: number = 20): Promise<Product[]> {
+  async getAllProducts(page: number, limit: number = 20): Promise<{ products: Product[], totalItems: number }> {
     const startIndex = (page - 1) * limit;
 
-    const paginatedProducts = await this.productModel
-      .find()
-      .skip(startIndex)
-      .limit(limit)
-      .exec();
+    const products = await this.productModel
+        .find()
+        .skip(startIndex)
+        .limit(limit)
+        .exec();
 
-    return paginatedProducts;
-  }
+    const totalItems = await this.productModel.countDocuments().exec();
+
+    return { products, totalItems };
+}
 
   async getProduct(id: string) {
     const product = await this.productModel.findById(id);
