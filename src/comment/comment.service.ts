@@ -76,16 +76,40 @@ export class CommentService {
       dislikesArray.splice(likeIndex, 1);
       likesArray.push(userId);
     }
-
     comment.dislike = dislikesArray;
     comment.like = likesArray;
 
     await comment.save();
 
-    return {
-      ...comment.toObject(),
-      author: author[0],
-    };
+    const product = await this.productModel.findById(comment.product);
+
+    let arrComments = [];
+
+    // Створюємо проміси для отримання коментарів та їх авторів
+    const commentWithAuthorPromises = product.comments.map(
+      async (commentId) => {
+        const comment = await this.getFullCommentsAndReplies(commentId);
+        if (!comment) return null;
+
+        const author = await this.userService.getUserWithNeedFields(
+          comment.author,
+          ['_id', 'firstName'],
+        );
+        return { comment, author };
+      },
+    );
+
+    // Виконуємо паралельні запити за допомогою Promise.all
+    const commentsWithAuthors = await Promise.all(commentWithAuthorPromises);
+
+    // Обробляємо результати запитів
+    commentsWithAuthors.forEach((item) => {
+      if (item) {
+        arrComments.push({ ...item.comment, author: item.author[0] });
+      }
+    });
+
+    return arrComments;
   }
 
   async dislike(commentId: string, userId: string) {
