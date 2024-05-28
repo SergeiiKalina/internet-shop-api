@@ -138,19 +138,22 @@ export class ProductsService {
     return product;
   }
 
-  async getAllProducts(page: number, limit: number = 20): Promise<{ products: Product[], totalItems: number }> {
+  async getAllProducts(
+    page: number,
+    limit: number = 20,
+  ): Promise<{ products: Product[]; totalItems: number }> {
     const startIndex = (page - 1) * limit;
 
     const products = await this.productModel
-        .find()
-        .skip(startIndex)
-        .limit(limit)
-        .exec();
+      .find()
+      .skip(startIndex)
+      .limit(limit)
+      .exec();
 
     const totalItems = await this.productModel.countDocuments().exec();
 
     return { products, totalItems };
-}
+  }
 
   async getProduct(id: string) {
     const product = await this.productModel.findById(id);
@@ -163,38 +166,13 @@ export class ProductsService {
       product.producer,
       ['_id', 'email', 'firstName', 'lastName', 'numberPhone', 'rating'],
     );
-
-    let arrComments = [];
-    let updatedComments = [];
-
-    // Створюємо проміси для отримання коментарів та їх авторів
-    const commentWithAuthorPromises = product.comments.map(
-      async (commentId) => {
-        const comment =
-          await this.commentService.getFullCommentsAndReplies(commentId);
-        if (!comment) return null;
-
-        const author = await this.userService.getUserWithNeedFields(
-          comment.author,
-          ['_id', 'firstName'],
-        );
-        return { comment, author };
-      },
+    const first = Date.now();
+    const allComment = await this.commentService.getAllFullCommentForProduct(
+      product.comments,
     );
-
-    // Виконуємо паралельні запити за допомогою Promise.all
-    const commentsWithAuthors = await Promise.all(commentWithAuthorPromises);
-
-    // Обробляємо результати запитів
-    commentsWithAuthors.forEach((item) => {
-      if (item) {
-        arrComments.push({ ...item.comment, author: item.author[0] });
-        updatedComments.push(item.comment._id);
-      }
-    });
-
+    const second = Date.now();
+    console.log((second - first) / 1000);
     product.visit = product.visit + 1;
-    product.comments = updatedComments;
     if (typeof product.parameters.color === 'string') {
       const checkColor = await this.colorModel.findOne({
         colorName: product.parameters.color.toLowerCase(),
@@ -214,7 +192,7 @@ export class ProductsService {
     return {
       ...product.toObject(),
       producer: user[0],
-      comments: arrComments,
+      comments: allComment,
     };
   }
   async delete(id: string) {

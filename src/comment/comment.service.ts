@@ -58,10 +58,6 @@ export class CommentService {
       throw new BadRequestException('Не знайденно цей коментар');
     }
 
-    const author = await this.userService.getUserWithNeedFields(
-      comment.author,
-      ['_id', 'firstName'],
-    );
     const likesArray = comment.like;
     const dislikesArray = comment.dislike;
     const likeIndex = likesArray.indexOf(userId);
@@ -82,34 +78,9 @@ export class CommentService {
     await comment.save();
 
     const product = await this.productModel.findById(comment.product);
+    const allComment = await this.getAllFullCommentForProduct(product.comments);
 
-    let arrComments = [];
-
-    // Створюємо проміси для отримання коментарів та їх авторів
-    const commentWithAuthorPromises = product.comments.map(
-      async (commentId) => {
-        const comment = await this.getFullCommentsAndReplies(commentId);
-        if (!comment) return null;
-
-        const author = await this.userService.getUserWithNeedFields(
-          comment.author,
-          ['_id', 'firstName'],
-        );
-        return { comment, author };
-      },
-    );
-
-    // Виконуємо паралельні запити за допомогою Promise.all
-    const commentsWithAuthors = await Promise.all(commentWithAuthorPromises);
-
-    // Обробляємо результати запитів
-    commentsWithAuthors.forEach((item) => {
-      if (item) {
-        arrComments.push({ ...item.comment, author: item.author[0] });
-      }
-    });
-
-    return arrComments;
+    return allComment;
   }
 
   async dislike(commentId: string, userId: string) {
@@ -117,11 +88,6 @@ export class CommentService {
     if (!comment) {
       throw new BadRequestException('Не знайденно цей коментар');
     }
-
-    const author = await this.userService.getUserWithNeedFields(
-      comment.author,
-      ['_id', 'firstName'],
-    );
     const likesArray = comment.like;
     const dislikesArray = comment.dislike;
     const likeIndex = likesArray.indexOf(userId);
@@ -136,65 +102,34 @@ export class CommentService {
       likesArray.splice(likeIndex, 1);
       dislikesArray.push(userId);
     }
-
     comment.dislike = dislikesArray;
     comment.like = likesArray;
 
     await comment.save();
 
-    return {
-      ...comment.toObject(),
-      author: author[0],
-    };
+    const product = await this.productModel.findById(comment.product);
+    const allComment = await this.getAllFullCommentForProduct(product.comments);
+
+    return allComment;
   }
 
-  async getFullCommentsAndReplies(id) {
-    const comment = await this.commentModel.findById(id).lean();
-    if (!comment) {
-      throw new Error('Comment not found');
-    }
+  async getAllFullCommentForProduct(
+    comments: string | string[],
+  ): Promise<any[]> {
+    const idsArray = Array.isArray(comments) ? comments : [comments];
+    const allComment = await this.commentModel
+      .find({ _id: { $in: idsArray } })
+      .populate('author', '_id firstName')
+      .lean();
 
-    await this.returnAllReplies(comment);
-    return comment;
-  }
-
-  private async returnAllReplies(parentComment) {
-    const comments = parentComment.comments;
-    if (!comments || comments.length === 0) {
-      return;
-    }
-
-    const nestedCommentsPromises = comments.map(async (commentId) => {
-      const nestedComment = await this.commentModel.findById(commentId).lean();
-      if (!nestedComment) {
-        return null;
-      }
-
-      const authorPromise = this.userService.getUserWithNeedFields(
-        nestedComment.author,
-        ['_id', 'firstName'],
-      );
-
-      return Promise.all([nestedComment, authorPromise]).then(
-        ([comment, author]) => {
-          const nestedCommentWithAuthor = { ...comment, author: author[0] };
-          return this.returnAllReplies(nestedCommentWithAuthor).then(
-            () => nestedCommentWithAuthor,
-          );
-        },
-      );
-    });
-
-    const nestedComments = await Promise.all(nestedCommentsPromises);
-
-    parentComment.comments = nestedComments.filter(
-      (comment) => comment !== null,
-    );
-
-    for (let nestedComment of nestedComments) {
-      if (nestedComment) {
-        await this.returnAllReplies(nestedComment);
+    for (const comment of allComment) {
+      if (comment.comments && comment.comments.length > 0) {
+        comment.comments = await this.getAllFullCommentForProduct(
+          comment.comments,
+        );
       }
     }
+
+    return allComment;
   }
 }
