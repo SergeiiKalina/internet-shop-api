@@ -66,6 +66,8 @@ export class Product {
       state: { type: String },
       brand: { type: String },
       eco: { type: Boolean },
+      sex: { type: String },
+      isUkraine: { type: Boolean },
     },
     default: {
       color: { name: 'без кольору', code: 'transparent' },
@@ -73,6 +75,8 @@ export class Product {
       state: 'Нове',
       brand: 'Без бренду',
       eco: true,
+      sex: 'unsex',
+      isUkraine: true,
     },
   })
   parameters: IParameter;
