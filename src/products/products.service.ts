@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  Inject,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -16,6 +17,8 @@ import { SubCategory } from 'src/category/subCategory.model';
 import { Color } from 'src/color/color.model';
 import { CommentService } from 'src/comment/comment.service';
 import { UserService } from 'src/user/user.service';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Cache } from 'cache-manager';
 
 @Injectable()
 export class ProductsService {
@@ -29,6 +32,7 @@ export class ProductsService {
     private readonly imageService: ImageService,
     private readonly commentService: CommentService,
     private readonly userService: UserService,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
 
   async searchProducts(title: string): Promise<Product[]> {
@@ -59,7 +63,8 @@ export class ProductsService {
       'subCategory.ua': createProductDto.subCategory,
     });
 
-    const { color, size, state, brand, eco, ...restProduct } = createProductDto;
+    const { color, size, state, brand, eco, isUkraine, ...restProduct } =
+      createProductDto;
 
     const checkColor = await this.colorModel.findOne({
       colorName: color.toLowerCase(),
@@ -83,6 +88,7 @@ export class ProductsService {
         state,
         brand,
         eco,
+        isUkraine,
       },
     });
 
@@ -157,43 +163,62 @@ export class ProductsService {
 
   async getProduct(id: string) {
     const product = await this.productModel.findById(id);
-
-    if (!product) {
-      throw new BadRequestException('Щось пішло не так');
-    }
-
-    const user = await this.userService.getUserWithNeedFields(
-      product.producer,
-      ['_id', 'email', 'firstName', 'lastName', 'numberPhone', 'rating'],
-    );
     const first = Date.now();
-    const allComment = await this.commentService.getAllFullCommentForProduct(
-      product.comments,
-    );
-    const second = Date.now();
-    console.log((second - first) / 1000);
-    product.visit = product.visit + 1;
-    if (typeof product.parameters.color === 'string') {
-      const checkColor = await this.colorModel.findOne({
-        colorName: product.parameters.color.toLowerCase(),
-      });
-      if (!checkColor) {
-        product.parameters.color = { name: 'Без кольору', code: 'transparent' };
-      } else {
-        product.parameters.color = {
-          name: checkColor.colorName,
-          code: checkColor.color,
-        };
+
+    if (!(await this.cacheManager.get(id))) {
+      if (!product) {
+        throw new BadRequestException('Щось пішло не так');
       }
+
+      const user = await this.userService.getUserWithNeedFields(
+        product.producer,
+        ['_id', 'email', 'firstName', 'lastName', 'numberPhone', 'rating'],
+      );
+
+      const allComment = await this.commentService.getAllFullCommentForProduct(
+        product.comments,
+      );
+
+      product.visit = product.visit + 1;
+      if (typeof product.parameters.color === 'string') {
+        const checkColor = await this.colorModel.findOne({
+          colorName: product.parameters.color.toLowerCase(),
+        });
+        if (!checkColor) {
+          product.parameters.color = {
+            name: 'Без кольору',
+            code: 'transparent',
+          };
+        } else {
+          product.parameters.color = {
+            name: checkColor.colorName,
+            code: checkColor.color,
+          };
+        }
+      }
+
+      await this.cacheManager.set(
+        id.toString(),
+        {
+          ...product.toObject(),
+          producer: user[0],
+          comments: allComment,
+        },
+        1000 * 60 * 60,
+      );
+
+      await product.save();
+      const second = Date.now();
+      console.log((second - first) / 1000);
+      return {
+        ...product.toObject(),
+        producer: user[0],
+        comments: allComment,
+      };
     }
-
-    await product.save();
-
-    return {
-      ...product.toObject(),
-      producer: user[0],
-      comments: allComment,
-    };
+    const secondtwo = Date.now();
+    console.log('cache call', (secondtwo - first) / 1000);
+    return await this.cacheManager.get(id);
   }
   async delete(id: string) {
     const deleteProduct = this.productModel.findByIdAndDelete(id);

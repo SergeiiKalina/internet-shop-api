@@ -135,6 +135,9 @@ export class CreateProductDto {
   @IsString()
   describe: string;
 
+  @IsBoolean()
+  isUkraine: boolean;
+
   @ApiProperty({
     type: 'array',
     items: {

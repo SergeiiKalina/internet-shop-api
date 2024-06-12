@@ -18,12 +18,16 @@ import { BasketModule } from './basket/basket.module';
 import { FavoriteModule } from './favorite/favorite.module';
 import { CategoryModule } from './category/category.module';
 import { ColorModule } from './color/color.module';
+import { CacheModule } from '@nestjs/cache-manager';
 
 @Module({
   imports: [
     MongooseModule.forRoot(
       'mongodb+srv://trainingfromsergijkalyna:I3FEDP34PHQX6lZp@cluster0.tqsxfke.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0',
     ),
+    CacheModule.register({
+      isGlobal: true,
+    }),
     MulterModule.register({
       storage: memoryStorage(),
     }),

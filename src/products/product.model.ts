@@ -3,26 +3,14 @@ import { Document, Schema as MongooseSchema } from 'mongoose';
 
 export type ProductDocument = Product & Document;
 
-export class IParameter {
+export interface IParameter {
   color: object | string;
   size: string;
   state: string;
   brand: string;
   eco: boolean;
-
-  constructor(
-    color: object | string = { name: 'без кольору', code: 'transparent' },
-    size: string = 'Без розміру',
-    state: string = 'Нове',
-    brand: string = 'Без бренду',
-    eco = true,
-  ) {
-    this.color = color;
-    this.size = size;
-    this.state = state;
-    this.brand = brand;
-    this.eco = eco;
-  }
+  sex: string;
+  isUkraine: boolean;
 }
 
 @Schema()
@@ -60,9 +48,9 @@ export class Product {
     required: true,
     type: {
       color: {
-        type: Object || String,
+        type: [Object || String],
       },
-      size: { type: String },
+      size: { type: [String] },
       state: { type: String },
       brand: { type: String },
       eco: { type: Boolean },
@@ -70,8 +58,8 @@ export class Product {
       isUkraine: { type: Boolean },
     },
     default: {
-      color: { name: 'без кольору', code: 'transparent' },
-      size: 'Без розміру',
+      color: [{ name: 'без кольору', code: 'transparent' }],
+      size: ['Без розміру'],
       state: 'Нове',
       brand: 'Без бренду',
       eco: true,

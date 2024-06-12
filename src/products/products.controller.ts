@@ -46,41 +46,48 @@ export class ProductsController {
 
   @ApiOperation({
     summary: 'Get all Products',
-})
-@ApiQuery({
+  })
+  @ApiQuery({
     name: 'page',
     required: false,
     type: Number,
     description: 'Page number',
-})
-@ApiQuery({
+  })
+  @ApiQuery({
     name: 'limit',
     required: false,
     type: Number,
     description: 'Items per page',
-})
-@ApiResponse({ status: 200, description: 'Returns all products with pagination info' })
-@Get()
-async getAllProducts(
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Returns all products with pagination info',
+  })
+  @Get()
+  async getAllProducts(
     @Query('page') page: number = 1,
     @Query('limit') limit: number = 20,
-): Promise<{ products: Product[], totalPages: number, totalItems: number }> {
+  ): Promise<{ products: Product[]; totalPages: number; totalItems: number }> {
     page = Number(page);
     limit = Number(limit);
 
     // Переконайтеся, що page і limit мають коректні значення
     if (page < 1) {
-        page = 1;
+      page = 1;
     }
-    if (limit > 20) { // наприклад, обмеження в 20 продуктів
-        limit = 20;
+    if (limit > 20) {
+      // наприклад, обмеження в 20 продуктів
+      limit = 20;
     }
 
-    const { products, totalItems } = await this.productsService.getAllProducts(page, limit);
+    const { products, totalItems } = await this.productsService.getAllProducts(
+      page,
+      limit,
+    );
     const totalPages = Math.ceil(totalItems / limit);
 
     return { products, totalPages, totalItems };
-}
+  }
 
   @ApiOperation({
     summary: 'Get product',
