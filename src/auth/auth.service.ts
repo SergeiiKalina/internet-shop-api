@@ -186,25 +186,22 @@ export class AuthService {
         isActivated: true,
         password: randomBytes(8).toString('hex'),
       });
-      const {
-        password,
-        isActivated = true,
-        activationLink,
-        lastLogout,
-        ...restUser
-      } = newUser.user.toObject();
+      const { password, activationLink, lastLogout, ...restUser } =
+        newUser.user.toObject();
       return { ...newUser, user: { ...restUser } };
     }
 
     if (userDb) {
       const userFromDb = await this.userService.findByEmail(user.email);
-      const { password, isActivated, activationLink, lastLogout, ...restUser } =
+      userFromDb.isActivated = true;
+      await userFromDb.save();
+      const { password, activationLink, lastLogout, ...restUser } =
         userFromDb.toObject();
       const tokens = await this.tokenService.generationJwt({
         ...restUser,
         id: restUser._id,
       });
-      return { ...tokens, user: restUser };
+      return { ...tokens, user: { ...restUser, isActivated: true } };
     }
   }
 
@@ -225,25 +222,22 @@ export class AuthService {
         isActivated: true,
         password: randomBytes(8).toString('hex'),
       });
-      const {
-        password,
-        isActivated = true,
-        activationLink,
-        lastLogout,
-        ...restUser
-      } = newUser.user.toObject();
+      const { password, activationLink, lastLogout, ...restUser } =
+        newUser.user.toObject();
       return { ...newUser, user: { ...restUser } };
     }
 
     if (userDb) {
       const userFromDb = await this.userService.findByEmail(user.email);
-      const { password, isActivated, activationLink, lastLogout, ...restUser } =
+      userFromDb.isActivated = true;
+      await userFromDb.save();
+      const { password, activationLink, lastLogout, ...restUser } =
         userFromDb.toObject();
       const tokens = await this.tokenService.generationJwt({
         ...restUser,
         id: restUser._id,
       });
-      return { ...tokens, user: restUser };
+      return { ...tokens, user: restUser, isActivated: true };
     }
   }
 }
