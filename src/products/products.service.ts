@@ -58,24 +58,22 @@ export class ProductsService {
     const category = await this.categoryModel.findOne({
       'mainCategory.ua': createProductDto.category,
     });
-
     const subCategory = await this.subCategoryModel.findOne({
       'subCategory.ua': createProductDto.subCategory,
     });
 
     const { color, size, state, brand, eco, isUkraine, ...restProduct } =
       createProductDto;
-    console.log(color);
+
     const allColor = await this.colorModel.find({
-      colorName: { $in: color },
+      colorName: { $in: color.split(',').map((el) => el.toLocaleLowerCase()) },
     });
-    console.log(allColor);
+
     if (!allColor) {
       throw new BadRequestException(
         'Не коректний колір він повинен бути з списку (Білий, Чорний, Сірий, Бежевий,  Червоний, Жовтий, Помаранчевий, Синій, Блакитний, Рожевий, Зелений, Фіолетовий, Золотий, Сріблястий ) або "Без кольору"',
       );
     }
-
     const product = await this.productModel.create({
       ...restProduct,
       category: category.mainCategory,
@@ -84,20 +82,18 @@ export class ProductsService {
       producer: id,
       parameters: {
         color: allColor,
-        size,
+        size: size.split(','),
         state,
         brand,
         eco,
         isUkraine,
       },
     });
-
     if (!product) {
       throw new BadRequestException(
         'Щось сталось не так з завантаженням продукту',
       );
     }
-
     return product;
   }
 
@@ -126,20 +122,20 @@ export class ProductsService {
       }
       arrayLinkImages.push(image.data.url);
     }
-    const category = await this.categoryModel.findOne({
-      'mainCategory.ua': updateProduct.category,
-    });
+    // const category = await this.categoryModel.findOne({
+    //   'mainCategory.ua': updateProduct.category,
+    // });
 
-    const subCategory = await this.subCategoryModel.findOne({
-      'subCategory.ua': updateProduct.subCategory,
-    });
+    // const subCategory = await this.subCategoryModel.findOne({
+    //   'subCategory.ua': updateProduct.subCategory,
+    // });
 
-    product.img = arrayLinkImages;
-    product.producer = userId;
-    product.category = category.mainCategory;
-    product.subCategory = subCategory.subCategory;
+    // product.img = arrayLinkImages;
+    // product.producer = userId;
+    // product.category = category.mainCategory;
+    // product.subCategory = subCategory.subCategory;
 
-    await product.save();
+    // await product.save();
 
     return product;
   }

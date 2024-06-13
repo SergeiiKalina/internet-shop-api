@@ -3,7 +3,6 @@ import {
   Post,
   Body,
   UseInterceptors,
-  UploadedFile,
   Get,
   UseGuards,
   Req,
@@ -11,12 +10,11 @@ import {
   Param,
   Query,
   Patch,
-  ValidationPipe,
   UploadedFiles,
 } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
-import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
+import { FilesInterceptor } from '@nestjs/platform-express';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import {
   ApiBearerAuth,
