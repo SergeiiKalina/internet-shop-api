@@ -163,9 +163,9 @@ export class ProductsService {
 
   async getProduct(id: string) {
     const product = await this.productModel.findById(id);
-    const first = Date.now();
+    const cacheProduct = await this.cacheManager.get(id);
 
-    if (!(await this.cacheManager.get(id))) {
+    if (!cacheProduct) {
       if (!product) {
         throw new BadRequestException('Щось пішло не так');
       }
@@ -180,22 +180,6 @@ export class ProductsService {
       );
 
       product.visit = product.visit + 1;
-      if (typeof product.parameters.color === 'string') {
-        const checkColor = await this.colorModel.findOne({
-          colorName: product.parameters.color.toLowerCase(),
-        });
-        if (!checkColor) {
-          product.parameters.color = {
-            name: 'Без кольору',
-            code: 'transparent',
-          };
-        } else {
-          product.parameters.color = {
-            name: checkColor.colorName,
-            code: checkColor.color,
-          };
-        }
-      }
 
       await this.cacheManager.set(
         id.toString(),
@@ -208,17 +192,15 @@ export class ProductsService {
       );
 
       await product.save();
-      const second = Date.now();
-      console.log((second - first) / 1000);
+
       return {
         ...product.toObject(),
         producer: user[0],
         comments: allComment,
       };
     }
-    const secondtwo = Date.now();
-    console.log('cache call', (secondtwo - first) / 1000);
-    return await this.cacheManager.get(id);
+
+    return cacheProduct;
   }
   async delete(id: string) {
     const deleteProduct = this.productModel.findByIdAndDelete(id);

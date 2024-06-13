@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { CreateCommentDto } from './dto/create-comment.dto';
 
 import { InjectModel } from '@nestjs/mongoose';
@@ -7,6 +7,8 @@ import { Model } from 'mongoose';
 import { Product } from 'src/products/product.model';
 import { User } from 'src/auth/user.model';
 import { UserService } from 'src/user/user.service';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Cache } from 'cache-manager';
 
 @Injectable()
 export class CommentService {
@@ -15,6 +17,7 @@ export class CommentService {
     @InjectModel(Product.name) private readonly productModel: Model<Product>,
     @InjectModel(User.name) private readonly userModel: Model<User>,
     private readonly userService: UserService,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
   async create(createCommentDto: CreateCommentDto, id: string) {
     const commentInstance = await this.commentModel.create({
@@ -37,6 +40,7 @@ export class CommentService {
 
       await parent.comments.push(commentInstance.id);
       await parent.save();
+      await this.cacheManager.del(parent.product);
       return { ...commentInstance.toObject(), author: user[0] };
     } else {
       const product = await this.productModel.findById(
@@ -45,6 +49,7 @@ export class CommentService {
       if (!product) {
         throw new Error('Продукт не знайдений');
       }
+      await this.cacheManager.del(product.id);
 
       await product.comments.push(commentInstance.id);
       product.save();
