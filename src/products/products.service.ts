@@ -66,11 +66,11 @@ export class ProductsService {
     const { color, size, state, brand, eco, isUkraine, ...restProduct } =
       createProductDto;
 
-    const checkColor = await this.colorModel.findOne({
-      colorName: color.toLowerCase(),
+    const allColor = await this.colorModel.find({
+      colorName: { $in: color },
     });
 
-    if (!checkColor) {
+    if (!allColor) {
       throw new BadRequestException(
         'Не коректний колір він повинен бути з списку (Білий, Чорний, Сірий, Бежевий,  Червоний, Жовтий, Помаранчевий, Синій, Блакитний, Рожевий, Зелений, Фіолетовий, Золотий, Сріблястий ) або "Без кольору"',
       );
@@ -83,7 +83,7 @@ export class ProductsService {
       img: arrayLinkImages,
       producer: id,
       parameters: {
-        color: { name: checkColor.colorName, code: checkColor.color },
+        color: allColor,
         size,
         state,
         brand,

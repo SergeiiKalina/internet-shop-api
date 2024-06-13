@@ -119,19 +119,20 @@ export class CreateProductDto {
   @IsEnum(['Нове', 'Уживаний товар'], { message: 'Subcategory not correct' })
   state: string;
   @ApiProperty({
+    type: [String],
     description: 'Size of the product',
-    default: 'Без розміру',
-    enum: sizeEmbroidery,
+    default: ['Без розміру'],
   })
-  @IsString()
+  @IsArray()
   @IsEnum(sizeEmbroidery)
-  size: string;
-  @ApiProperty({ description: 'Color of the product' })
-  color?: string;
-  @ApiProperty({ description: 'Brand of the product' })
+  size: string[];
+  @ApiProperty({ type: [String], description: 'Color of the product' })
+  @IsArray()
+  color?: string[];
+  @ApiProperty({ type: String, description: 'Brand of the product' })
   @IsString()
   brand?: string;
-  @ApiProperty({ description: 'Description of the product' })
+  @ApiProperty({ type: String, description: 'Description of the product' })
   @IsString()
   describe: string;
 
