@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
 import {
   IsArray,
   IsBoolean,
@@ -124,11 +125,16 @@ export class CreateProductDto {
     default: ['Без розміру'],
   })
   @IsArray()
+  @IsString({ each: true })
   @IsEnum(sizeEmbroidery)
   size: string[];
-  @ApiProperty({ type: [String], description: 'Color of the product' })
+
+  @ApiProperty({ description: 'Color of the product', type: [String] })
   @IsArray()
+  @IsString({ each: true })
+  @Transform(({ value }) => value.map((color: string) => color.toLowerCase()))
   color?: string[];
+
   @ApiProperty({ type: String, description: 'Brand of the product' })
   @IsString()
   brand?: string;

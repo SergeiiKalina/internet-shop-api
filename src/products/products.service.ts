@@ -65,7 +65,7 @@ export class ProductsService {
 
     const { color, size, state, brand, eco, isUkraine, ...restProduct } =
       createProductDto;
-
+    console.log(color);
     const allColor = await this.colorModel.find({
       colorName: { $in: color },
     });
