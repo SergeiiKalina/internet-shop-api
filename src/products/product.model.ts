@@ -4,7 +4,7 @@ import { Document, Schema as MongooseSchema } from 'mongoose';
 export type ProductDocument = Product & Document;
 
 export interface IParameter {
-  color: object | string;
+  color: object[];
   size: string;
   state: string;
   brand: string;
@@ -48,7 +48,7 @@ export class Product {
     required: true,
     type: {
       color: {
-        type: [Object || String],
+        type: [Object],
       },
       size: { type: [String] },
       state: { type: String },

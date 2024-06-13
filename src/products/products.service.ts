@@ -69,7 +69,7 @@ export class ProductsService {
     const allColor = await this.colorModel.find({
       colorName: { $in: color },
     });
-
+    console.log(allColor);
     if (!allColor) {
       throw new BadRequestException(
         'Не коректний колір він повинен бути з списку (Білий, Чорний, Сірий, Бежевий,  Червоний, Жовтий, Помаранчевий, Синій, Блакитний, Рожевий, Зелений, Фіолетовий, Золотий, Сріблястий ) або "Без кольору"',
