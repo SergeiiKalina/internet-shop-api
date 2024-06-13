@@ -5,6 +5,8 @@ import {
   Matches,
   IsNotEmpty,
   ValidationError,
+  IsOptional,
+  IsBoolean,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
@@ -72,4 +74,8 @@ export class RegistrationDto {
       'Password (6-20 characters, must contain at least 1 special character and 1 uppercase letter)',
   })
   password: string;
+
+  @IsOptional()
+  @IsBoolean()
+  isActivated?: boolean;
 }

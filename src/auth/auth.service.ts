@@ -183,10 +183,16 @@ export class AuthService {
         firstName: user.name.split(' ')[0],
         lastName: user.name.split(' ')[1],
         numberPhone: '+380000000000',
+        isActivated: true,
         password: randomBytes(8).toString('hex'),
       });
-      const { password, isActivated, activationLink, lastLogout, ...restUser } =
-        newUser.user.toObject();
+      const {
+        password,
+        isActivated = true,
+        activationLink,
+        lastLogout,
+        ...restUser
+      } = newUser.user.toObject();
       return { ...newUser, user: { ...restUser } };
     }
 
@@ -216,10 +222,16 @@ export class AuthService {
         firstName: user.firstName,
         lastName: user.lastName,
         numberPhone: '+380000000000',
+        isActivated: true,
         password: randomBytes(8).toString('hex'),
       });
-      const { password, isActivated, activationLink, lastLogout, ...restUser } =
-        newUser.user.toObject();
+      const {
+        password,
+        isActivated = true,
+        activationLink,
+        lastLogout,
+        ...restUser
+      } = newUser.user.toObject();
       return { ...newUser, user: { ...restUser } };
     }
 
