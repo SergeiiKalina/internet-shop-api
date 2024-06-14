@@ -4,7 +4,7 @@ import { Document, Schema as MongooseSchema } from 'mongoose';
 export type ProductDocument = Product & Document;
 
 export interface IParameter {
-  color: object[];
+  color: string[];
   size: string;
   state: string;
   brand: string;
@@ -33,12 +33,12 @@ export class Product {
   comments: string[];
   @Prop({ default: 0 })
   visit: number;
-  @Prop({ required: true, type: Object })
-  category: Record<string, object>;
+  @Prop({ required: true, type: String })
+  category: string;
   @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'User', required: true })
   producer: string;
-  @Prop({ required: true, type: Object })
-  subCategory: Record<string, object>;
+  @Prop({ required: true, type: String })
+  subCategory: string;
   @Prop({ required: true })
   img: string[];
   @Prop({ required: true })
@@ -48,7 +48,7 @@ export class Product {
     required: true,
     type: {
       color: {
-        type: [Object],
+        type: [String],
       },
       size: { type: [String] },
       state: { type: String },
@@ -58,7 +58,7 @@ export class Product {
       isUkraine: { type: Boolean },
     },
     default: {
-      color: [{ name: 'без кольору', code: 'transparent' }],
+      color: [],
       size: ['Без розміру'],
       state: 'Нове',
       brand: 'Без бренду',

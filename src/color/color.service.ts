@@ -23,7 +23,12 @@ export class ColorService {
     return newColor;
   }
 
-  async getAllColor() {
+  async getAllColors() {
     return this.colorModel.find().exec();
+  }
+
+  async getColor(ids: string[]) {
+    const colors = await this.colorModel.find({ _id: { $in: ids } }).exec();
+    return colors;
   }
 }

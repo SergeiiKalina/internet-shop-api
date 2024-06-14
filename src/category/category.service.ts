@@ -126,4 +126,17 @@ export class CategoryService {
     await category.save();
     return subcategory;
   }
+
+  async getCategory(_id: string) {
+    const category = await this.categoryModel.findById({ _id });
+
+    const { mainCategory } = category;
+    return mainCategory;
+  }
+  async getSubCategory(_id: string) {
+    const category = await this.subCategoryModel.findById({ _id });
+
+    const { subCategory } = category;
+    return subCategory;
+  }
 }

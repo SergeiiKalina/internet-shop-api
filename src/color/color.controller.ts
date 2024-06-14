@@ -18,6 +18,6 @@ export class ColorController {
   @ApiResponse({ status: 200, description: 'Return all colors' })
   @Get()
   async getAllColors() {
-    return this.colorService.getAllColor();
+    return this.colorService.getAllColors();
   }
 }

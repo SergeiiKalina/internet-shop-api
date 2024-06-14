@@ -16,6 +16,8 @@ import { Color, ColorSchema } from 'src/color/color.model';
 import { CommentModule } from 'src/comment/comment.module';
 import { UserService } from 'src/user/user.service';
 import { BasketModule } from 'src/basket/basket.module';
+import { CategoryService } from 'src/category/category.service';
+import { ColorService } from 'src/color/color.service';
 
 @Module({
   imports: [
@@ -39,6 +41,8 @@ import { BasketModule } from 'src/basket/basket.module';
     FacebookTokenStrategy,
     JwtAuthGuard,
     UserService,
+    CategoryService,
+    ColorService,
   ],
 })
 export class ProductsModule {}
