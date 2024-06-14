@@ -228,7 +228,7 @@ export class ProductsService {
     }
     const allProductWithThisSubCategory = await this.productModel
       .find({
-        'subCategory.ua': nameSubCategory.subCategory.ua,
+        subCategory: nameSubCategory.id,
       })
       .exec();
     return allProductWithThisSubCategory;
@@ -244,7 +244,7 @@ export class ProductsService {
     }
     const allProductWithThisCategory = await this.productModel
       .find({
-        'category.ua': nameCategory.mainCategory.ua,
+        category: nameCategory.id,
       })
       .exec();
     return allProductWithThisCategory;
