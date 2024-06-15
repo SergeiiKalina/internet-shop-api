@@ -84,8 +84,8 @@ export class ProductsService {
     }
     const product = await this.productModel.create({
       ...restProduct,
-      category: category.mainCategory,
-      subCategory: subCategory.subCategory,
+      category: category.mainCategory.id,
+      subCategory: subCategory.subCategory.id,
       img: arrayLinkImages,
       producer: id,
       parameters: {
