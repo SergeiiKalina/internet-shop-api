@@ -127,13 +127,36 @@ export class CategoryService {
     return subcategory;
   }
 
-  async getCategory(_id: string) {
-    const category = await this.categoryModel.findById({ _id });
+  async findCategoryByName(name: string) {
+    const category = await this.categoryModel.findOne({
+      'mainCategory.ua': name,
+    });
 
+    if (!category) {
+      throw new BadRequestException('Цю категорію не знайшов');
+    }
+
+    return category.id;
+  }
+
+  async findSubcategoryByName(name: string) {
+    const subcategory = await this.subCategoryModel.findOne({
+      'subCategory.ua': name,
+    });
+
+    if (!subcategory) {
+      throw new BadRequestException('Цю підкатегорію не знайшов');
+    }
+
+    return subcategory.id;
+  }
+
+  async getCategoryById(_id: string) {
+    const category = await this.categoryModel.findById({ _id });
     const { mainCategory } = category;
     return mainCategory;
   }
-  async getSubCategory(_id: string) {
+  async getSubCategoryById(_id: string) {
     const category = await this.subCategoryModel.findById({ _id });
 
     const { subCategory } = category;

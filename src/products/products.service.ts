@@ -10,8 +10,6 @@ import { Product } from './product.model';
 import { Model } from 'mongoose';
 import { ImageService } from './images-service/images.service';
 import { UpdateProductDto } from './dto/update-product.dto';
-import { User } from 'src/auth/user.model';
-import { Comment } from 'src/comment/comment.model';
 import { Category } from 'src/category/categoty.model';
 import { SubCategory } from 'src/category/subCategory.model';
 import { Color } from 'src/color/color.model';
@@ -19,7 +17,6 @@ import { CommentService } from 'src/comment/comment.service';
 import { UserService } from 'src/user/user.service';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
-import { Types } from 'mongoose';
 import { CategoryService } from 'src/category/category.service';
 import { ColorService } from 'src/color/color.service';
 
@@ -27,8 +24,6 @@ import { ColorService } from 'src/color/color.service';
 export class ProductsService {
   constructor(
     @InjectModel(Product.name) private productModel: Model<Product>,
-    @InjectModel(User.name) private userModel: Model<User>,
-    @InjectModel(Comment.name) private commentModel: Model<Comment>,
     @InjectModel(Category.name) private categoryModel: Model<Category>,
     @InjectModel(SubCategory.name) private subCategoryModel: Model<SubCategory>,
     @InjectModel(Color.name) private colorModel: Model<Color>,
@@ -49,31 +44,21 @@ export class ProductsService {
     createProductDto: CreateProductDto,
     files: Express.Multer.File[],
     id: string,
-  ) {
-    const arrayLinkImages = [];
-    for (let i = 0; i < files.length; i++) {
-      const image = await this.imageService.uploadPhoto(files[i]);
-      if (!image) {
-        throw new BadRequestException(
-          'Щось сталось не так з завантаженням кртинки',
-        );
-      }
-      arrayLinkImages.push(image.data.url);
-    }
+  ): Promise<Product> {
+    const images = await this.imageService.uploadPhotos(files);
+    const categoryId = await this.categoryService.findCategoryByName(
+      createProductDto.category,
+    );
+    const subCategoryId = await this.categoryService.findSubcategoryByName(
+      createProductDto.subCategory,
+    );
 
-    const category = await this.categoryModel.findOne({
-      'mainCategory.ua': createProductDto.category,
-    });
-
-    const subCategory = await this.subCategoryModel.findOne({
-      'subCategory.ua': createProductDto.subCategory,
-    });
     const { color, size, state, brand, eco, isUkraine, ...restProduct } =
       createProductDto;
 
-    const allColor = await this.colorModel.find({
-      colorName: { $in: color.split(',').map((el) => el.toLocaleLowerCase()) },
-    });
+    const allColor = await this.colorService.getColorsByName(
+      color.split(',').map((el) => el.toLocaleLowerCase()),
+    );
 
     if (!allColor) {
       throw new BadRequestException(
@@ -82,9 +67,9 @@ export class ProductsService {
     }
     const product = await this.productModel.create({
       ...restProduct,
-      category: category.id,
-      subCategory: subCategory.id,
-      img: arrayLinkImages,
+      category: categoryId,
+      subCategory: subCategoryId,
+      img: images,
       producer: id,
       parameters: {
         color: allColor.map((el) => el.id),
@@ -108,40 +93,29 @@ export class ProductsService {
     files: Express.Multer.File[],
     userId: string,
     id: string,
-  ) {
+  ): Promise<Product> {
     let product = await this.productModel.findById(id);
     if (!product) {
-      return new BadRequestException('Цей продукт не знайдено');
+      throw new BadRequestException('Цей продукт не знайдено');
     }
-
     for (const key in updateProduct) {
       product[key] = updateProduct[key];
     }
+    const images = await this.imageService.uploadPhotos(files);
+    const category = await this.categoryModel.findOne({
+      'mainCategory.ua': updateProduct.category,
+    });
 
-    const arrayLinkImages = [];
-    for (let i = 0; i < files.length; i++) {
-      const image = await this.imageService.uploadPhoto(files[i]);
-      if (!image) {
-        throw new BadRequestException(
-          'Щось сталось не так з завантаженням кртинки',
-        );
-      }
-      arrayLinkImages.push(image.data.url);
-    }
-    // const category = await this.categoryModel.findOne({
-    //   'mainCategory.ua': updateProduct.category,
-    // });
+    const subCategory = await this.subCategoryModel.findOne({
+      'subCategory.ua': updateProduct.subCategory,
+    });
 
-    // const subCategory = await this.subCategoryModel.findOne({
-    //   'subCategory.ua': updateProduct.subCategory,
-    // });
+    product.img = images;
+    product.producer = userId;
+    product.category = category.id;
+    product.subCategory = subCategory.id;
 
-    // product.img = arrayLinkImages;
-    // product.producer = userId;
-    // product.category = category.mainCategory;
-    // product.subCategory = subCategory.subCategory;
-
-    // await product.save();
+    await product.save();
 
     return product;
   }
@@ -181,12 +155,16 @@ export class ProductsService {
         product.comments,
       );
 
-      const category = await this.categoryService.getCategory(product.category);
-      const subCategory = await this.categoryService.getSubCategory(
+      const category = await this.categoryService.getCategoryById(
+        product.category,
+      );
+      const subCategory = await this.categoryService.getSubCategoryById(
         product.subCategory,
       );
 
-      const colors = await this.colorService.getColor(product.parameters.color);
+      const colors = await this.colorService.getColorsByIds(
+        product.parameters.color,
+      );
 
       product.visit = product.visit + 1;
 
