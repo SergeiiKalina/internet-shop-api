@@ -87,7 +87,7 @@ export class ProductsService {
       img: arrayLinkImages,
       producer: id,
       parameters: {
-        color: allColor,
+        color: allColor.map((el) => el.id),
         size: size.split(','),
         state,
         brand,
@@ -166,6 +166,7 @@ export class ProductsService {
   async getProduct(id: string) {
     const product = await this.findProductById(id);
     const cacheProduct = await this.cacheManager.get(id);
+
     if (!cacheProduct) {
       if (!product) {
         throw new BadRequestException('Щось пішло не так');
@@ -184,6 +185,7 @@ export class ProductsService {
       const subCategory = await this.categoryService.getSubCategory(
         product.subCategory,
       );
+
       const colors = await this.colorService.getColor(product.parameters.color);
 
       product.visit = product.visit + 1;
@@ -200,14 +202,16 @@ export class ProductsService {
         },
       };
 
-      await this.cacheManager.set(id.toString(), returnProduct, 1000 * 60 * 60);
+      await this.cacheManager.set(id.toString(), returnProduct, 1000 * 60 * 3);
 
       await product.save();
 
       return returnProduct;
+    } else {
+      product.visit = product.visit + 1;
+      await product.save();
+      return cacheProduct;
     }
-
-    return cacheProduct;
   }
   async delete(id: string) {
     const deleteProduct = this.productModel.findByIdAndDelete(id);
@@ -252,29 +256,13 @@ export class ProductsService {
 
   // async changeAllCategory() {
   //   const products = await this.productModel.find().exec();
-  //   const transparentColor = await this.colorModel.findById({
-  //     _id: '664f163a6cf20189596d56aa',
-  //   });
+
   //   for (let i = 0; i < products.length; i++) {
-  //     const arr = [];
-  //     console.log(products[i].parameters.color, i);
-  // for (let j = 0; j < products[i].parameters.color.length; j++) {
-  //   let currentEl = products[i].parameters.color[j];
-
-  //   if (!Types.ObjectId.isValid(currentEl)) {
-  //     const color = await this.colorModel.findOne({
-  //       colorName: currentEl.toLowerCase(),
-  //     });
-
-  //     if (!color) {
-  //       products[i].parameters.color[j] = transparentColor.id;
-  //       await products[i].save();
-  //       continue;
+  //     for (let j = 0; j < products[i].parameters.color.length; j++) {
+  //       if (Types.ObjectId.isValid(products[i].parameters.color[j])) {
+  //         console.log(products[i].title, products[i].parameters.color);
+  //       }
   //     }
-  //     products[i].parameters.color[j] = color.id;
-  //     await products[i].save();
-  //   }
-  // }
   //   }
   // }
 }
