@@ -60,16 +60,14 @@ export class ProductsService {
       }
       arrayLinkImages.push(image.data.url);
     }
-    console.log(createProductDto.category);
+
     const category = await this.categoryModel.findOne({
       'mainCategory.ua': createProductDto.category,
     });
-    console.log(category);
-    console.log(createProductDto.subCategory);
+
     const subCategory = await this.subCategoryModel.findOne({
       'subCategory.ua': createProductDto.subCategory,
     });
-    console.log(subCategory);
     const { color, size, state, brand, eco, isUkraine, ...restProduct } =
       createProductDto;
 
@@ -84,8 +82,8 @@ export class ProductsService {
     }
     const product = await this.productModel.create({
       ...restProduct,
-      category: category.mainCategory.id,
-      subCategory: subCategory.subCategory.id,
+      category: category.id,
+      subCategory: subCategory.id,
       img: arrayLinkImages,
       producer: id,
       parameters: {
