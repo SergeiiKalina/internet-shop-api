@@ -35,16 +35,14 @@ export class Product {
   visit: number;
   @Prop({
     required: true,
-    type: MongooseSchema.Types.ObjectId,
-    ref: 'Category',
+    type: String,
   })
   category: string;
   @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'User', required: true })
   producer: string;
   @Prop({
     required: true,
-    type: MongooseSchema.Types.ObjectId,
-    ref: 'SubCategory',
+    type: String,
   })
   subCategory: string;
   @Prop({ required: true })

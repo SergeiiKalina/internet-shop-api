@@ -229,11 +229,10 @@ export class ProductsService {
     if (!nameSubCategory) {
       throw new NotFoundException('Ця підкатегорія не знайденна');
     }
-    const allProductWithThisSubCategory = await this.productModel
-      .find({
-        subCategory: nameSubCategory.id,
-      })
-      .exec();
+    const allProductWithThisSubCategory = await this.productModel.find({
+      subCategory: nameSubCategory.id,
+    });
+
     return allProductWithThisSubCategory;
   }
 
