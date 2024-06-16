@@ -38,8 +38,10 @@ export class ColorService {
     const colors = await this.colorModel
       .find({ colorName: { $in: names } })
       .exec();
-    if (!colors) {
-      throw new BadRequestException('Names colors not correct');
+    if (colors.length === 0 && names.length > 0) {
+      throw new BadRequestException(
+        'Не знайдено жодного кольору за вказаними іменами',
+      );
     }
     return colors.map((el) => el.id);
   }

@@ -12,7 +12,6 @@ import { ImageService } from './images-service/images.service';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { Category } from 'src/category/categoty.model';
 import { SubCategory } from 'src/category/subCategory.model';
-import { Color } from 'src/color/color.model';
 import { CommentService } from 'src/comment/comment.service';
 import { UserService } from 'src/user/user.service';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
@@ -26,7 +25,6 @@ export class ProductsService {
     @InjectModel(Product.name) private productModel: Model<Product>,
     @InjectModel(Category.name) private categoryModel: Model<Category>,
     @InjectModel(SubCategory.name) private subCategoryModel: Model<SubCategory>,
-    @InjectModel(Color.name) private colorModel: Model<Color>,
     private readonly imageService: ImageService,
     private readonly commentService: CommentService,
     private readonly userService: UserService,
@@ -60,12 +58,6 @@ export class ProductsService {
       color.split(',').map((el) => el.toLocaleLowerCase()),
     );
 
-    if (!allColor) {
-      throw new BadRequestException(
-        'Не коректний колір він повинен бути з списку (Білий, Чорний, Сірий, Бежевий,  Червоний, Жовтий, Помаранчевий, Синій, Блакитний, Рожевий, Зелений, Фіолетовий, Золотий, Сріблястий ) або "Без кольору"',
-      );
-    }
-
     const product = await this.productModel.create({
       ...restProduct,
       category: categoryId,
@@ -94,13 +86,10 @@ export class ProductsService {
     files: Express.Multer.File[],
     userId: string,
     id: string,
-  ): Promise<Product> {
+  ) {
     let product = await this.productModel.findById(id);
     if (!product) {
       throw new BadRequestException('Цей продукт не знайдено');
-    }
-    for (const key in updateProduct) {
-      product[key] = updateProduct[key];
     }
     const images = await this.imageService.uploadPhotos(files);
     const category = await this.categoryModel.findOne({
@@ -111,13 +100,28 @@ export class ProductsService {
       'subCategory.ua': updateProduct.subCategory,
     });
 
+    Object.assign(product, updateProduct);
+
+    const allColor = await this.colorService.getColorsByName(
+      updateProduct.color.split(',').map((el) => el.toLocaleLowerCase()),
+    );
+
     product.img = images;
     product.producer = userId;
     product.category = category.id;
     product.subCategory = subCategory.id;
+    product.parameters = {
+      ...product.parameters,
+      eco: updateProduct.eco,
+      size: updateProduct.size,
+      state: updateProduct.state,
+      brand: updateProduct.brand,
+      isUkraine: updateProduct.isUkraine,
+      color: allColor,
+    };
 
     await product.save();
-
+    await this.cacheManager.del(id.toString());
     return product;
   }
 
@@ -192,6 +196,19 @@ export class ProductsService {
       return cacheProduct;
     }
   }
+
+  async getMinProduct(id: string) {
+    const product = await this.findProductById(id);
+    const { category, producer, describe, comments, ...restProduct } =
+      product.toObject();
+    const { color, size, state, ...restParameters } = restProduct.parameters;
+
+    return {
+      ...restProduct,
+      parameters: restParameters,
+    };
+  }
+
   async delete(id: string) {
     const deleteProduct = this.productModel.findByIdAndDelete(id);
 
@@ -199,7 +216,11 @@ export class ProductsService {
   }
 
   async findProductById(id: string) {
-    return await this.productModel.findById(id);
+    const product = await this.productModel.findById(id);
+    if (!product) {
+      throw new BadRequestException('Цей продукт не знайденно');
+    }
+    return product;
   }
 
   async filterBySubcategory(subCategory: string) {

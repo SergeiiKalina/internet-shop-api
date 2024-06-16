@@ -215,9 +215,9 @@ export class ProductsController {
   })
   @ApiResponse({
     status: 200,
-    description: 'return all product with this category',
+    description: 'return all products with this category',
   })
-  @ApiOperation({ summary: 'return all product with this category' })
+  @ApiOperation({ summary: 'return all products with this category' })
   @ApiResponse({
     status: 404,
     description: 'Not Found. this category not found.',
@@ -225,5 +225,25 @@ export class ProductsController {
   @Get('filterByCategory/:category')
   async filterByCategory(@Param('category') category: string) {
     return this.productsService.filterByCategory(category);
+  }
+
+  @ApiParam({
+    name: 'getMinProduct',
+    required: true,
+    type: String,
+    description: 'product Id',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'return product with this category',
+  })
+  @ApiOperation({ summary: 'return product with this category' })
+  @ApiResponse({
+    status: 404,
+    description: 'this product not found.',
+  })
+  @Get('getMinProduct/:id')
+  async getMinProduct(@Param('id') id: string) {
+    return this.productsService.getMinProduct(id);
   }
 }
