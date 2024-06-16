@@ -227,12 +227,6 @@ export class ProductsController {
     return this.productsService.filterByCategory(category);
   }
 
-  @ApiParam({
-    name: 'getMinProduct',
-    required: true,
-    type: String,
-    description: 'product Id',
-  })
   @ApiResponse({
     status: 200,
     description: 'return product with this category',
