@@ -65,6 +65,8 @@ export class ProductsService {
         'Не коректний колір він повинен бути з списку (Білий, Чорний, Сірий, Бежевий,  Червоний, Жовтий, Помаранчевий, Синій, Блакитний, Рожевий, Зелений, Фіолетовий, Золотий, Сріблястий ) або "Без кольору"',
       );
     }
+
+    console.log(allColor.map((el) => el.id));
     const product = await this.productModel.create({
       ...restProduct,
       category: categoryId,
