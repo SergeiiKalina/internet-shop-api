@@ -44,7 +44,7 @@ export class ProductsService {
     createProductDto: CreateProductDto,
     files: Express.Multer.File[],
     id: string,
-  ): Promise<Product> {
+  ) {
     const images = await this.imageService.uploadPhotos(files);
     const categoryId = await this.categoryService.findCategoryByName(
       createProductDto.category,
@@ -66,7 +66,6 @@ export class ProductsService {
       );
     }
 
-    const colorsId = await allColor.map((el) => el.id);
     const product = await this.productModel.create({
       ...restProduct,
       category: categoryId,
@@ -74,7 +73,7 @@ export class ProductsService {
       img: images,
       producer: id,
       parameters: {
-        color: colorsId,
+        color: allColor,
         size: size.split(','),
         state,
         brand,
