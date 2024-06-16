@@ -66,6 +66,7 @@ export class ProductsService {
       );
     }
 
+    const colorsId = await allColor.map((el) => el.id);
     const product = await this.productModel.create({
       ...restProduct,
       category: categoryId,
@@ -73,7 +74,7 @@ export class ProductsService {
       img: images,
       producer: id,
       parameters: {
-        color: allColor.map((el) => el._id),
+        color: colorsId,
         size: size.split(','),
         state,
         brand,
