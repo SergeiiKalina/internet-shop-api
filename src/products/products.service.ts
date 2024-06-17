@@ -18,6 +18,7 @@ import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
 import { CategoryService } from 'src/category/category.service';
 import { ColorService } from 'src/color/color.service';
+import { Size } from 'src/size/size.model';
 
 @Injectable()
 export class ProductsService {
@@ -25,6 +26,7 @@ export class ProductsService {
     @InjectModel(Product.name) private productModel: Model<Product>,
     @InjectModel(Category.name) private categoryModel: Model<Category>,
     @InjectModel(SubCategory.name) private subCategoryModel: Model<SubCategory>,
+    @InjectModel(Size.name) private sizeModel: Model<Size>,
     private readonly imageService: ImageService,
     private readonly commentService: CommentService,
     private readonly userService: UserService,
@@ -143,10 +145,10 @@ export class ProductsService {
   }
 
   async getProduct(id: string) {
-    const product = await this.findProductById(id);
     const cacheProduct = await this.cacheManager.get(id);
 
     if (!cacheProduct) {
+      const product = await this.findProductById(id);
       if (!product) {
         throw new BadRequestException('Щось пішло не так');
       }
@@ -171,8 +173,6 @@ export class ProductsService {
         product.parameters.color,
       );
 
-      product.visit = product.visit + 1;
-
       const returnProduct = {
         ...product.toObject(),
         category,
@@ -186,15 +186,13 @@ export class ProductsService {
       };
 
       await this.cacheManager.set(id.toString(), returnProduct, 1000 * 60 * 3);
-
-      await product.save();
+      await this.productModel.findByIdAndUpdate(id, { $inc: { visit: 1 } });
 
       return returnProduct;
-    } else {
-      product.visit = product.visit + 1;
-      await product.save();
-      return cacheProduct;
     }
+    await this.productModel.findByIdAndUpdate(id, { $inc: { visit: 1 } });
+
+    return cacheProduct;
   }
 
   async getMinProduct(id: string) {
@@ -224,6 +222,7 @@ export class ProductsService {
     if (!product) {
       throw new BadRequestException('Цей продукт не знайденно');
     }
+
     return product;
   }
 
@@ -239,7 +238,22 @@ export class ProductsService {
       subCategory: nameSubCategory.id,
     });
 
-    return allProductWithThisSubCategory;
+    const filters = {};
+    if (nameSubCategory.color) {
+      const colors = await this.colorService.getAllColors();
+
+      filters['colors'] = colors;
+    }
+    if (nameSubCategory.sizeChart && nameSubCategory.sizeChart.length > 0) {
+      const sizeChart = await this.sizeModel.findById(
+        nameSubCategory.sizeChart[0],
+      );
+      const { subCategory, ...restSubcategory } = sizeChart.toObject();
+
+      filters['sizeChart'] = restSubcategory;
+    }
+
+    return { products: allProductWithThisSubCategory, filters };
   }
 
   async filterByCategory(category: string) {
@@ -259,14 +273,7 @@ export class ProductsService {
   }
 
   // async changeAllCategory() {
-  //   const products = await this.productModel.find().exec();
-
-  //   for (let i = 0; i < products.length; i++) {
-  //     for (let j = 0; j < products[i].parameters.color.length; j++) {
-  //       if (Types.ObjectId.isValid(products[i].parameters.color[j])) {
-  //         console.log(products[i].title, products[i].parameters.color);
-  //       }
-  //     }
-  //   }
+  //   await this.cacheManager.reset();
+  //   return;
   // }
 }

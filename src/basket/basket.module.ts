@@ -16,6 +16,7 @@ import { UserModule } from 'src/user/user.module';
 import { UserService } from 'src/user/user.service';
 import { CategoryService } from 'src/category/category.service';
 import { ColorService } from 'src/color/color.service';
+import { Size, SizeSchema } from 'src/size/size.model';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { ColorService } from 'src/color/color.service';
       { name: Category.name, schema: CategorySchema },
       { name: SubCategory.name, schema: SubcategorySchema },
       { name: Color.name, schema: ColorSchema },
+      { name: Size.name, schema: SizeSchema },
     ]),
     CommentModule,
   ],

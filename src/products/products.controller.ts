@@ -37,7 +37,7 @@ export class ProductsController {
 
   // @Get('change')
   // async changeAllCategory() {
-  //   await this.productsService.changeAllCategory();
+  //   return await this.productsService.changeAllCategory();
   // }
 
   @Get('search')
@@ -195,9 +195,11 @@ export class ProductsController {
   })
   @ApiResponse({
     status: 200,
-    description: 'return all product with this subcategory',
+    description: 'return all product with this subcategory and filters',
   })
-  @ApiOperation({ summary: 'return all product with this subcategory' })
+  @ApiOperation({
+    summary: 'return all product with this subcategory and filters',
+  })
   @ApiResponse({
     status: 404,
     description: 'Not Found. this subcategory not found.',
