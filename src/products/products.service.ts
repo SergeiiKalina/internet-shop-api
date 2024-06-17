@@ -201,11 +201,15 @@ export class ProductsService {
     const product = await this.findProductById(id);
     const { category, producer, describe, comments, ...restProduct } =
       product.toObject();
+    const subCategory = await this.categoryService.getSubCategoryById(
+      product.subCategory,
+    );
     const { color, size, state, ...restParameters } = restProduct.parameters;
 
     return {
       ...restProduct,
       parameters: restParameters,
+      subCategory,
     };
   }
 
