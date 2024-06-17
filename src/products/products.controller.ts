@@ -29,6 +29,7 @@ import {
 import { UpdateProductDto } from './dto/update-product.dto';
 import { SharpPipe } from './pipes/sharpForFewFile.pipe';
 import { Product } from './product.model';
+import { Max, Min } from 'class-validator';
 
 @ApiTags('product')
 @Controller('products')
@@ -66,6 +67,7 @@ export class ProductsController {
     status: 200,
     description: 'Returns all products with pagination info',
   })
+
   @Get()
   async getAllProducts(
     @Query('page') page: number = 1,
@@ -73,23 +75,13 @@ export class ProductsController {
   ): Promise<{ products: Product[]; totalPages: number; totalItems: number }> {
     page = Number(page);
     limit = Number(limit);
+    const { products, pagination } = await this.productsService.getAllProducts(page, limit);
 
-    // Переконайтеся, що page і limit мають коректні значення
-    if (page < 1) {
-      page = 1;
-    }
-    if (limit > 20) {
-      // наприклад, обмеження в 20 продуктів
-      limit = 20;
-    }
-
-    const { products, totalItems } = await this.productsService.getAllProducts(
-      page,
-      limit,
-    );
-    const totalPages = Math.ceil(totalItems / limit);
-
-    return { products, totalPages, totalItems };
+    return {
+      products,
+      totalPages: pagination.totalPages,
+      totalItems: pagination.totalItems,
+    };
   }
 
   @ApiOperation({
@@ -226,4 +218,5 @@ export class ProductsController {
   async filterByCategory(@Param('category') category: string) {
     return this.productsService.filterByCategory(category);
   }
+
 }

@@ -148,25 +148,34 @@ export class ProductsService {
     return product;
   }
 
-  async getAllProducts(
-    page: number,
-    limit: number = 20,
-  ): Promise<{ products: Product[]; totalItems: number }> {
-    const startIndex = (page - 1) * limit;
+async getAllProducts(
+  page: number,
+  limit: number = 20,
+): Promise<{ products: Product[]; pagination: { totalItems: number; totalPages: number; currentPage: number; pageSize: number } }> {
+  const startIndex = (page - 1) * limit;
 
-    const products = await this.productModel
-      .find()
-      .skip(startIndex)
-      .limit(limit)
-      .exec();
+  const products = await this.productModel
+    .find()
+    .skip(startIndex)
+    .limit(limit)
+    .exec();
 
-    const totalItems = await this.productModel.countDocuments().exec();
+  const totalItems = await this.productModel.countDocuments().exec();
+  const totalPages = Math.ceil(totalItems / limit);
 
-    return { products, totalItems };
-  }
+  const pagination = {
+    totalItems,
+    totalPages,
+    currentPage: page,
+    pageSize: limit,
+  };
 
+  return { products, pagination };
+}
+
+  
   async getProduct(id: string) {
-    const product = await this.findProductById(id);
+    const product = await this.findProductById(id); 
     const cacheProduct = await this.cacheManager.get(id);
     if (!cacheProduct) {
       if (!product) {
