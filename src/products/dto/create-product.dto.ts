@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
 import {
   IsArray,
   IsBoolean,
@@ -64,7 +65,7 @@ export class CreateProductDto {
   @IsString()
   title: string;
 
-  @ApiProperty({ description: 'Price of the product' })
+  @ApiProperty({ type: Number, description: 'Price of the product' })
   @IsNumber()
   price: number;
 
@@ -138,7 +139,7 @@ export class CreateProductDto {
   @ApiProperty({ type: String, description: 'Description of the product' })
   @IsString()
   describe: string;
-
+  @ApiProperty({ type: Boolean, description: 'Made in Ukraine or not' })
   @IsBoolean()
   isUkraine: boolean;
 

@@ -19,6 +19,7 @@ import { FavoriteModule } from './favorite/favorite.module';
 import { CategoryModule } from './category/category.module';
 import { ColorModule } from './color/color.module';
 import { CacheModule } from '@nestjs/cache-manager';
+import { SizeModule } from './size/size.module';
 
 @Module({
   imports: [
@@ -68,6 +69,7 @@ import { CacheModule } from '@nestjs/cache-manager';
     FavoriteModule,
     CategoryModule,
     ColorModule,
+    SizeModule,
   ],
   controllers: [AppController],
   providers: [AppService],

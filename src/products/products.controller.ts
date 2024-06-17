@@ -38,7 +38,7 @@ export class ProductsController {
 
   // @Get('change')
   // async changeAllCategory() {
-  //   await this.productsService.changeAllCategory();
+  //   return await this.productsService.changeAllCategory();
   // }
 
   @Get('search')
@@ -187,9 +187,11 @@ export class ProductsController {
   })
   @ApiResponse({
     status: 200,
-    description: 'return all product with this subcategory',
+    description: 'return all product with this subcategory and filters',
   })
-  @ApiOperation({ summary: 'return all product with this subcategory' })
+  @ApiOperation({
+    summary: 'return all product with this subcategory and filters',
+  })
   @ApiResponse({
     status: 404,
     description: 'Not Found. this subcategory not found.',
@@ -207,9 +209,9 @@ export class ProductsController {
   })
   @ApiResponse({
     status: 200,
-    description: 'return all product with this category',
+    description: 'return all products with this category',
   })
-  @ApiOperation({ summary: 'return all product with this category' })
+  @ApiOperation({ summary: 'return all products with this category' })
   @ApiResponse({
     status: 404,
     description: 'Not Found. this category not found.',
@@ -219,4 +221,17 @@ export class ProductsController {
     return this.productsService.filterByCategory(category);
   }
 
+  @ApiResponse({
+    status: 200,
+    description: 'return product with this category',
+  })
+  @ApiOperation({ summary: 'return product with this category' })
+  @ApiResponse({
+    status: 404,
+    description: 'this product not found.',
+  })
+  @Get('getMinProduct/:id')
+  async getMinProduct(@Param('id') id: string) {
+    return this.productsService.getMinProduct(id);
+  }
 }

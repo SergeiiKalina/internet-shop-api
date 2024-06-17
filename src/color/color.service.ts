@@ -27,8 +27,22 @@ export class ColorService {
     return this.colorModel.find().exec();
   }
 
-  async getColor(ids: string[]) {
+  async getColorsByIds(ids: string[]) {
     const colors = await this.colorModel.find({ _id: { $in: ids } }).exec();
+    if (!colors) {
+      throw new BadRequestException('Ids colors not correct');
+    }
     return colors;
+  }
+  async getColorsByName(names: string[]) {
+    const colors = await this.colorModel
+      .find({ colorName: { $in: names } })
+      .exec();
+    if (colors.length === 0 && names.length > 0) {
+      throw new BadRequestException(
+        'Не знайдено жодного кольору за вказаними іменами',
+      );
+    }
+    return colors.map((el) => el.id);
   }
 }

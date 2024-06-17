@@ -10,28 +10,23 @@ import { Product } from './product.model';
 import { Model } from 'mongoose';
 import { ImageService } from './images-service/images.service';
 import { UpdateProductDto } from './dto/update-product.dto';
-import { User } from 'src/auth/user.model';
-import { Comment } from 'src/comment/comment.model';
 import { Category } from 'src/category/categoty.model';
 import { SubCategory } from 'src/category/subCategory.model';
-import { Color } from 'src/color/color.model';
 import { CommentService } from 'src/comment/comment.service';
 import { UserService } from 'src/user/user.service';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
-import { Types } from 'mongoose';
 import { CategoryService } from 'src/category/category.service';
 import { ColorService } from 'src/color/color.service';
+import { Size } from 'src/size/size.model';
 
 @Injectable()
 export class ProductsService {
   constructor(
     @InjectModel(Product.name) private productModel: Model<Product>,
-    @InjectModel(User.name) private userModel: Model<User>,
-    @InjectModel(Comment.name) private commentModel: Model<Comment>,
     @InjectModel(Category.name) private categoryModel: Model<Category>,
     @InjectModel(SubCategory.name) private subCategoryModel: Model<SubCategory>,
-    @InjectModel(Color.name) private colorModel: Model<Color>,
+    @InjectModel(Size.name) private sizeModel: Model<Size>,
     private readonly imageService: ImageService,
     private readonly commentService: CommentService,
     private readonly userService: UserService,
@@ -50,43 +45,26 @@ export class ProductsService {
     files: Express.Multer.File[],
     id: string,
   ) {
-    const arrayLinkImages = [];
-    for (let i = 0; i < files.length; i++) {
-      const image = await this.imageService.uploadPhoto(files[i]);
-      if (!image) {
-        throw new BadRequestException(
-          'Щось сталось не так з завантаженням кртинки',
-        );
-      }
-      arrayLinkImages.push(image.data.url);
-    }
-    console.log(createProductDto.category);
-    const category = await this.categoryModel.findOne({
-      'mainCategory.ua': createProductDto.category,
-    });
-    console.log(category);
-    console.log(createProductDto.subCategory);
-    const subCategory = await this.subCategoryModel.findOne({
-      'subCategory.ua': createProductDto.subCategory,
-    });
-    console.log(subCategory);
+    const images = await this.imageService.uploadPhotos(files);
+    const categoryId = await this.categoryService.findCategoryByName(
+      createProductDto.category,
+    );
+    const subCategoryId = await this.categoryService.findSubcategoryByName(
+      createProductDto.subCategory,
+    );
+
     const { color, size, state, brand, eco, isUkraine, ...restProduct } =
       createProductDto;
 
-    const allColor = await this.colorModel.find({
-      colorName: { $in: color.split(',').map((el) => el.toLocaleLowerCase()) },
-    });
+    const allColor = await this.colorService.getColorsByName(
+      color.split(',').map((el) => el.toLocaleLowerCase()),
+    );
 
-    if (!allColor) {
-      throw new BadRequestException(
-        'Не коректний колір він повинен бути з списку (Білий, Чорний, Сірий, Бежевий,  Червоний, Жовтий, Помаранчевий, Синій, Блакитний, Рожевий, Зелений, Фіолетовий, Золотий, Сріблястий ) або "Без кольору"',
-      );
-    }
     const product = await this.productModel.create({
       ...restProduct,
-      category: category.mainCategory,
-      subCategory: subCategory.subCategory,
-      img: arrayLinkImages,
+      category: categoryId,
+      subCategory: subCategoryId,
+      img: images,
       producer: id,
       parameters: {
         color: allColor,
@@ -113,38 +91,39 @@ export class ProductsService {
   ) {
     let product = await this.productModel.findById(id);
     if (!product) {
-      return new BadRequestException('Цей продукт не знайдено');
+      throw new BadRequestException('Цей продукт не знайдено');
     }
+    const images = await this.imageService.uploadPhotos(files);
+    const category = await this.categoryModel.findOne({
+      'mainCategory.ua': updateProduct.category,
+    });
 
-    for (const key in updateProduct) {
-      product[key] = updateProduct[key];
-    }
+    const subCategory = await this.subCategoryModel.findOne({
+      'subCategory.ua': updateProduct.subCategory,
+    });
 
-    const arrayLinkImages = [];
-    for (let i = 0; i < files.length; i++) {
-      const image = await this.imageService.uploadPhoto(files[i]);
-      if (!image) {
-        throw new BadRequestException(
-          'Щось сталось не так з завантаженням кртинки',
-        );
-      }
-      arrayLinkImages.push(image.data.url);
-    }
-    // const category = await this.categoryModel.findOne({
-    //   'mainCategory.ua': updateProduct.category,
-    // });
+    Object.assign(product, updateProduct);
 
-    // const subCategory = await this.subCategoryModel.findOne({
-    //   'subCategory.ua': updateProduct.subCategory,
-    // });
+    const allColor = await this.colorService.getColorsByName(
+      updateProduct.color.split(',').map((el) => el.toLocaleLowerCase()),
+    );
 
-    // product.img = arrayLinkImages;
-    // product.producer = userId;
-    // product.category = category.mainCategory;
-    // product.subCategory = subCategory.subCategory;
+    product.img = images;
+    product.producer = userId;
+    product.category = category.id;
+    product.subCategory = subCategory.id;
+    product.parameters = {
+      ...product.parameters,
+      eco: updateProduct.eco,
+      size: updateProduct.size,
+      state: updateProduct.state,
+      brand: updateProduct.brand,
+      isUkraine: updateProduct.isUkraine,
+      color: allColor,
+    };
 
-    // await product.save();
-
+    await product.save();
+    await this.cacheManager.del(id.toString());
     return product;
   }
 
@@ -175,9 +154,10 @@ async getAllProducts(
 
   
   async getProduct(id: string) {
-    const product = await this.findProductById(id); 
     const cacheProduct = await this.cacheManager.get(id);
+
     if (!cacheProduct) {
+      const product = await this.findProductById(id);
       if (!product) {
         throw new BadRequestException('Щось пішло не так');
       }
@@ -191,13 +171,16 @@ async getAllProducts(
         product.comments,
       );
 
-      const category = await this.categoryService.getCategory(product.category);
-      const subCategory = await this.categoryService.getSubCategory(
+      const category = await this.categoryService.getCategoryById(
+        product.category,
+      );
+      const subCategory = await this.categoryService.getSubCategoryById(
         product.subCategory,
       );
-      const colors = await this.colorService.getColor(product.parameters.color);
 
-      product.visit = product.visit + 1;
+      const colors = await this.colorService.getColorsByIds(
+        product.parameters.color,
+      );
 
       const returnProduct = {
         ...product.toObject(),
@@ -211,15 +194,32 @@ async getAllProducts(
         },
       };
 
-      await this.cacheManager.set(id.toString(), returnProduct, 1000 * 60 * 60);
-
-      await product.save();
+      await this.cacheManager.set(id.toString(), returnProduct, 1000 * 60 * 3);
+      await this.productModel.findByIdAndUpdate(id, { $inc: { visit: 1 } });
 
       return returnProduct;
     }
+    await this.productModel.findByIdAndUpdate(id, { $inc: { visit: 1 } });
 
     return cacheProduct;
   }
+
+  async getMinProduct(id: string) {
+    const product = await this.findProductById(id);
+    const { category, producer, describe, comments, ...restProduct } =
+      product.toObject();
+    const subCategory = await this.categoryService.getSubCategoryById(
+      product.subCategory,
+    );
+    const { color, size, state, ...restParameters } = restProduct.parameters;
+
+    return {
+      ...restProduct,
+      parameters: restParameters,
+      subCategory,
+    };
+  }
+
   async delete(id: string) {
     const deleteProduct = this.productModel.findByIdAndDelete(id);
 
@@ -227,7 +227,12 @@ async getAllProducts(
   }
 
   async findProductById(id: string) {
-    return await this.productModel.findById(id);
+    const product = await this.productModel.findById(id);
+    if (!product) {
+      throw new BadRequestException('Цей продукт не знайденно');
+    }
+
+    return product;
   }
 
   async filterBySubcategory(subCategory: string) {
@@ -238,12 +243,26 @@ async getAllProducts(
     if (!nameSubCategory) {
       throw new NotFoundException('Ця підкатегорія не знайденна');
     }
-    const allProductWithThisSubCategory = await this.productModel
-      .find({
-        subCategory: nameSubCategory.id,
-      })
-      .exec();
-    return allProductWithThisSubCategory;
+    const allProductWithThisSubCategory = await this.productModel.find({
+      subCategory: nameSubCategory.id,
+    });
+
+    const filters = {};
+    if (nameSubCategory.color) {
+      const colors = await this.colorService.getAllColors();
+
+      filters['colors'] = colors;
+    }
+    if (nameSubCategory.sizeChart && nameSubCategory.sizeChart.length > 0) {
+      const sizeChart = await this.sizeModel.findById(
+        nameSubCategory.sizeChart[0],
+      );
+      const { subCategory, ...restSubcategory } = sizeChart.toObject();
+
+      filters['sizeChart'] = restSubcategory;
+    }
+
+    return { products: allProductWithThisSubCategory, filters };
   }
 
   async filterByCategory(category: string) {
@@ -263,30 +282,7 @@ async getAllProducts(
   }
 
   // async changeAllCategory() {
-  //   const products = await this.productModel.find().exec();
-  //   const transparentColor = await this.colorModel.findById({
-  //     _id: '664f163a6cf20189596d56aa',
-  //   });
-  //   for (let i = 0; i < products.length; i++) {
-  //     const arr = [];
-  //     console.log(products[i].parameters.color, i);
-  // for (let j = 0; j < products[i].parameters.color.length; j++) {
-  //   let currentEl = products[i].parameters.color[j];
-
-  //   if (!Types.ObjectId.isValid(currentEl)) {
-  //     const color = await this.colorModel.findOne({
-  //       colorName: currentEl.toLowerCase(),
-  //     });
-
-  //     if (!color) {
-  //       products[i].parameters.color[j] = transparentColor.id;
-  //       await products[i].save();
-  //       continue;
-  //     }
-  //     products[i].parameters.color[j] = color.id;
-  //     await products[i].save();
-  //   }
-  // }
-  //   }
+  //   await this.cacheManager.reset();
+  //   return;
   // }
 }

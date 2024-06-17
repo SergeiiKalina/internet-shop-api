@@ -12,6 +12,10 @@ export class SubCategory {
   subCategory: Record<string, object>;
   @Prop({ required: true, type: String })
   img: string;
+  @Prop({ required: false, type: [MongooseSchema.Types.ObjectId] })
+  sizeChart: string;
+  @Prop({ required: false, type: Boolean, default: false })
+  color: boolean;
 }
 
 export const SubcategorySchema = SchemaFactory.createForClass(SubCategory);
