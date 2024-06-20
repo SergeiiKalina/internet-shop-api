@@ -235,51 +235,73 @@ async getAllProducts(
     return product;
   }
 
-  async filterBySubcategory(subCategory: string) {
+  async filterBySubcategory(subCategory: string, size: string, price: number, sex: string, state: string, color: string[]) {
     const nameSubCategory = await this.subCategoryModel.findOne({
-      'subCategory.en': subCategory,
+        'subCategory.en': subCategory,
     });
 
     if (!nameSubCategory) {
-      throw new NotFoundException('Ця підкатегорія не знайденна');
+        throw new NotFoundException('Ця підкатегорія не знайденна');
     }
+
     const allProductWithThisSubCategory = await this.productModel.find({
-      subCategory: nameSubCategory.id,
+        subCategory: nameSubCategory.id,
+        
     });
 
-    const filters = {};
+    
+    
+    if (allProductWithThisSubCategory.length === 0) {
+      return { products: [], filters: {} };
+    }
+
+    // Ініціалізуємо початкові значення для фільтрів
+    const firstProduct = allProductWithThisSubCategory[0];
+    const filters = {
+      price: { max: firstProduct.price, min: firstProduct.price },
+      state: [firstProduct.parameters.state],
+      size:  [firstProduct.parameters.size],
+      color: [firstProduct.parameters.color],
+      sex:   [firstProduct.parameters.sex]
+    };
+
+    // Додаємо фільтри для кольорів, якщо вони є
     if (nameSubCategory.color) {
-      const colors = await this.colorService.getAllColors();
-
-      filters['colors'] = colors;
+        const colors = await this.colorService.getAllColors();
+        filters['colors'] = colors;
     }
+
+    // Додаємо фільтри для таблиці розмірів, якщо вона є
     if (nameSubCategory.sizeChart && nameSubCategory.sizeChart.length > 0) {
-      const sizeChart = await this.sizeModel.findById(
-        nameSubCategory.sizeChart[0],
-      );
-      const { subCategory, ...restSubcategory } = sizeChart.toObject();
-
-      filters['sizeChart'] = restSubcategory;
+        const sizeChartId = nameSubCategory.sizeChart[0];
+        const sizeChart = await this.sizeModel.findById(sizeChartId);
+        const { subCategory, ...restSubcategory } = sizeChart.toObject();
+        filters['sizeChart'] = restSubcategory;
     }
 
+
+    // Повертаємо об'єкт з продуктами та фільтрами
     return { products: allProductWithThisSubCategory, filters };
+}
+
+async filterByCategory(category: string) {
+  const nameCategory = await this.categoryModel.findOne({
+      'mainCategory.en': category,
+  });
+
+  if (!nameCategory) {
+      throw new NotFoundException('Ця категорія не знайдена');
   }
 
-  async filterByCategory(category: string) {
-    const nameCategory = await this.categoryModel.findOne({
-      'mainCategory.en': category,
-    });
-
-    if (!nameCategory) {
-      throw new NotFoundException('Ця категорія не знайдена');
-    }
-    const allProductWithThisCategory = await this.productModel
+  const allProductWithThisCategory = await this.productModel
       .find({
-        category: nameCategory.id,
+          category: nameCategory.id,
       })
       .exec();
-    return allProductWithThisCategory;
-  }
+
+  // Повертаємо тільки список продуктів, бо фільтри специфічні для підкатегорій
+  return allProductWithThisCategory;
+}
 
   // async changeAllCategory() {
   //   await this.cacheManager.reset();

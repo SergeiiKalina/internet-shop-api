@@ -197,8 +197,8 @@ export class ProductsController {
     description: 'Not Found. this subcategory not found.',
   })
   @Get('filterBySubcategory/:subCategory')
-  async filterBySubcategory(@Param('subCategory') subCategory: string) {
-    return this.productsService.filterBySubcategory(subCategory);
+  async filterBySubcategory(@Param('subCategory') subCategory: string, size: string, price: number, sex: string, state: string, color: string[]) {
+    return this.productsService.filterBySubcategory(subCategory,size ,price,sex,state,color);
   }
 
   @ApiParam({
