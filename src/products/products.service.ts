@@ -257,14 +257,15 @@ async getAllProducts(
 
     // Ініціалізуємо початкові значення для фільтрів
     const firstProduct = allProductWithThisSubCategory[0];
+  
     const filters = {
       price: { max: firstProduct.price, min: firstProduct.price },
       state: [firstProduct.parameters.state],
-      size:  [firstProduct.parameters.size],
-      color: [firstProduct.parameters.color],
-      sex:   [firstProduct.parameters.sex]
+      size: [...firstProduct.parameters.size],
+      color: [...firstProduct.parameters.color],
+      sex:   [firstProduct.parameters.sex || [] ]
     };
-
+   
     // Додаємо фільтри для кольорів, якщо вони є
     if (nameSubCategory.color) {
         const colors = await this.colorService.getAllColors();
