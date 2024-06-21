@@ -19,6 +19,8 @@ import { Cache } from 'cache-manager';
 import { CategoryService } from 'src/category/category.service';
 import { ColorService } from 'src/color/color.service';
 import { Size } from 'src/size/size.model';
+import { TransformImageService } from './images-service/transform-image.sevice';
+import axios from 'axios';
 
 @Injectable()
 export class ProductsService {
@@ -33,6 +35,7 @@ export class ProductsService {
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
     private readonly categoryService: CategoryService,
     private readonly colorService: ColorService,
+    private readonly transformImageService: TransformImageService,
   ) {}
 
   async searchProducts(title: string): Promise<Product[]> {
@@ -46,6 +49,9 @@ export class ProductsService {
     id: string,
   ) {
     const images = await this.imageService.uploadPhotos(files);
+    const circle = await this.transformImageService.transform(files[0]);
+
+    const minImage = await this.imageService.uploadPhoto(circle);
     const categoryId = await this.categoryService.findCategoryByName(
       createProductDto.category,
     );
@@ -66,6 +72,7 @@ export class ProductsService {
       subCategory: subCategoryId,
       img: images,
       producer: id,
+      minImage,
       parameters: {
         color: allColor,
         size: size.split(','),
@@ -135,6 +142,9 @@ export class ProductsService {
 
     const products = await this.productModel
       .find()
+      .populate('category', '-subCategory -img ')
+      .populate('subCategory', '-sizeChart -color -mainCategory -img ')
+      .populate('parameters.color')
       .skip(startIndex)
       .limit(limit)
       .exec();
@@ -272,8 +282,33 @@ export class ProductsService {
     return allProductWithThisCategory;
   }
 
-  // async changeAllCategory() {
-  //   await this.cacheManager.reset();
-  //   return;
+  // async changeAllCategory(file: Express.Multer.File) {
+  //   const products = await this.productModel.find().exec();
+  //   for (let i = 0; i < products.length; i++) {
+  //     const responce = await axios.get(products[i].img[0], {
+  //       responseType: 'arraybuffer',
+  //     });
+  //     const circle = await this.transformImageService.transform(responce.data);
+  //     const formData = new FormData();
+  //     formData.append(
+  //       'image',
+  //       new Blob([circle.buffer], { type: 'image/png' }),
+  //       Date.now() + '-' + Math.round(Math.random() * 1e9),
+  //     );
+  //     const { data } = await axios.post(
+  //       'https://api.imgbb.com/1/upload',
+  //       formData,
+  //       {
+  //         params: {
+  //           key: '401f89dfe6ab448e7a936805f8cc22af',
+  //         },
+  //         headers: {
+  //           'Content-Type': 'multipart/form-data',
+  //         },
+  //       },
+  //     );
+  //     products[i].minImage = data.data.url;
+  //     await products[i].save();
+  //   }
   // }
 }

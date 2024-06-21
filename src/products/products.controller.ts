@@ -11,10 +11,11 @@ import {
   Query,
   Patch,
   UploadedFiles,
+  UploadedFile,
 } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
-import { FilesInterceptor } from '@nestjs/platform-express';
+import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import {
   ApiBearerAuth,
@@ -35,9 +36,13 @@ import { Product } from './product.model';
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
-  // @Get('change')
-  // async changeAllCategory() {
-  //   return await this.productsService.changeAllCategory();
+  // @UseInterceptors(FileInterceptor('file'))
+  // @Post('change')
+  // async changeAllCategory(
+  //   @UploadedFile()
+  //   file: Express.Multer.File,
+  // ) {
+  //   return await this.productsService.changeAllCategory(file);
   // }
 
   @Get('search')

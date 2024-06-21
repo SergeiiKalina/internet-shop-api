@@ -20,6 +20,7 @@ import { CategoryModule } from './category/category.module';
 import { ColorModule } from './color/color.module';
 import { CacheModule } from '@nestjs/cache-manager';
 import { SizeModule } from './size/size.module';
+import { PurchaseModule } from './purchase/purchase.module';
 
 @Module({
   imports: [
@@ -70,6 +71,7 @@ import { SizeModule } from './size/size.module';
     CategoryModule,
     ColorModule,
     SizeModule,
+    PurchaseModule,
   ],
   controllers: [AppController],
   providers: [AppService],

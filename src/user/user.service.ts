@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   HttpException,
   HttpStatus,
   Injectable,
@@ -18,9 +19,14 @@ export class UserService {
   async getAllUsers() {
     return this.userModel.find().exec();
   }
-  async findOne(id: string): Promise<User | null> {
-    return this.userModel.findById(id).exec();
+  async findOne(id: string): Promise<User> {
+    const user = await this.userModel.findById(id).exec();
+    if (!user) {
+      throw new BadRequestException('Такого користувача не знайденно');
+    }
+    return user;
   }
+
   async findByEmail(email: string) {
     return await this.userModel.findOne({ email }).exec();
   }

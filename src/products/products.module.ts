@@ -19,6 +19,7 @@ import { BasketModule } from 'src/basket/basket.module';
 import { CategoryService } from 'src/category/category.service';
 import { ColorService } from 'src/color/color.service';
 import { Size, SizeSchema } from 'src/size/size.model';
+import { TransformImageService } from './images-service/transform-image.sevice';
 
 @Module({
   imports: [
@@ -45,6 +46,7 @@ import { Size, SizeSchema } from 'src/size/size.model';
     UserService,
     CategoryService,
     ColorService,
+    TransformImageService,
   ],
 })
 export class ProductsModule {}

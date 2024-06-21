@@ -35,14 +35,16 @@ export class Product {
   visit: number;
   @Prop({
     required: true,
-    type: String,
+    type: MongooseSchema.Types.ObjectId,
+    ref: 'Category',
   })
   category: string;
   @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'User', required: true })
   producer: string;
   @Prop({
     required: true,
-    type: String,
+    type: MongooseSchema.Types.ObjectId,
+    ref: 'SubCategory',
   })
   subCategory: string;
   @Prop({ required: true })
@@ -54,7 +56,8 @@ export class Product {
     required: true,
     type: {
       color: {
-        type: [String],
+        type: [MongooseSchema.Types.ObjectId],
+        ref: 'Color',
       },
       size: { type: [String] },
       state: { type: String },
@@ -74,6 +77,8 @@ export class Product {
     },
   })
   parameters: IParameter;
+  @Prop({ type: String })
+  minImage: string;
 }
 
 export const ProductSchema = SchemaFactory.createForClass(Product);

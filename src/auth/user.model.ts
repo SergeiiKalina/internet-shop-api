@@ -11,6 +11,11 @@ export class IBasketProduct {
     this.quantity = quantity;
   }
 }
+export interface IPurchasedGoods {
+  product: string;
+  status?: string;
+  roundImage: string;
+}
 
 @Schema()
 export class User {
@@ -46,6 +51,20 @@ export class User {
   basket: IBasketProduct[];
   @Prop({ default: [], type: [MongooseSchema.Types.ObjectId], ref: 'Product' })
   favorites: string[];
+  @Prop({
+    default: [],
+    type: [
+      {
+        product: { type: MongooseSchema.Types.ObjectId },
+        status: { type: String, default: 'Очікується відправка' },
+        roundImage: { type: String },
+      },
+    ],
+    ref: 'Product',
+  })
+  purchasedGoods: IPurchasedGoods[];
+  @Prop({ default: [], type: [MongooseSchema.Types.ObjectId], ref: 'Product' })
+  soldGoods: string[];
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
