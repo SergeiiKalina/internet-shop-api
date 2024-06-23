@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, Schema as MongooseSchema } from 'mongoose';
+import { Document, Schema as MongooseSchema, Types } from 'mongoose';
 
 export type ProductDocument = Product & Document;
 
@@ -35,18 +35,18 @@ export class Product {
   visit: number;
   @Prop({
     required: true,
-    type: MongooseSchema.Types.ObjectId,
+    type: String,
     ref: 'Category',
   })
-  category: string;
+  category: Types.ObjectId;
   @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'User', required: true })
   producer: string;
   @Prop({
     required: true,
-    type: MongooseSchema.Types.ObjectId,
+    type: String,
     ref: 'SubCategory',
   })
-  subCategory: string;
+  subCategory: Types.ObjectId;
   @Prop({ required: true })
   img: string[];
   @Prop({ required: true })

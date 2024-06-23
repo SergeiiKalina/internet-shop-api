@@ -20,7 +20,6 @@ import { CategoryService } from 'src/category/category.service';
 import { ColorService } from 'src/color/color.service';
 import { Size } from 'src/size/size.model';
 import { TransformImageService } from './images-service/transform-image.sevice';
-import axios from 'axios';
 
 @Injectable()
 export class ProductsService {
@@ -40,7 +39,19 @@ export class ProductsService {
 
   async searchProducts(title: string): Promise<Product[]> {
     const regex = new RegExp(`^${title}`, 'i'); // Case-insensitive search for names starting with 'firstLetter'
-    return this.productModel.find({ title: regex }).exec();
+    return this.productModel
+      .find({ title: regex })
+      .populate({ path: 'category', select: 'mainCategory -_id' })
+      .populate({
+        path: 'subCategory',
+        select: 'subCategory -_id',
+      })
+      .populate('parameters.color')
+      .populate(
+        'producer',
+        '-password -isActivated -activationLink -lastLogout -favorites -registrationDate -basket -purchasedGoods -soldGoods',
+      )
+      .exec();
   }
 
   async create(
@@ -142,9 +153,16 @@ export class ProductsService {
 
     const products = await this.productModel
       .find()
-      .populate('category', '-subCategory -img ')
-      .populate('subCategory', '-sizeChart -color -mainCategory -img ')
+      .populate({ path: 'category', select: 'mainCategory -_id' })
+      .populate({
+        path: 'subCategory',
+        select: 'subCategory -_id',
+      })
       .populate('parameters.color')
+      .populate(
+        'producer',
+        '-password -isActivated -activationLink -lastLogout -favorites -registrationDate -basket -purchasedGoods -soldGoods',
+      )
       .skip(startIndex)
       .limit(limit)
       .exec();
@@ -163,41 +181,17 @@ export class ProductsService {
         throw new BadRequestException('Щось пішло не так');
       }
 
-      const user = await this.userService.getUserWithNeedFields(
-        product.producer,
-        ['_id', 'email', 'firstName', 'lastName', 'numberPhone', 'rating'],
-      );
-
       const allComment = await this.commentService.getAllFullCommentForProduct(
         product.comments,
       );
 
-      const category = await this.categoryService.getCategoryById(
-        product.category,
-      );
-      const subCategory = await this.categoryService.getSubCategoryById(
-        product.subCategory,
-      );
-
-      const colors = await this.colorService.getColorsByIds(
-        product.parameters.color,
-      );
-
       const returnProduct = {
         ...product.toObject(),
-        category,
-        subCategory,
-        producer: user[0],
         comments: allComment,
-        parameters: {
-          ...product.toObject().parameters,
-          color: colors,
-        },
       };
 
       await this.cacheManager.set(id.toString(), returnProduct, 1000 * 60 * 3);
       await this.productModel.findByIdAndUpdate(id, { $inc: { visit: 1 } });
-
       return returnProduct;
     }
     await this.productModel.findByIdAndUpdate(id, { $inc: { visit: 1 } });
@@ -209,15 +203,11 @@ export class ProductsService {
     const product = await this.findProductById(id);
     const { category, producer, describe, comments, ...restProduct } =
       product.toObject();
-    const subCategory = await this.categoryService.getSubCategoryById(
-      product.subCategory,
-    );
-    const { color, size, state, ...restParameters } = restProduct.parameters;
 
+    const { color, size, state, ...restParameters } = restProduct.parameters;
     return {
       ...restProduct,
       parameters: restParameters,
-      subCategory,
     };
   }
 
@@ -228,7 +218,19 @@ export class ProductsService {
   }
 
   async findProductById(id: string) {
-    const product = await this.productModel.findById(id);
+    const product = await this.productModel
+      .findById(id)
+      .populate({ path: 'category', select: 'mainCategory -_id' })
+      .populate({
+        path: 'subCategory',
+        select: 'subCategory -_id',
+      })
+      .populate('parameters.color')
+      .populate(
+        'producer',
+        '-password -isActivated -activationLink -lastLogout -favorites -registrationDate -basket -purchasedGoods -soldGoods',
+      )
+      .populate('comments');
     if (!product) {
       throw new BadRequestException('Цей продукт не знайденно');
     }
@@ -244,26 +246,95 @@ export class ProductsService {
     if (!nameSubCategory) {
       throw new NotFoundException('Ця підкатегорія не знайденна');
     }
-    const allProductWithThisSubCategory = await this.productModel.find({
-      subCategory: nameSubCategory.id,
+
+    const allProductWithThisSubCategory = await this.productModel
+      .find({
+        subCategory: nameSubCategory._id,
+      })
+      .populate({ path: 'category', select: 'mainCategory -_id' })
+      .populate({
+        path: 'subCategory',
+        select: 'subCategory -_id',
+      })
+      .populate('parameters.color')
+      .populate(
+        'producer',
+        '-password -isActivated -activationLink -lastLogout -favorites -registrationDate -basket -purchasedGoods -soldGoods',
+      );
+
+    const colors = await this.getUniqueValues(
+      allProductWithThisSubCategory,
+      'color',
+    );
+    const sizes = await this.getUniqueValues(
+      allProductWithThisSubCategory,
+      'size',
+    );
+    const states = await this.getUniqueValues(
+      allProductWithThisSubCategory,
+      'state',
+    );
+    const brands = await this.getUniqueValues(
+      allProductWithThisSubCategory,
+      'brand',
+    );
+    const ecoFriendly = [
+      ...new Set(
+        allProductWithThisSubCategory.map((product) => product.parameters.eco),
+      ),
+    ];
+    const madeInUkraine = [
+      ...new Set(
+        allProductWithThisSubCategory.map(
+          (product) => product.parameters.isUkraine,
+        ),
+      ),
+    ];
+    const price = { max: Number.MIN_VALUE, min: Number.MAX_VALUE };
+
+    allProductWithThisSubCategory.forEach((el) => {
+      if (el.price > price.max) {
+        price.max = el.price;
+      }
+      if (el.price < price.min) {
+        price.min = el.price;
+      }
     });
 
-    const filters = {};
-    if (nameSubCategory.color) {
-      const colors = await this.colorService.getAllColors();
+    return {
+      products: allProductWithThisSubCategory,
+      filters: {
+        price,
+        colors,
+        sizes,
+        states,
+        brands,
+        ecoFriendly,
+        madeInUkraine,
+      },
+    };
+  }
 
-      filters['colors'] = colors;
+  async getUniqueValues(products, key) {
+    const values = products.flatMap((product) => product.parameters[key]);
+
+    if (key === 'color') {
+      const colorMap = new Map();
+      values.forEach((colorObj) => {
+        if (!colorMap.has(colorObj.colorName)) {
+          colorMap.set(colorObj.colorName, colorObj);
+        }
+      });
+      return Array.from(colorMap.values());
+    } else if (key === 'size') {
+      return [...new Set(values.filter((size) => size !== ''))];
+    } else if (key === 'brand') {
+      return [
+        ...new Set(values.filter((brand) => brand !== '' && brand !== '-')),
+      ];
+    } else {
+      return [...new Set(values)];
     }
-    if (nameSubCategory.sizeChart && nameSubCategory.sizeChart.length > 0) {
-      const sizeChart = await this.sizeModel.findById(
-        nameSubCategory.sizeChart[0],
-      );
-      const { subCategory, ...restSubcategory } = sizeChart.toObject();
-
-      filters['sizeChart'] = restSubcategory;
-    }
-
-    return { products: allProductWithThisSubCategory, filters };
   }
 
   async filterByCategory(category: string) {
@@ -276,10 +347,71 @@ export class ProductsService {
     }
     const allProductWithThisCategory = await this.productModel
       .find({
-        category: nameCategory.id,
+        category: nameCategory._id,
       })
+      .populate({ path: 'category', select: 'mainCategory -_id' })
+      .populate({
+        path: 'subCategory',
+        select: 'subCategory -_id',
+      })
+      .populate('parameters.color')
+      .populate(
+        'producer',
+        '-password -isActivated -activationLink -lastLogout -favorites -registrationDate -basket -purchasedGoods -soldGoods',
+      )
       .exec();
-    return allProductWithThisCategory;
+
+    const colors = await this.getUniqueValues(
+      allProductWithThisCategory,
+      'color',
+    );
+    const sizes = await this.getUniqueValues(
+      allProductWithThisCategory,
+      'size',
+    );
+    const states = await this.getUniqueValues(
+      allProductWithThisCategory,
+      'state',
+    );
+    const brands = await this.getUniqueValues(
+      allProductWithThisCategory,
+      'brand',
+    );
+    const ecoFriendly = [
+      ...new Set(
+        allProductWithThisCategory.map((product) => product.parameters.eco),
+      ),
+    ];
+    const madeInUkraine = [
+      ...new Set(
+        allProductWithThisCategory.map(
+          (product) => product.parameters.isUkraine,
+        ),
+      ),
+    ];
+
+    const price = { max: Number.MIN_VALUE, min: Number.MAX_VALUE };
+
+    allProductWithThisCategory.forEach((el) => {
+      if (el.price > price.max) {
+        price.max = el.price;
+      }
+      if (el.price < price.min) {
+        price.min = el.price;
+      }
+    });
+    return {
+      products: allProductWithThisCategory,
+      filters: {
+        price,
+        colors,
+        sizes,
+        states,
+        brands,
+        ecoFriendly,
+        madeInUkraine,
+      },
+    };
   }
 
   // async changeAllCategory(file: Express.Multer.File) {
