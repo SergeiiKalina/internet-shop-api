@@ -16,6 +16,7 @@ import { ColorService } from 'src/color/color.service';
 import { Comment, CommentSchema } from 'src/comment/comment.model';
 import { Color, ColorSchema } from 'src/color/color.model';
 import { TransformImageService } from 'src/products/images-service/transform-image.sevice';
+import { ProductFilterService } from 'src/products/filter/filter.service';
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { TransformImageService } from 'src/products/images-service/transform-ima
     CategoryService,
     ColorService,
     TransformImageService,
+    ProductFilterService,
   ],
 })
 export class PurchaseModule {}

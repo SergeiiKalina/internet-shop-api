@@ -12,6 +12,7 @@ import {
   Patch,
   UploadedFiles,
   UploadedFile,
+  Res,
 } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
@@ -30,21 +31,35 @@ import {
 import { UpdateProductDto } from './dto/update-product.dto';
 import { SharpPipe } from './pipes/sharpForFewFile.pipe';
 import { Product } from './product.model';
-
+import * as fs from 'fs';
+import { FiltersDto } from './dto/filters.dto';
 @ApiTags('product')
 @Controller('products')
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
-  // @UseInterceptors(FileInterceptor('file'))
-  // @Post('change')
-  // async changeAllCategory(
-  //   @UploadedFile()
-  //   file: Express.Multer.File,
-  // ) {
-  //   return await this.productsService.changeAllCategory(file);
+  // @Get('change')
+  // async changeAllCategory() {
+  //   return await this.productsService.changeAllCategory();
   // }
 
+  @ApiOperation({
+    summary: 'Get filtered products',
+  })
+  @ApiConsumes('application/json')
+  @ApiBody({
+    type: FiltersDto,
+  })
+  @ApiResponse({ status: 200, description: 'return products' })
+  @ApiOperation({ summary: 'Get filtered products' })
+  @ApiResponse({
+    status: 400,
+    description: 'Такої Категорії або підкатегорії не існує',
+  })
+  @Post('filter')
+  async filterProduct(@Body() filters: FiltersDto) {
+    return await this.productsService.filterProduct(filters);
+  }
   @Get('search')
   async searchProductsByFirstLetter(
     @Query('title') title: string,

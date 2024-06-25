@@ -18,6 +18,7 @@ import { CategoryService } from 'src/category/category.service';
 import { ColorService } from 'src/color/color.service';
 import { Size, SizeSchema } from 'src/size/size.model';
 import { TransformImageService } from 'src/products/images-service/transform-image.sevice';
+import { ProductFilterService } from 'src/products/filter/filter.service';
 
 @Module({
   imports: [
@@ -41,6 +42,7 @@ import { TransformImageService } from 'src/products/images-service/transform-ima
     CategoryService,
     ColorService,
     TransformImageService,
+    ProductFilterService,
   ],
 })
 export class BasketModule {}

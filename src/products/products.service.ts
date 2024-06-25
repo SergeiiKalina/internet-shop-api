@@ -20,6 +20,8 @@ import { CategoryService } from 'src/category/category.service';
 import { ColorService } from 'src/color/color.service';
 import { Size } from 'src/size/size.model';
 import { TransformImageService } from './images-service/transform-image.sevice';
+import { ProductFilterService } from './filter/filter.service';
+import { FiltersDto } from './dto/filters.dto';
 
 @Injectable()
 export class ProductsService {
@@ -30,7 +32,7 @@ export class ProductsService {
     @InjectModel(Size.name) private sizeModel: Model<Size>,
     private readonly imageService: ImageService,
     private readonly commentService: CommentService,
-    private readonly userService: UserService,
+    private readonly productFilterService: ProductFilterService,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
     private readonly categoryService: CategoryService,
     private readonly colorService: ColorService,
@@ -261,80 +263,14 @@ export class ProductsService {
         'producer',
         '-password -isActivated -activationLink -lastLogout -favorites -registrationDate -basket -purchasedGoods -soldGoods',
       );
-
-    const colors = await this.getUniqueValues(
+    const filters = await this.productFilterService.createFiltersData(
       allProductWithThisSubCategory,
-      'color',
     );
-    const sizes = await this.getUniqueValues(
-      allProductWithThisSubCategory,
-      'size',
-    );
-    const states = await this.getUniqueValues(
-      allProductWithThisSubCategory,
-      'state',
-    );
-    const brands = await this.getUniqueValues(
-      allProductWithThisSubCategory,
-      'brand',
-    );
-    const ecoFriendly = [
-      ...new Set(
-        allProductWithThisSubCategory.map((product) => product.parameters.eco),
-      ),
-    ];
-    const madeInUkraine = [
-      ...new Set(
-        allProductWithThisSubCategory.map(
-          (product) => product.parameters.isUkraine,
-        ),
-      ),
-    ];
-    const price = { max: Number.MIN_VALUE, min: Number.MAX_VALUE };
-
-    allProductWithThisSubCategory.forEach((el) => {
-      if (el.price > price.max) {
-        price.max = el.price;
-      }
-      if (el.price < price.min) {
-        price.min = el.price;
-      }
-    });
 
     return {
       products: allProductWithThisSubCategory,
-      filters: {
-        price,
-        colors,
-        sizes,
-        states,
-        brands,
-        ecoFriendly,
-        madeInUkraine,
-      },
+      filters,
     };
-  }
-
-  async getUniqueValues(products, key) {
-    const values = products.flatMap((product) => product.parameters[key]);
-
-    if (key === 'color') {
-      const colorMap = new Map();
-      values.forEach((colorObj) => {
-        if (!colorMap.has(colorObj.colorName)) {
-          colorMap.set(colorObj.colorName, colorObj);
-        }
-      });
-      return Array.from(colorMap.values());
-    } else if (key === 'size') {
-      return [...new Set(values.filter((size) => size !== ''))];
-    } else if (key === 'brand') {
-      return [
-        ...new Set(values.filter((brand) => brand !== '' && brand !== '-')),
-      ];
-    } else {
-      return [...new Set(values)];
-    }
   }
 
   async filterByCategory(category: string) {
@@ -361,86 +297,196 @@ export class ProductsService {
       )
       .exec();
 
-    const colors = await this.getUniqueValues(
+    const filters = await this.productFilterService.createFiltersData(
       allProductWithThisCategory,
-      'color',
     );
-    const sizes = await this.getUniqueValues(
-      allProductWithThisCategory,
-      'size',
-    );
-    const states = await this.getUniqueValues(
-      allProductWithThisCategory,
-      'state',
-    );
-    const brands = await this.getUniqueValues(
-      allProductWithThisCategory,
-      'brand',
-    );
-    const ecoFriendly = [
-      ...new Set(
-        allProductWithThisCategory.map((product) => product.parameters.eco),
-      ),
-    ];
-    const madeInUkraine = [
-      ...new Set(
-        allProductWithThisCategory.map(
-          (product) => product.parameters.isUkraine,
-        ),
-      ),
-    ];
-
-    const price = { max: Number.MIN_VALUE, min: Number.MAX_VALUE };
-
-    allProductWithThisCategory.forEach((el) => {
-      if (el.price > price.max) {
-        price.max = el.price;
-      }
-      if (el.price < price.min) {
-        price.min = el.price;
-      }
-    });
     return {
       products: allProductWithThisCategory,
-      filters: {
-        price,
-        colors,
-        sizes,
-        states,
-        brands,
-        ecoFriendly,
-        madeInUkraine,
-      },
+      filters,
     };
   }
 
-  // async changeAllCategory(file: Express.Multer.File) {
-  //   const products = await this.productModel.find().exec();
-  //   for (let i = 0; i < products.length; i++) {
-  //     const responce = await axios.get(products[i].img[0], {
-  //       responseType: 'arraybuffer',
-  //     });
-  //     const circle = await this.transformImageService.transform(responce.data);
-  //     const formData = new FormData();
-  //     formData.append(
-  //       'image',
-  //       new Blob([circle.buffer], { type: 'image/png' }),
-  //       Date.now() + '-' + Math.round(Math.random() * 1e9),
-  //     );
-  //     const { data } = await axios.post(
-  //       'https://api.imgbb.com/1/upload',
-  //       formData,
-  //       {
-  //         params: {
-  //           key: '401f89dfe6ab448e7a936805f8cc22af',
+  async filterProduct(filters: FiltersDto) {
+    const category = await this.categoryModel.findOne({
+      'mainCategory.en': filters.nameCategoryOrSubcategory,
+    });
+    const subcategory = await this.subCategoryModel.findOne({
+      'subCategory.en': filters.nameCategoryOrSubcategory,
+    });
+
+    if (!category && !subcategory) {
+      throw new BadRequestException(
+        'Такої Категорії або підкатегорії не існує',
+      );
+    }
+    const categoryId = category ? category.id : '';
+    const subcategoryId = subcategory ? subcategory.id : '';
+    const products = await this.productModel.aggregate([
+      {
+        $match: {
+          $or: [{ category: categoryId }, { subCategory: subcategoryId }],
+          price: { $gte: filters.price.min, $lte: filters.price.max },
+          'parameters.color': {
+            $in: filters.colors.length ? filters.colors : [/.*/],
+          },
+          'parameters.size': {
+            $in: filters.sizes.length ? filters.sizes : [/.*/],
+          },
+          'parameters.state': {
+            $in: filters.states.length ? filters.states : [/.*/],
+          },
+          'parameters.eco': {
+            $in: filters.eco.length ? filters.eco : [true, false],
+          },
+          'parameters.isUkraine': {
+            $in: filters.IsUkraine.length ? filters.IsUkraine : [true, false],
+          },
+        },
+      },
+    ]);
+
+    return products;
+  }
+
+  // async changeAllCategory() {
+  //   const subcategory = await this.subCategoryModel.findOne({
+  //     'subCategory.en': 'souvenirs',
+  //   });
+
+  //   if (!subcategory) {
+  //     throw new Error('Subcategory not found');
+  //   }
+
+  //   const products = await this.productModel.aggregate([
+  //     { $match: { subCategory: subcategory.id } },
+  //     {
+  //       $group: {
+  //         _id: subcategory._id,
+  //         minPrice: { $min: '$price' },
+  //         maxPrice: { $max: '$price' },
+  //         states: { $addToSet: '$parameters.state' },
+  //         sizes: { $addToSet: '$parameters.size' },
+  //         colors: { $addToSet: '$parameters.color' },
+  //         sexes: { $addToSet: '$parameters.sex' },
+  //       },
+  //     },
+  //     {
+  //       $project: {
+  //         minPrice: 1,
+  //         maxPrice: 1,
+  //         states: {
+  //           $reduce: {
+  //             input: {
+  //               $map: {
+  //                 input: '$states',
+  //                 as: 'state',
+  //                 in: {
+  //                   $cond: {
+  //                     if: { $isArray: '$$state' },
+  //                     then: '$$state',
+  //                     else: ['$$state'],
+  //                   },
+  //                 },
+  //               },
+  //             },
+  //             initialValue: [],
+  //             in: { $setUnion: ['$$value', '$$this'] },
+  //           },
   //         },
-  //         headers: {
-  //           'Content-Type': 'multipart/form-data',
+  //         sizes: {
+  //           $reduce: {
+  //             input: {
+  //               $map: {
+  //                 input: '$sizes',
+  //                 as: 'size',
+  //                 in: {
+  //                   $cond: {
+  //                     if: { $isArray: '$$size' },
+  //                     then: '$$size',
+  //                     else: ['$$size'],
+  //                   },
+  //                 },
+  //               },
+  //             },
+  //             initialValue: [],
+  //             in: { $setUnion: ['$$value', '$$this'] },
+  //           },
+  //         },
+  //         colors: {
+  //           $reduce: {
+  //             input: {
+  //               $map: {
+  //                 input: '$colors',
+  //                 as: 'color',
+  //                 in: {
+  //                   $cond: {
+  //                     if: { $isArray: '$$color' },
+  //                     then: '$$color',
+  //                     else: ['$$color'],
+  //                   },
+  //                 },
+  //               },
+  //             },
+  //             initialValue: [],
+  //             in: { $setUnion: ['$$value', '$$this'] },
+  //           },
+  //         },
+  //         sexes: {
+  //           $reduce: {
+  //             input: {
+  //               $map: {
+  //                 input: '$sexes',
+  //                 as: 'sex',
+  //                 in: {
+  //                   $cond: {
+  //                     if: { $isArray: '$$sex' },
+  //                     then: '$$sex',
+  //                     else: ['$$sex'],
+  //                   },
+  //                 },
+  //               },
+  //             },
+  //             initialValue: [],
+  //             in: { $setUnion: ['$$value', '$$this'] },
+  //           },
   //         },
   //       },
-  //     );
-  //     products[i].minImage = data.data.url;
-  //     await products[i].save();
-  //   }
+  //     },
+  //     {
+  //       $project: {
+  //         minPrice: 1,
+  //         maxPrice: 1,
+  //         states: {
+  //           $filter: {
+  //             input: '$states',
+  //             as: 'state',
+  //             cond: { $ne: ['$$state', ''] },
+  //           },
+  //         },
+  //         sizes: {
+  //           $filter: {
+  //             input: '$sizes',
+  //             as: 'size',
+  //             cond: { $ne: ['$$size', ''] },
+  //           },
+  //         },
+  //         colors: {
+  //           $filter: {
+  //             input: '$colors',
+  //             as: 'color',
+  //             cond: { $ne: ['$$color', ''] },
+  //           },
+  //         },
+  //         sexes: {
+  //           $filter: {
+  //             input: '$sexes',
+  //             as: 'sex',
+  //             cond: { $ne: ['$$sex', ''] },
+  //           },
+  //         },
+  //       },
+  //     },
+  //   ]);
+  //   return products;
   // }
 }

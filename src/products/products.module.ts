@@ -20,6 +20,7 @@ import { CategoryService } from 'src/category/category.service';
 import { ColorService } from 'src/color/color.service';
 import { Size, SizeSchema } from 'src/size/size.model';
 import { TransformImageService } from './images-service/transform-image.sevice';
+import { ProductFilterService } from './filter/filter.service';
 
 @Module({
   imports: [
@@ -47,6 +48,7 @@ import { TransformImageService } from './images-service/transform-image.sevice';
     CategoryService,
     ColorService,
     TransformImageService,
+    ProductFilterService,
   ],
 })
 export class ProductsModule {}
