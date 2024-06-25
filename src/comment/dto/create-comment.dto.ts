@@ -1,5 +1,13 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsDate, IsNumber, IsOptional, IsString } from 'class-validator';
+import {
+  IsDate,
+  IsInt,
+  IsNumber,
+  IsOptional,
+  IsString,
+  Max,
+  Min,
+} from 'class-validator';
 import { Date } from 'mongoose';
 
 export class CreateCommentDto {
@@ -15,4 +23,12 @@ export class CreateCommentDto {
   })
   @IsOptional()
   parent?: string | null;
+  @ApiProperty({
+    type: Number,
+    description: 'product evaluation',
+  })
+  @IsInt({ message: 'Rating must be an integer' })
+  @Min(1, { message: 'Rating must be at least 1' })
+  @Max(5, { message: 'Rating must not exceed 5' })
+  rating: number;
 }
