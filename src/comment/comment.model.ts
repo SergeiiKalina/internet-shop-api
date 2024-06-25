@@ -21,6 +21,8 @@ export class Comment {
   product: string;
   @Prop({ type: [MongooseSchema.Types.ObjectId], ref: 'Comment', default: [] })
   comments: string[];
+  @Prop({ type: Number, default: 3 })
+  rating: number;
 }
 
 export const CommentSchema = SchemaFactory.createForClass(Comment);
