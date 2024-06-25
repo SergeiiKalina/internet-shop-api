@@ -21,12 +21,11 @@ export class CommentService {
   async create(createCommentDto: CreateCommentDto, id: string) {
     const commentInstance = await this.commentModel.create({
       ...createCommentDto,
+      rating: createCommentDto.parent === null ? createCommentDto.rating : null,
       author: id,
     });
-    const user = await this.userService.getUserWithNeedFields(id, [
-      '_id',
-      'firstName',
-    ]);
+    const user = await this.userModel.findById(id);
+    const { _id, firstName } = user;
 
     if (createCommentDto.parent) {
       const parent = await this.commentModel.findById({
@@ -40,7 +39,7 @@ export class CommentService {
       await parent.comments.push(commentInstance.id);
       await parent.save();
       await this.cacheManager.del(parent.product);
-      return { ...commentInstance.toObject(), author: user[0] };
+      return { ...commentInstance.toObject(), author: { _id, firstName } };
     } else {
       const product = await this.productModel.findById(
         createCommentDto.product,
@@ -48,11 +47,21 @@ export class CommentService {
       if (!product) {
         throw new Error('Продукт не знайдений');
       }
+
+      if (!user.rating || !user.rating.sum) {
+        user.rating = { count: 0, sum: 0 };
+      }
+
+      user.rating.sum = (user.rating.sum || 0) + createCommentDto.rating;
+      user.rating.count = (user.rating.count || 0) + 1;
+
+      await user.save();
+
       await this.cacheManager.del(product.id);
 
       await product.comments.push(commentInstance.id);
       product.save();
-      return { ...commentInstance.toObject(), author: user[0] };
+      return { ...commentInstance.toObject(), author: { _id, firstName } };
     }
   }
 

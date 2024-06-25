@@ -16,6 +16,10 @@ export interface IPurchasedGoods {
   status?: string;
   roundImage: string;
 }
+export interface IRating {
+  count: number;
+  sum: number;
+}
 
 @Schema()
 export class User {
@@ -37,8 +41,11 @@ export class User {
   registrationDate: Date;
   @Prop({ default: null }) // Example: Default value can be null if the user has never logged out
   lastLogout: Date;
-  @Prop({ default: 0 })
-  rating: number;
+  @Prop({
+    type: { count: { type: Number }, sum: { type: Number } },
+    default: { count: 0, sum: 0 },
+  })
+  rating: IRating;
   @Prop({
     default: () => [],
     type: [

@@ -8,6 +8,7 @@ import {
   Delete,
   UseGuards,
   Req,
+  ValidationPipe,
 } from '@nestjs/common';
 import { CommentService } from './comment.service';
 import { CreateCommentDto } from './dto/create-comment.dto';
@@ -22,7 +23,10 @@ export class CommentController {
 
   @Post()
   @UseGuards(JwtAuthGuard)
-  async create(@Body() createCommentDto: CreateCommentDto, @Req() req) {
+  async create(
+    @Body(new ValidationPipe()) createCommentDto: CreateCommentDto,
+    @Req() req,
+  ) {
     return await this.commentService.create(createCommentDto, req.user.id);
   }
 

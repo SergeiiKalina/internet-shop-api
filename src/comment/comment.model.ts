@@ -22,7 +22,7 @@ export class Comment {
   @Prop({ type: [MongooseSchema.Types.ObjectId], ref: 'Comment', default: [] })
   comments: string[];
   @Prop({ type: Number, default: null })
-  rating: number;
+  rating: number | null;
 }
 
 export const CommentSchema = SchemaFactory.createForClass(Comment);
