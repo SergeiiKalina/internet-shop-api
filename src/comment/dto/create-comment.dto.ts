@@ -7,6 +7,7 @@ import {
   IsString,
   Max,
   Min,
+  ValidateIf,
 } from 'class-validator';
 import { Date } from 'mongoose';
 
@@ -30,5 +31,6 @@ export class CreateCommentDto {
   @IsInt({ message: 'Rating must be an integer' })
   @Min(1, { message: 'Rating must be at least 1' })
   @Max(5, { message: 'Rating must not exceed 5' })
+  @ValidateIf((o) => o.parent === null || o.parent === undefined)
   rating: number;
 }
