@@ -52,10 +52,11 @@ export class CommentService {
         throw new Error('Продукт не знайдений');
       }
 
-      user.rating.sum = (user.rating.sum || 0) + createCommentDto.rating;
-      user.rating.count = (user.rating.count || 0) + 1;
+      const author = await this.userModel.findById(product.producer);
+      author.rating.sum = (author.rating.sum || 0) + createCommentDto.rating;
+      author.rating.count = (author.rating.count || 0) + 1;
 
-      await user.save();
+      await author.save();
 
       await this.cacheManager.del(product.id.toString());
 
