@@ -21,9 +21,13 @@ export class CommentService {
   async create(createCommentDto: CreateCommentDto, id: string) {
     const commentInstance = await this.commentModel.create({
       ...createCommentDto,
-      rating: createCommentDto.parent === null ? createCommentDto.rating : null,
+      rating:
+        createCommentDto.parent === null || !createCommentDto.parent
+          ? createCommentDto.rating
+          : null,
       author: id,
     });
+
     const user = await this.userModel.findById(id);
     const { _id, firstName } = user;
 
@@ -61,6 +65,7 @@ export class CommentService {
 
       await product.comments.push(commentInstance.id);
       product.save();
+
       return { ...commentInstance.toObject(), author: { _id, firstName } };
     }
   }
