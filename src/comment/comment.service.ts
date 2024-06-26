@@ -38,7 +38,7 @@ export class CommentService {
 
       await parent.comments.push(commentInstance.id);
       await parent.save();
-      await this.cacheManager.del(parent.product);
+      await this.cacheManager.del(parent.product.toString());
       return { ...commentInstance.toObject(), author: { _id, firstName } };
     } else {
       const product = await this.productModel.findById(
@@ -57,7 +57,7 @@ export class CommentService {
 
       await user.save();
 
-      await this.cacheManager.del(product.id);
+      await this.cacheManager.del(product.id.toString());
 
       await product.comments.push(commentInstance.id);
       product.save();
