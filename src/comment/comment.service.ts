@@ -133,6 +133,7 @@ export class CommentService {
     const allComment = await this.commentModel
       .find({ _id: { $in: idsArray } })
       .populate('author', '_id firstName')
+      .sort({ createDate: -1 })
       .lean();
 
     for (const comment of allComment) {
