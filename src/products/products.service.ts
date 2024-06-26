@@ -197,7 +197,7 @@ export class ProductsService {
       return returnProduct;
     }
     await this.productModel.findByIdAndUpdate(id, { $inc: { visit: 1 } });
-    console.log('call cache');
+
     return cacheProduct;
   }
 

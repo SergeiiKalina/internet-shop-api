@@ -52,10 +52,6 @@ export class CommentService {
         throw new Error('Продукт не знайдений');
       }
 
-      if (!user.rating || !user.rating.sum) {
-        user.rating = { count: 0, sum: 0 };
-      }
-
       user.rating.sum = (user.rating.sum || 0) + createCommentDto.rating;
       user.rating.count = (user.rating.count || 0) + 1;
 
@@ -135,6 +131,7 @@ export class CommentService {
     comments: string | string[],
   ): Promise<any[]> {
     const idsArray = Array.isArray(comments) ? comments : [comments];
+
     const allComment = await this.commentModel
       .find({ _id: { $in: idsArray } })
       .populate('author', '_id firstName')
