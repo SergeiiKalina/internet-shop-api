@@ -61,13 +61,11 @@ export class ProductsService {
   ) {
     const { color, size, state, brand, eco, isUkraine, ...restProduct } =
       createProductDto;
-
     const imagesPromise = this.imageService.uploadPhotos(files);
     const circlePromise = this.transformImageService.transform(files[0]);
     const categoryIdPromise = this.categoryService.findCategoryByName(
       createProductDto.category,
     );
-
     const subCategoryIdPromise = this.categoryService.findSubcategoryByName(
       createProductDto.subCategory,
     );
@@ -81,7 +79,6 @@ export class ProductsService {
         allColorPromise,
       ]);
     const minImage = await this.imageService.uploadPhoto(circle);
-
     const product = await this.productModel.create({
       ...restProduct,
       category: categoryId,
@@ -153,7 +150,7 @@ export class ProductsService {
   async getAllProducts(
     page: number,
     limit: number = 20,
-  ): Promise<{ products: Product[]; totalItems: number }> {
+  ): Promise<{ products: Product[]; totalItems: number; filters: any }> {
     const startIndex = (page - 1) * limit;
 
     const products = await this.productModel
@@ -171,10 +168,10 @@ export class ProductsService {
       .skip(startIndex)
       .limit(limit)
       .exec();
-
+    const filters = await this.productFilterService.createFiltersData(products);
     const totalItems = await this.productModel.countDocuments().exec();
 
-    return { products, totalItems };
+    return { products, totalItems, filters };
   }
 
   async getProduct(id: string) {
@@ -273,6 +270,8 @@ export class ProductsService {
     return {
       products: allProductWithThisSubCategory,
       filters,
+      totalItems: allProductWithThisSubCategory.length,
+      totalPages: allProductWithThisSubCategory.length ? 1 : 0,
     };
   }
 
@@ -306,6 +305,8 @@ export class ProductsService {
     return {
       products: allProductWithThisCategory,
       filters,
+      totalItems: allProductWithThisCategory.length,
+      totalPages: allProductWithThisCategory.length ? 1 : 0,
     };
   }
 

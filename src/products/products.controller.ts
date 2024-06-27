@@ -88,7 +88,12 @@ export class ProductsController {
   async getAllProducts(
     @Query('page') page: number = 1,
     @Query('limit') limit: number = 20,
-  ): Promise<{ products: Product[]; totalPages: number; totalItems: number }> {
+  ): Promise<{
+    products: Product[];
+    totalPages: number;
+    totalItems: number;
+    filters: any;
+  }> {
     page = Number(page);
     limit = Number(limit);
 
@@ -101,13 +106,11 @@ export class ProductsController {
       limit = 20;
     }
 
-    const { products, totalItems } = await this.productsService.getAllProducts(
-      page,
-      limit,
-    );
+    const { products, totalItems, filters } =
+      await this.productsService.getAllProducts(page, limit);
     const totalPages = Math.ceil(totalItems / limit);
 
-    return { products, totalPages, totalItems };
+    return { products, totalPages, totalItems, filters };
   }
 
   @ApiOperation({
