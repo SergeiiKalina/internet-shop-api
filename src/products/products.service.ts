@@ -59,21 +59,27 @@ export class ProductsService {
     files: Express.Multer.File[],
     id: string,
   ) {
-    const images = await this.imageService.uploadPhotos(files);
-    const circle = await this.transformImageService.transform(files[0]);
-
-    const minImage = await this.imageService.uploadPhoto(circle);
-    const categoryId = await this.categoryService.findCategoryByName(
-      createProductDto.category,
-    );
-    const subCategoryId = await this.categoryService.findSubcategoryByName(
-      createProductDto.subCategory,
-    );
-
     const { color, size, state, brand, eco, isUkraine, ...restProduct } =
       createProductDto;
 
-    const allColor = await this.colorService.getColorsByName(color);
+    const imagesPromise = this.imageService.uploadPhotos(files);
+    const circlePromise = this.transformImageService.transform(files[0]);
+    const categoryIdPromise = this.categoryService.findCategoryByName(
+      createProductDto.category,
+    );
+    const subCategoryIdPromise = this.categoryService.findSubcategoryByName(
+      createProductDto.subCategory,
+    );
+    const allColorPromise = this.colorService.getColorsByName(color);
+    const [images, circle, categoryId, subCategoryId, allColor] =
+      await Promise.all([
+        imagesPromise,
+        circlePromise,
+        categoryIdPromise,
+        subCategoryIdPromise,
+        allColorPromise,
+      ]);
+    const minImage = await this.imageService.uploadPhoto(circle);
 
     const product = await this.productModel.create({
       ...restProduct,

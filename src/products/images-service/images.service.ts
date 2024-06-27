@@ -47,6 +47,7 @@ export class ImageService {
   async uploadPhotos(files: Express.Multer.File[]) {
     try {
       const arrayLinkImages = [];
+
       for (let i = 0; i < files.length; i++) {
         if (!files || !files[i].buffer) {
           throw new Error(
@@ -60,28 +61,22 @@ export class ImageService {
           new Blob([files[i].buffer], { type: files[i].mimetype }),
           Date.now() + '-' + Math.round(Math.random() * 1e9),
         );
-        const { data } = await axios.post(
-          'https://api.imgbb.com/1/upload',
-          formData,
-          {
+
+        arrayLinkImages.push(
+          axios.post('https://api.imgbb.com/1/upload', formData, {
             params: {
               key: '401f89dfe6ab448e7a936805f8cc22af',
             },
             headers: {
               'Content-Type': 'multipart/form-data',
             },
-          },
+          }),
         );
-
-        if (!data) {
-          throw new BadRequestException(
-            'Щось сталось не так з завантаженням кртинки',
-          );
-        }
-        arrayLinkImages.push(data.data.url);
       }
 
-      return arrayLinkImages;
+      const result = await Promise.all(arrayLinkImages);
+
+      return result.map((el) => el.data.data.url);
     } catch (error) {
       throw new Error('Помилка завантаження картинок');
     }
