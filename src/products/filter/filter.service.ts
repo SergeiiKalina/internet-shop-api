@@ -18,7 +18,10 @@ export class ProductFilterService {
     const madeInUkraine = [
       ...new Set(products.map((product) => product.parameters.isUkraine)),
     ];
-    const price = { max: Number.MIN_VALUE, min: Number.MAX_VALUE };
+    const price = {
+      max: products.length ? 0 : Number.MIN_VALUE,
+      min: products.length ? 0 : Number.MAX_VALUE,
+    };
 
     products.forEach((el) => {
       if (el.price > price.max) {
