@@ -146,6 +146,7 @@ export class ProductsController {
     newProduct: CreateProductDto,
     @Req() req,
   ) {
+    console.log(newProduct.category);
     const id = req.user.id;
     return this.productsService.create(newProduct, files, id);
   }

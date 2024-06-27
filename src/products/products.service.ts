@@ -67,6 +67,7 @@ export class ProductsService {
     const categoryIdPromise = this.categoryService.findCategoryByName(
       createProductDto.category,
     );
+
     const subCategoryIdPromise = this.categoryService.findSubcategoryByName(
       createProductDto.subCategory,
     );
