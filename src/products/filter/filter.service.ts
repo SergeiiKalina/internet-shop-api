@@ -19,8 +19,8 @@ export class ProductFilterService {
       ...new Set(products.map((product) => product.parameters.isUkraine)),
     ];
     const price = {
-      max: products.length ? 0 : Number.MIN_VALUE,
-      min: products.length ? 0 : Number.MAX_VALUE,
+      max: products.length ? Number.MIN_VALUE : 0,
+      min: products.length ? Number.MAX_VALUE : 0,
     };
 
     products.forEach((el) => {
