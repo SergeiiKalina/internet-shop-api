@@ -7,6 +7,8 @@ import {
   IsNumber,
   IsOptional,
   IsString,
+  Length,
+  MinLength,
 } from 'class-validator';
 
 const CategoryEnum = [
@@ -64,6 +66,7 @@ export class CreateProductDto {
   constructor() {}
   @ApiProperty({ type: String, description: 'Title of the product' })
   @IsString()
+  @Length(3, 50)
   title: string;
 
   @ApiProperty({ type: Number, description: 'Price of the product' })
@@ -91,6 +94,7 @@ export class CreateProductDto {
     description: 'Description of the discount item',
   })
   @IsNumber()
+  @IsOptional()
   @Transform(({ value }) => Number(value))
   discountPrice: number;
 
@@ -128,6 +132,7 @@ export class CreateProductDto {
     description: 'Size of the product',
     default: ['Без розміру'],
   })
+  @IsString({ each: true })
   @IsArray()
   @Transform(({ value }) =>
     typeof value === 'string'
@@ -153,6 +158,7 @@ export class CreateProductDto {
   brand?: string;
   @ApiProperty({ type: String, description: 'Description of the product' })
   @IsString()
+  @MinLength(30)
   describe: string;
   @ApiProperty({ type: Boolean, description: 'Made in Ukraine or not' })
   @IsBoolean()
