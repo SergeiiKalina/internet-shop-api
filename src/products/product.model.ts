@@ -5,7 +5,7 @@ export type ProductDocument = Product & Document;
 
 export interface IParameter {
   color: string[];
-  size: string;
+  size: string[];
   state: string;
   brand: string;
   eco: boolean;

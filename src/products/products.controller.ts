@@ -11,12 +11,11 @@ import {
   Query,
   Patch,
   UploadedFiles,
-  UploadedFile,
-  Res,
+  ValidationPipe,
 } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
-import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
+import { FilesInterceptor } from '@nestjs/platform-express';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import {
   ApiBearerAuth,
@@ -31,7 +30,6 @@ import {
 import { UpdateProductDto } from './dto/update-product.dto';
 import { SharpPipe } from './pipes/sharpForFewFile.pipe';
 import { Product } from './product.model';
-import * as fs from 'fs';
 import { FiltersDto } from './dto/filters.dto';
 @ApiTags('product')
 @Controller('products')
@@ -144,7 +142,7 @@ export class ProductsController {
   async create(
     @UploadedFiles(SharpPipe)
     files: Express.Multer.File[],
-    @Body()
+    @Body(new ValidationPipe({ transform: true }))
     newProduct: CreateProductDto,
     @Req() req,
   ) {
@@ -176,7 +174,8 @@ export class ProductsController {
   async updateProduct(
     @UploadedFiles(SharpPipe)
     files: Express.Multer.File[],
-    @Body() newProducts: UpdateProductDto,
+    @Body(new ValidationPipe({ transform: true }))
+    newProducts: UpdateProductDto,
     @Param('id') id: string,
     @Req() req,
   ) {

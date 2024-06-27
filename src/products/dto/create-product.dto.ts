@@ -5,6 +5,7 @@ import {
   IsBoolean,
   IsEnum,
   IsNumber,
+  IsOptional,
   IsString,
 } from 'class-validator';
 
@@ -67,6 +68,7 @@ export class CreateProductDto {
 
   @ApiProperty({ type: Number, description: 'Price of the product' })
   @IsNumber()
+  @Transform(({ value }) => Number(value))
   price: number;
 
   @ApiProperty({
@@ -74,12 +76,14 @@ export class CreateProductDto {
     description: 'Whether the product has discount',
   })
   @IsBoolean()
+  @Transform(({ value }) => (value === 'false' ? false : true))
   discount: boolean;
   @ApiProperty({
     description: 'Flag indicating if the product is eco-friendly',
     type: Boolean,
   })
   @IsBoolean()
+  @Transform(({ value }) => (value === 'false' ? false : true))
   eco: boolean;
 
   @ApiProperty({
@@ -87,6 +91,7 @@ export class CreateProductDto {
     description: 'Description of the discount item',
   })
   @IsNumber()
+  @Transform(({ value }) => Number(value))
   discountPrice: number;
 
   @ApiProperty({
@@ -124,23 +129,34 @@ export class CreateProductDto {
     default: ['Без розміру'],
   })
   @IsArray()
-  @IsString()
-  @IsEnum(sizeEmbroidery)
-  size: string;
+  @Transform(({ value }) =>
+    typeof value === 'string'
+      ? value.split(',').map((item) => item.trim())
+      : value,
+  )
+  @IsEnum(sizeEmbroidery, { each: true })
+  size: string[];
 
   @ApiProperty({ description: 'Color of the product', type: [String] })
   @IsArray()
-  @IsString()
-  color?: string;
+  @IsString({ each: true })
+  @Transform(({ value }) =>
+    typeof value === 'string'
+      ? value.split(',').map((item) => item.trim().toLowerCase())
+      : value,
+  )
+  color?: string[];
 
   @ApiProperty({ type: String, description: 'Brand of the product' })
   @IsString()
+  @IsOptional()
   brand?: string;
   @ApiProperty({ type: String, description: 'Description of the product' })
   @IsString()
   describe: string;
   @ApiProperty({ type: Boolean, description: 'Made in Ukraine or not' })
   @IsBoolean()
+  @Transform(({ value }) => (value === 'false' ? false : true))
   isUkraine: boolean;
 
   @ApiProperty({

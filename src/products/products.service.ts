@@ -13,7 +13,6 @@ import { UpdateProductDto } from './dto/update-product.dto';
 import { Category } from 'src/category/categoty.model';
 import { SubCategory } from 'src/category/subCategory.model';
 import { CommentService } from 'src/comment/comment.service';
-import { UserService } from 'src/user/user.service';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
 import { CategoryService } from 'src/category/category.service';
@@ -29,7 +28,6 @@ export class ProductsService {
     @InjectModel(Product.name) private productModel: Model<Product>,
     @InjectModel(Category.name) private categoryModel: Model<Category>,
     @InjectModel(SubCategory.name) private subCategoryModel: Model<SubCategory>,
-    @InjectModel(Size.name) private sizeModel: Model<Size>,
     private readonly imageService: ImageService,
     private readonly commentService: CommentService,
     private readonly productFilterService: ProductFilterService,
@@ -75,9 +73,7 @@ export class ProductsService {
     const { color, size, state, brand, eco, isUkraine, ...restProduct } =
       createProductDto;
 
-    const allColor = await this.colorService.getColorsByName(
-      color.split(',').map((el) => el.toLocaleLowerCase()),
-    );
+    const allColor = await this.colorService.getColorsByName(color);
 
     const product = await this.productModel.create({
       ...restProduct,
@@ -88,7 +84,7 @@ export class ProductsService {
       minImage,
       parameters: {
         color: allColor,
-        size: size.split(','),
+        size,
         state,
         brand,
         eco,
@@ -125,7 +121,7 @@ export class ProductsService {
     Object.assign(product, updateProduct);
 
     const allColor = await this.colorService.getColorsByName(
-      updateProduct.color.split(',').map((el) => el.toLocaleLowerCase()),
+      updateProduct.color,
     );
 
     product.img = images;
