@@ -17,7 +17,6 @@ import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
 import { CategoryService } from 'src/category/category.service';
 import { ColorService } from 'src/color/color.service';
-import { Size } from 'src/size/size.model';
 import { TransformImageService } from './images-service/transform-image.sevice';
 import { ProductFilterService } from './filter/filter.service';
 import { FiltersDto } from './dto/filters.dto';
@@ -66,9 +65,14 @@ export class ProductsService {
     const categoryIdPromise = this.categoryService.findCategoryByName(
       createProductDto.category,
     );
-    const subCategoryIdPromise = this.categoryService.findSubcategoryByName(
-      createProductDto.subCategory,
-    );
+    let subCategoryIdPromise;
+
+    if (!(createProductDto.category === 'Подарую')) {
+      subCategoryIdPromise = this.categoryService.findSubcategoryByName(
+        createProductDto.subCategory,
+      );
+    }
+
     const allColorPromise = this.colorService.getColorsByName(color);
     const [images, circle, categoryId, subCategoryId, allColor] =
       await Promise.all([
@@ -79,10 +83,11 @@ export class ProductsService {
         allColorPromise,
       ]);
     const minImage = await this.imageService.uploadPhoto(circle);
+
     const product = await this.productModel.create({
       ...restProduct,
       category: categoryId,
-      subCategory: subCategoryId,
+      subCategory: subCategoryId ? subCategoryId : null,
       img: images,
       producer: id,
       minImage,

@@ -40,6 +40,7 @@ const SubCategoryEnum = [
   'Перероблений денім',
   'Востановленний секонд хэнд',
   'Вишивка',
+  null,
 ] as const;
 
 const sizeEmbroidery = [
@@ -116,8 +117,9 @@ export class CreateProductDto {
     default: 'Сувеніри',
   })
   @IsString()
+  @IsOptional()
   @IsEnum(SubCategoryEnum, { message: 'Subcategory not correct' })
-  subCategory: string;
+  subCategory: string | null;
 
   @ApiProperty({
     description: 'State of the product',
@@ -126,7 +128,7 @@ export class CreateProductDto {
     enum: ['Нове', 'Уживаний товар'],
   })
   @IsString()
-  @IsEnum(['Нове', 'Уживаний товар'], { message: 'Subcategory not correct' })
+  @IsEnum(['Нове', 'Уживаний товар'], { message: 'state not correct' })
   state: string;
   @ApiProperty({
     type: [String],

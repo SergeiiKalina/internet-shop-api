@@ -42,11 +42,12 @@ export class Product {
   @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'User', required: true })
   producer: string;
   @Prop({
-    required: true,
+    required: false,
     type: String,
     ref: 'SubCategory',
+    default: null,
   })
-  subCategory: Types.ObjectId;
+  subCategory: Types.ObjectId | null;
   @Prop({ required: true })
   img: string[];
   @Prop({ required: true })
