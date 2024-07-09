@@ -22,7 +22,9 @@ export class CommentService {
     const commentInstance = await this.commentModel.create({
       ...createCommentDto,
       rating:
-        createCommentDto.parent === null || !createCommentDto.parent
+        createCommentDto.parent === null ||
+        !createCommentDto.parent ||
+        createCommentDto.rating === 0
           ? createCommentDto.rating
           : null,
       author: id,
@@ -126,6 +128,50 @@ export class CommentService {
     const allComment = await this.getAllFullCommentForProduct(product.comments);
 
     return allComment;
+  }
+
+  async getAllFullCommentForProductAlt(id: string) {
+    const allCommentMainComments = this.commentModel
+      .find({ product: id, parent: null })
+      .sort({ createDate: -1 });
+    const allAnswersPromise = this.commentModel
+      .find({ product: id, parent: { $ne: null } })
+      .sort({ createDate: -1 });
+    const [allComment, allAnswers] = await Promise.all([
+      allCommentMainComments,
+      allAnswersPromise,
+    ]);
+
+    const mapMainComments = new Map();
+    const mapAnswers = new Map();
+
+    allComment.forEach((comment) => {
+      const commentObj = { ...comment.toObject(), answers: [] };
+      delete commentObj.comments;
+      mapMainComments.set(comment.id, commentObj);
+    });
+
+    allAnswers.forEach((answer) => {
+      const answerObj = { ...answer.toObject(), answers: [] };
+      delete answerObj.comments;
+      mapAnswers.set(answer.id, answerObj);
+    });
+
+    for (const [key, value] of mapAnswers) {
+      const parentKey = value.parent.toString();
+      if (mapAnswers.has(parentKey)) {
+        mapAnswers.get(parentKey).answers.push(value);
+      }
+    }
+
+    for (const [key, value] of mapAnswers) {
+      const parentKey = value.parent.toString();
+      if (mapMainComments.has(parentKey)) {
+        mapMainComments.get(parentKey).answers.push(value);
+      }
+    }
+
+    return Array.from(mapMainComments.values());
   }
 
   async getAllFullCommentForProduct(

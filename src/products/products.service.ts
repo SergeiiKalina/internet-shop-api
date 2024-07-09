@@ -113,25 +113,35 @@ export class ProductsService {
     if (!product) {
       throw new BadRequestException('Цей продукт не знайдено');
     }
-    const images = await this.imageService.uploadPhotos(files);
-    const category = await this.categoryModel.findOne({
-      'mainCategory.ua': updateProduct.category,
-    });
+    let images;
+    if (files.length) {
+      images = await this.imageService.uploadPhotos(files);
+    }
+    let category;
+    if (updateProduct.category) {
+      category = await this.categoryModel.findOne({
+        'mainCategory.ua': updateProduct.category,
+      });
+    }
 
-    const subCategory = await this.subCategoryModel.findOne({
-      'subCategory.ua': updateProduct.subCategory,
-    });
+    let subCategory;
+    if (updateProduct.subCategory) {
+      subCategory = await this.subCategoryModel.findOne({
+        'subCategory.ua': updateProduct.subCategory,
+      });
+    }
 
     Object.assign(product, updateProduct);
 
-    const allColor = await this.colorService.getColorsByName(
-      updateProduct.color,
-    );
+    let allColor;
+    if (updateProduct.color) {
+      allColor = await this.colorService.getColorsByName(updateProduct.color);
+    }
 
-    product.img = images;
+    product.img = images ? images : product.img;
     product.producer = userId;
-    product.category = category.id;
-    product.subCategory = subCategory.id;
+    product.category = category ? category.id : product.category;
+    product.subCategory = subCategory ? subCategory.id : product.subCategory;
     product.parameters = {
       ...product.parameters,
       eco: updateProduct.eco,

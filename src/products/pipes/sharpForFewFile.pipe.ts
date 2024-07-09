@@ -3,11 +3,11 @@ import * as sharp from 'sharp';
 
 @Injectable()
 export class SharpPipe
-  implements PipeTransform<Express.Multer.File[], Promise<Buffer[]>>
+  implements PipeTransform<Express.Multer.File[], Promise<Buffer[] | []>>
 {
-  async transform(images: Express.Multer.File[]): Promise<Buffer[]> {
+  async transform(images: Express.Multer.File[]): Promise<Buffer[] | []> {
     if (!images || images.length === 0) {
-      throw new BadRequestException('Подано недійсний масив файлів зображень');
+      return [];
     }
 
     try {

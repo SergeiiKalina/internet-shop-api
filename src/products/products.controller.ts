@@ -176,7 +176,7 @@ export class ProductsController {
   @UseInterceptors(FilesInterceptor('file', 10))
   async updateProduct(
     @UploadedFiles(SharpPipe)
-    files: Express.Multer.File[],
+    files: Express.Multer.File[] | [],
     @Body(new ValidationPipe({ transform: true }))
     newProducts: UpdateProductDto,
     @Param('id') id: string,
