@@ -1,6 +1,7 @@
 require('dotenv').config();
 import { Injectable } from '@nestjs/common';
 import { MailerService } from '@nestjs-modules/mailer';
+import { User } from 'src/auth/user.model';
 
 @Injectable()
 export class Mailer {
@@ -25,6 +26,19 @@ export class Mailer {
           link,
           info,
           textButton,
+        },
+      })
+      .catch((e) => {
+        console.log(e);
+      });
+  }
+  public orderGood(to: string, user: User) {
+    this.mailerService
+      .sendMail({
+        to,
+        from: 'Marketplace',
+        context: {
+          userName: user.firstName,
         },
       })
       .catch((e) => {
