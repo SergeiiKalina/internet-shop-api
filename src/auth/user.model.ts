@@ -15,7 +15,16 @@ export interface IPurchasedGoods {
   product: string;
   status?: string;
   roundImage: string;
+  quantity: number;
 }
+
+export interface ISoldGoods {
+  product: string;
+  status?: string;
+  roundImage: string;
+  quantity: number;
+}
+
 export interface IRating {
   count: number;
   sum: number;
@@ -70,8 +79,18 @@ export class User {
     ref: 'Product',
   })
   purchasedGoods: IPurchasedGoods[];
-  @Prop({ default: [], type: [MongooseSchema.Types.ObjectId], ref: 'Product' })
-  soldGoods: string[];
+  @Prop({
+    default: [],
+    type: [
+      {
+        product: { type: MongooseSchema.Types.ObjectId },
+        status: { type: String, default: 'Очікується відправка' },
+        roundImage: { type: String },
+      },
+    ],
+    ref: 'Product',
+  })
+  soldGoods: ISoldGoods[];
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
