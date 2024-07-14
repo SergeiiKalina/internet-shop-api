@@ -21,6 +21,9 @@ import { ColorService } from 'src/color/color.service';
 import { Size, SizeSchema } from 'src/size/size.model';
 import { TransformImageService } from './images-service/transform-image.sevice';
 import { ProductFilterService } from './filter/filter.service';
+import Purchase, { PurchaseSchema } from 'src/purchase/purchase.model';
+import { PurchaseService } from 'src/purchase/purchase.service';
+import { Mailer } from 'src/auth/mailer/mailer.service';
 
 @Module({
   imports: [
@@ -33,6 +36,7 @@ import { ProductFilterService } from './filter/filter.service';
       { name: SubCategory.name, schema: SubcategorySchema },
       { name: Color.name, schema: ColorSchema },
       { name: Size.name, schema: SizeSchema },
+      { name: Purchase.name, schema: PurchaseSchema },
     ]),
     ConfigModule,
     CommentModule,
@@ -49,6 +53,8 @@ import { ProductFilterService } from './filter/filter.service';
     ColorService,
     TransformImageService,
     ProductFilterService,
+    PurchaseService,
+    Mailer,
   ],
 })
 export class ProductsModule {}

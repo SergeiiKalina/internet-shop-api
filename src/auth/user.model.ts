@@ -3,14 +3,6 @@ import { Schema as MongooseSchema } from 'mongoose';
 
 export type UserDocument = User & Document;
 
-export class IBasketProduct {
-  productId: string;
-  quantity: number;
-  constructor(productId, quantity) {
-    this.productId = productId;
-    this.quantity = quantity;
-  }
-}
 export interface IPurchasedGoods {
   product: string;
   status?: string;
@@ -57,40 +49,23 @@ export class User {
   rating: IRating;
   @Prop({
     default: () => [],
-    type: [
-      {
-        productId: { type: MongooseSchema.Types.ObjectId },
-        quantity: { type: Number },
-      },
-    ],
+    type: [MongooseSchema.Types.ObjectId],
   })
-  basket: IBasketProduct[];
+  basket: string[];
   @Prop({ default: [], type: [MongooseSchema.Types.ObjectId], ref: 'Product' })
   favorites: string[];
   @Prop({
     default: [],
-    type: [
-      {
-        product: { type: MongooseSchema.Types.ObjectId },
-        status: { type: String, default: 'Очікується відправка' },
-        roundImage: { type: String },
-      },
-    ],
-    ref: 'Product',
+    type: [MongooseSchema.Types.ObjectId],
+    ref: 'Purchase',
   })
-  purchasedGoods: IPurchasedGoods[];
+  purchasedGoods: string[];
   @Prop({
     default: [],
-    type: [
-      {
-        product: { type: MongooseSchema.Types.ObjectId },
-        status: { type: String, default: 'Очікується відправка' },
-        roundImage: { type: String },
-      },
-    ],
-    ref: 'Product',
+    type: [MongooseSchema.Types.ObjectId],
+    ref: 'Purchase',
   })
-  soldGoods: ISoldGoods[];
+  soldGoods: string[];
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

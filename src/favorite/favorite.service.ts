@@ -2,12 +2,14 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { User } from 'src/auth/user.model';
+
 import { ProductsService } from 'src/products/products.service';
 
 @Injectable()
 export class FavoriteService {
   constructor(
     @InjectModel(User.name) private userModel: Model<User>,
+
     private readonly productService: ProductsService,
   ) {}
   async addToFavorite(productId: string, userId: string) {

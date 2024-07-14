@@ -36,11 +36,6 @@ import { FiltersDto } from './dto/filters.dto';
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
-  // @Get('change')
-  // async changeAllCategory() {
-  //   return await this.productsService.changeAllCategory();
-  // }
-
   @ApiOperation({
     summary: 'Get filtered products',
   })

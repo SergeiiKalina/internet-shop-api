@@ -367,6 +367,13 @@ export class ProductsService {
     return products;
   }
 
+  async getFewProducts(ids: string[]) {
+    const favorites = await this.productModel
+      .find({ _id: { $in: ids } })
+      .select('-comments');
+    return favorites;
+  }
+
   // async changeAllCategory() {
   //   const subcategory = await this.subCategoryModel.findOne({
   //     'subCategory.en': 'souvenirs',

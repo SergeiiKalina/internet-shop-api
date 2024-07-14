@@ -18,6 +18,8 @@ import { Color, ColorSchema } from 'src/color/color.model';
 import { TransformImageService } from 'src/products/images-service/transform-image.sevice';
 import { ProductFilterService } from 'src/products/filter/filter.service';
 import { Mailer } from 'src/auth/mailer/mailer.service';
+import Purchase, { PurchaseSchema } from './purchase.model';
+import { CommentModule } from 'src/comment/comment.module';
 
 @Module({
   imports: [
@@ -29,7 +31,9 @@ import { Mailer } from 'src/auth/mailer/mailer.service';
       { name: Size.name, schema: SizeSchema },
       { name: Comment.name, schema: CommentSchema },
       { name: Color.name, schema: ColorSchema },
+      { name: Purchase.name, schema: PurchaseSchema },
     ]),
+    CommentModule,
   ],
   controllers: [PurchaseController],
   providers: [

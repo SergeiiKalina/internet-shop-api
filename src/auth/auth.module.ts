@@ -15,6 +15,19 @@ import { FacebookStrategy } from './strategys/facebook.strategy';
 import { FacebookTokenStrategy } from './strategys/facebookToken.strategy';
 import { GoogleAuthStrategy } from './strategys/google.strategy';
 import { Product, ProductSchema } from 'src/products/product.model';
+import { ProductsService } from 'src/products/products.service';
+import { Category, CategorySchema } from 'src/category/categoty.model';
+import { SubCategory, SubcategorySchema } from 'src/category/subCategory.model';
+import { Color, ColorSchema } from 'src/color/color.model';
+import { ImageService } from 'src/products/images-service/images.service';
+import { CommentService } from 'src/comment/comment.service';
+import { ProductFilterService } from 'src/products/filter/filter.service';
+import { CategoryService } from 'src/category/category.service';
+import { ColorService } from 'src/color/color.service';
+import { TransformImageService } from 'src/products/images-service/transform-image.sevice';
+import { Comment, CommentSchema } from 'src/comment/comment.model';
+import Purchase, { PurchaseSchema } from 'src/purchase/purchase.model';
+import { PurchaseService } from 'src/purchase/purchase.service';
 
 @Module({
   imports: [
@@ -22,6 +35,11 @@ import { Product, ProductSchema } from 'src/products/product.model';
       { name: User.name, schema: UserSchema },
       { name: Jwt.name, schema: JwtSchema },
       { name: Product.name, schema: ProductSchema },
+      { name: Category.name, schema: CategorySchema },
+      { name: SubCategory.name, schema: SubcategorySchema },
+      { name: Color.name, schema: ColorSchema },
+      { name: Comment.name, schema: CommentSchema },
+      { name: Purchase.name, schema: PurchaseSchema },
     ]),
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.registerAsync({
@@ -54,6 +72,15 @@ import { Product, ProductSchema } from 'src/products/product.model';
     FacebookTokenStrategy,
     GoogleAuthStrategy,
     ConfigService,
+    ProductsService,
+    ImageService,
+    CommentService,
+    ProductFilterService,
+    CategoryService,
+    ColorService,
+    TransformImageService,
+    PurchaseService,
+    Mailer,
   ],
   exports: [JwtStrategy, PassportModule],
 })

@@ -9,12 +9,15 @@ import { InjectModel } from '@nestjs/mongoose';
 import { isValidObjectId, Model } from 'mongoose';
 import { User } from 'src/auth/user.model';
 import { Product } from 'src/products/product.model';
+import { ProductsService } from 'src/products/products.service';
+import { PurchaseService } from 'src/purchase/purchase.service';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectModel(User.name) private userModel: Model<User>,
-    @InjectModel(Product.name) private readonly productModel: Model<Product>,
+    private readonly productService: ProductsService,
+    private readonly purchaseService: PurchaseService,
   ) {}
   async getAllUsers() {
     return this.userModel.find().exec();
@@ -32,20 +35,29 @@ export class UserService {
   }
   async getUser(id: string) {
     const user = await this.userModel.findById(id);
-    const newBasket = [];
-    const newFavorite = [];
-    for (let i = 0; i < user.basket.length; i++) {
-      const product = await this.productModel.findById(
-        user.basket[i].productId,
-      );
-      newBasket.push(product);
-    }
+    const promiseFavorites = this.productService.getFewProducts(user.favorites);
+    const promiseBasket = this.productService.getFewProducts(user.basket);
+    const promisePurchases = this.purchaseService.getAllPurchase(
+      user.purchasedGoods,
+    );
+    const promiseSoldGoods = this.purchaseService.getAllPurchase(
+      user.soldGoods,
+    );
 
-    for (let i = 0; i < user.favorites.length; i++) {
-      const product = await this.productModel.findById(user.favorites[i]);
-      newFavorite.push(product);
-    }
-    return { ...user.toObject(), basket: newBasket, favorites: newFavorite };
+    const [favorites, basket, purchases, soldGoods] = await Promise.all([
+      promiseFavorites,
+      promiseBasket,
+      promisePurchases,
+      promiseSoldGoods,
+    ]);
+
+    return {
+      ...user.toObject(),
+      basket: basket,
+      favorites,
+      purchasedGoods: purchases,
+      soldGoods: soldGoods,
+    };
   }
   async getGuestsUserInfo(userId: string) {
     if (!isValidObjectId(userId)) {

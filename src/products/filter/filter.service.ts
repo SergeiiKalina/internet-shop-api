@@ -14,10 +14,22 @@ export class ProductFilterService {
     const sizes = await this.getUniqueValues(products, 'size');
     const states = await this.getUniqueValues(products, 'state');
     const brands = await this.getUniqueValues(products, 'brand');
-    const eco = [...new Set(products.map((product) => product.parameters.eco))];
-    const madeInUkraine = [
-      ...new Set(products.map((product) => product.parameters.isUkraine)),
+    const sex = await this.getUniqueValues(products, 'sex');
+    const eco = [
+      ...new Set(
+        products
+          .map((product) => product.parameters.eco)
+          .filter((value) => value !== null && value !== undefined),
+      ),
     ];
+    const madeInUkraine = [
+      ...new Set(
+        products
+          .map((product) => product.parameters.isUkraine)
+          .filter((value) => value !== null && value !== undefined),
+      ),
+    ];
+
     const price = {
       max: products.length ? Number.MIN_VALUE : 0,
       min: products.length ? Number.MAX_VALUE : 0,
@@ -40,6 +52,7 @@ export class ProductFilterService {
       brands,
       eco,
       madeInUkraine,
+      sex,
     };
   }
   async getUniqueValues(products, key) {
@@ -48,19 +61,46 @@ export class ProductFilterService {
     if (key === 'color') {
       const colorMap = new Map();
       values.forEach((colorObj) => {
-        if (!colorMap.has(colorObj.colorName)) {
+        if (colorObj && !colorMap.has(colorObj.colorName)) {
           colorMap.set(colorObj.colorName, colorObj);
         }
       });
       return Array.from(colorMap.values());
     } else if (key === 'size') {
-      return [...new Set(values.filter((size) => size !== ''))];
+      return [
+        ...new Set(
+          values.filter(
+            (size) => size !== '' && size !== null && size !== undefined,
+          ),
+        ),
+      ];
     } else if (key === 'brand') {
       return [
-        ...new Set(values.filter((brand) => brand !== '' && brand !== '-')),
+        ...new Set(
+          values.filter(
+            (brand) =>
+              brand !== '' &&
+              brand !== '-' &&
+              brand !== null &&
+              brand !== undefined,
+          ),
+        ),
+      ];
+    } else if (key === 'sex') {
+      return [
+        ...new Set(
+          values.filter(
+            (sex) =>
+              sex !== '' && sex !== '-' && sex !== null && sex !== undefined,
+          ),
+        ),
       ];
     } else {
-      return [...new Set(values)];
+      return [
+        ...new Set(
+          values.filter((value) => value !== null && value !== undefined),
+        ),
+      ];
     }
   }
 }

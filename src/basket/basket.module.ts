@@ -19,6 +19,9 @@ import { ColorService } from 'src/color/color.service';
 import { Size, SizeSchema } from 'src/size/size.model';
 import { TransformImageService } from 'src/products/images-service/transform-image.sevice';
 import { ProductFilterService } from 'src/products/filter/filter.service';
+import { PurchaseService } from 'src/purchase/purchase.service';
+import Purchase, { PurchaseSchema } from 'src/purchase/purchase.model';
+import { Mailer } from 'src/auth/mailer/mailer.service';
 
 @Module({
   imports: [
@@ -30,6 +33,7 @@ import { ProductFilterService } from 'src/products/filter/filter.service';
       { name: SubCategory.name, schema: SubcategorySchema },
       { name: Color.name, schema: ColorSchema },
       { name: Size.name, schema: SizeSchema },
+      { name: Purchase.name, schema: PurchaseSchema },
     ]),
     CommentModule,
   ],
@@ -43,6 +47,8 @@ import { ProductFilterService } from 'src/products/filter/filter.service';
     ColorService,
     TransformImageService,
     ProductFilterService,
+    PurchaseService,
+    Mailer,
   ],
 })
 export class BasketModule {}

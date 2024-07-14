@@ -11,6 +11,7 @@ import { PurchaseService } from './purchase.service';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { CreatePurchaseDto } from './dto/create-purchase.dto';
+import ChangeStatusDto from './dto/change-status.dto';
 
 @ApiTags('purchase')
 @Controller('purchase')
@@ -24,6 +25,18 @@ export class PurchaseController {
   @ApiResponse({
     status: 400,
     description: 'Цей продукт не знайденно',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Продавця не знайденно',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Щось пішло не так',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Продавця не знайденно',
   })
   @ApiResponse({
     status: 401,
@@ -48,12 +61,20 @@ export class PurchaseController {
   })
   @ApiResponse({
     status: 400,
-    description: 'Цей продукт не знайденно',
+    description: 'Цей продукт продаєте не ви',
   })
   @ApiResponse({
     status: 401,
     description: 'Ви не авторизовані',
   })
-  @Post('changeStatus')
-  async changeStatus() {}
+  @Post('changeStatus/:idPurchase')
+  @UseGuards(JwtAuthGuard)
+  async changeStatus(
+    @Param('idPurchase') idPurchase: string,
+    @Body(new ValidationPipe()) status: ChangeStatusDto,
+    @Req() req,
+  ) {
+    const userId = req.user.id;
+    return this.purchaseService.changeStatus(idPurchase, status.status, userId);
+  }
 }

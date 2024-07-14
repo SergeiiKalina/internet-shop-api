@@ -15,7 +15,6 @@ export class CommentService {
     @InjectModel(Comment.name) private readonly commentModel: Model<Comment>,
     @InjectModel(Product.name) private readonly productModel: Model<Product>,
     @InjectModel(User.name) private readonly userModel: Model<User>,
-    private readonly userService: UserService,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
   async create(createCommentDto: CreateCommentDto, id: string) {

@@ -2,7 +2,7 @@ import { Controller, Get, Param, Res } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { UserService } from './user.service';
 
-@ApiTags('Get all users')
+@ApiTags('Users')
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
@@ -16,6 +16,6 @@ export class UserController {
   }
   @Get('profile/:userId')
   async getGuestUserInfo(@Param('userId') userId: string) {
-    return await this.userService.getGuestsUserInfo(userId)
+    return await this.userService.getGuestsUserInfo(userId);
   }
 }
