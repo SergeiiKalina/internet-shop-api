@@ -50,9 +50,10 @@ export class UserService {
       promisePurchases,
       promiseSoldGoods,
     ]);
-
+    const { password, isActivated, activationLink, lastLogout, ...restUser } =
+      user.toObject();
     return {
-      ...user.toObject(),
+      ...restUser,
       basket: basket,
       favorites,
       purchasedGoods: purchases,

@@ -86,6 +86,19 @@ export class ProductsService {
 
     const product = await this.productModel.create({
       ...restProduct,
+      price:
+        createProductDto.category === 'Подарую' && !createProductDto.price
+          ? 0
+          : createProductDto.price,
+      discount:
+        createProductDto.category === 'Подарую' && !createProductDto.discount
+          ? false
+          : createProductDto.discount,
+      discountPrice:
+        createProductDto.category === 'Подарую' &&
+        !createProductDto.discountPrice
+          ? 0
+          : createProductDto.discountPrice,
       category: categoryId,
       subCategory: subCategoryId ? subCategoryId : null,
       img: images,

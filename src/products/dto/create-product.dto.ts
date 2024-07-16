@@ -73,6 +73,7 @@ export class CreateProductDto {
 
   @ApiProperty({ type: Number, description: 'Price of the product' })
   @IsNumber()
+  @IsOptional()
   @Transform(({ value }) => Number(value))
   price: number;
 
@@ -81,6 +82,7 @@ export class CreateProductDto {
     description: 'Whether the product has discount',
   })
   @IsBoolean()
+  @IsOptional()
   @Transform(({ value }) => (value === 'false' ? false : true))
   discount: boolean;
   @ApiProperty({
