@@ -41,7 +41,7 @@ export class ProductsService {
   ) {}
 
   async searchProducts(title: string): Promise<Product[]> {
-    const regex = new RegExp(`^${title}`, 'i'); // Case-insensitive search for names starting with 'firstLetter'
+    const regex = new RegExp(`.*${title}.*`, 'i'); // Case-insensitive search for names starting with 'firstLetter'
     return this.productModel
       .find({ title: regex })
       .populate({ path: 'category', select: 'mainCategory -_id' })
