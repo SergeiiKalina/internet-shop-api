@@ -7,7 +7,7 @@ import {
 import { CreateProductDto } from './dto/create-product.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Product } from './product.model';
-import { Model } from 'mongoose';
+import { Model, SortOrder, Types } from 'mongoose';
 import { ImageService } from './images-service/images.service';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { Category } from 'src/category/categoty.model';
@@ -20,6 +20,7 @@ import { ColorService } from 'src/color/color.service';
 import { TransformImageService } from './images-service/transform-image.sevice';
 import { ProductFilterService } from './filter/filter.service';
 import { FiltersDto } from './dto/filters.dto';
+import { aggregateForFiltersAndSortedProducts } from './aggregates/aggregates';
 
 @Injectable()
 export class ProductsService {
@@ -268,83 +269,26 @@ export class ProductsService {
     return product;
   }
 
-  async filterBySubcategory(subCategory: string) {
-    const nameSubCategory = await this.subCategoryModel.findOne({
-      'subCategory.en': subCategory,
+  async filterAndSortedProducts(
+    subCategoryOrCategory: string,
+    sortField: string,
+    sortOrder: string,
+    filtersDto: FiltersDto,
+  ) {
+    const sortOptions: { [key: string]: SortOrder } = sortField
+      ? { [sortField]: sortOrder === 'asc' ? 1 : -1 }
+      : {};
+    const promiseCategory = this.categoryModel.findOne({
+      'mainCategory.en': subCategoryOrCategory,
+    });
+    const promiseSubcategory = this.subCategoryModel.findOne({
+      'subCategory.en': subCategoryOrCategory,
     });
 
-    if (!nameSubCategory) {
-      throw new NotFoundException('Ця підкатегорія не знайденна');
-    }
-
-    const allProductWithThisSubCategory = await this.productModel
-      .find({
-        subCategory: nameSubCategory._id,
-      })
-      .populate({ path: 'category', select: 'mainCategory -_id' })
-      .populate({
-        path: 'subCategory',
-        select: 'subCategory -_id',
-      })
-      .populate('parameters.color')
-      .populate(
-        'producer',
-        '-password -isActivated -activationLink -lastLogout -favorites -registrationDate -basket -purchasedGoods -soldGoods',
-      );
-    const filters = await this.productFilterService.createFiltersData(
-      allProductWithThisSubCategory,
-    );
-
-    return {
-      products: allProductWithThisSubCategory,
-      filters,
-      totalItems: allProductWithThisSubCategory.length,
-      totalPages: allProductWithThisSubCategory.length ? 1 : 0,
-    };
-  }
-
-  async filterByCategory(category: string) {
-    const nameCategory = await this.categoryModel.findOne({
-      'mainCategory.en': category,
-    });
-
-    if (!nameCategory) {
-      throw new NotFoundException('Ця категорія не знайдена');
-    }
-    const allProductWithThisCategory = await this.productModel
-      .find({
-        category: nameCategory._id,
-      })
-      .populate({ path: 'category', select: 'mainCategory -_id' })
-      .populate({
-        path: 'subCategory',
-        select: 'subCategory -_id',
-      })
-      .populate('parameters.color')
-      .populate(
-        'producer',
-        '-password -isActivated -activationLink -lastLogout -favorites -registrationDate -basket -purchasedGoods -soldGoods',
-      )
-      .exec();
-
-    const filters = await this.productFilterService.createFiltersData(
-      allProductWithThisCategory,
-    );
-    return {
-      products: allProductWithThisCategory,
-      filters,
-      totalItems: allProductWithThisCategory.length,
-      totalPages: allProductWithThisCategory.length ? 1 : 0,
-    };
-  }
-
-  async filterProduct(filters: FiltersDto) {
-    const category = await this.categoryModel.findOne({
-      'mainCategory.en': filters.nameCategoryOrSubcategory,
-    });
-    const subcategory = await this.subCategoryModel.findOne({
-      'subCategory.en': filters.nameCategoryOrSubcategory,
-    });
+    const [category, subcategory] = await Promise.all([
+      promiseCategory,
+      promiseSubcategory,
+    ]);
 
     if (!category && !subcategory) {
       throw new BadRequestException(
@@ -353,31 +297,78 @@ export class ProductsService {
     }
     const categoryId = category ? category.id : '';
     const subcategoryId = subcategory ? subcategory.id : '';
-    const products = await this.productModel.aggregate([
-      {
-        $match: {
-          $or: [{ category: categoryId }, { subCategory: subcategoryId }],
-          price: { $gte: filters.price.min, $lte: filters.price.max },
-          'parameters.color': {
-            $in: filters.colors.length ? filters.colors : [/.*/],
-          },
-          'parameters.size': {
-            $in: filters.sizes.length ? filters.sizes : [/.*/],
-          },
-          'parameters.state': {
-            $in: filters.states.length ? filters.states : [/.*/],
-          },
-          'parameters.eco': {
-            $in: filters.eco.length ? filters.eco : [true, false],
-          },
-          'parameters.isUkraine': {
-            $in: filters.IsUkraine.length ? filters.IsUkraine : [true, false],
+
+    const filterOptions = {
+      $or: [{ category: categoryId }, { subCategory: subcategoryId }],
+      price: { $gte: filtersDto.price.min, $lte: filtersDto.price.max },
+
+      'parameters.size': {
+        $in: filtersDto.sizes.length ? filtersDto.sizes : [/.*/],
+      },
+      'parameters.state': {
+        $in: filtersDto.states.length ? filtersDto.states : [/.*/],
+      },
+      'parameters.eco': {
+        $in: filtersDto.eco.length ? filtersDto.eco : [true, false],
+      },
+      'parameters.isUkraine': {
+        $in: filtersDto.isUkraine.length ? filtersDto.isUkraine : [true, false],
+      },
+    };
+    if (filtersDto.colors.length > 0) {
+      filterOptions['parameters.color'] = {
+        $in: filtersDto.colors.map((colorId) => new Types.ObjectId(colorId)),
+      };
+    }
+
+    const promiseAllProductsWithThisSubCategory = this.productModel
+      .aggregate([
+        {
+          $match: {
+            $or: [{ category: categoryId }, { subCategory: subcategoryId }],
           },
         },
-      },
-    ]);
+        {
+          $lookup: {
+            from: 'colors',
+            localField: 'parameters.color',
+            foreignField: '_id',
+            as: 'parameters.color',
+          },
+        },
+        {
+          $unwind: {
+            path: '$parameters.color',
+            preserveNullAndEmptyArrays: true,
+          },
+        },
+      ])
+      .exec();
 
-    return products;
+    const promiseAllProductWithAllFiltersAndSorted = this.productModel
+      .aggregate([
+        { $match: filterOptions },
+        ...aggregateForFiltersAndSortedProducts,
+      ])
+      .sort(sortOptions)
+      .exec();
+
+    const [allProductsWithThisSubCategory, allProductWithAllFiltersAndSorted] =
+      await Promise.all([
+        promiseAllProductsWithThisSubCategory,
+        promiseAllProductWithAllFiltersAndSorted,
+      ]);
+
+    const filters = await this.productFilterService.createFiltersData(
+      allProductsWithThisSubCategory,
+    );
+
+    return {
+      products: allProductWithAllFiltersAndSorted,
+      filters,
+      totalItems: allProductsWithThisSubCategory.length,
+      totalPages: allProductWithAllFiltersAndSorted.length ? 1 : 0,
+    };
   }
 
   async getFewProducts(ids: string[]) {
@@ -386,146 +377,4 @@ export class ProductsService {
       .select('-comments');
     return favorites;
   }
-
-  // async changeAllCategory() {
-  //   const subcategory = await this.subCategoryModel.findOne({
-  //     'subCategory.en': 'souvenirs',
-  //   });
-
-  //   if (!subcategory) {
-  //     throw new Error('Subcategory not found');
-  //   }
-
-  //   const products = await this.productModel.aggregate([
-  //     { $match: { subCategory: subcategory.id } },
-  //     {
-  //       $group: {
-  //         _id: subcategory._id,
-  //         minPrice: { $min: '$price' },
-  //         maxPrice: { $max: '$price' },
-  //         states: { $addToSet: '$parameters.state' },
-  //         sizes: { $addToSet: '$parameters.size' },
-  //         colors: { $addToSet: '$parameters.color' },
-  //         sexes: { $addToSet: '$parameters.sex' },
-  //       },
-  //     },
-  //     {
-  //       $project: {
-  //         minPrice: 1,
-  //         maxPrice: 1,
-  //         states: {
-  //           $reduce: {
-  //             input: {
-  //               $map: {
-  //                 input: '$states',
-  //                 as: 'state',
-  //                 in: {
-  //                   $cond: {
-  //                     if: { $isArray: '$$state' },
-  //                     then: '$$state',
-  //                     else: ['$$state'],
-  //                   },
-  //                 },
-  //               },
-  //             },
-  //             initialValue: [],
-  //             in: { $setUnion: ['$$value', '$$this'] },
-  //           },
-  //         },
-  //         sizes: {
-  //           $reduce: {
-  //             input: {
-  //               $map: {
-  //                 input: '$sizes',
-  //                 as: 'size',
-  //                 in: {
-  //                   $cond: {
-  //                     if: { $isArray: '$$size' },
-  //                     then: '$$size',
-  //                     else: ['$$size'],
-  //                   },
-  //                 },
-  //               },
-  //             },
-  //             initialValue: [],
-  //             in: { $setUnion: ['$$value', '$$this'] },
-  //           },
-  //         },
-  //         colors: {
-  //           $reduce: {
-  //             input: {
-  //               $map: {
-  //                 input: '$colors',
-  //                 as: 'color',
-  //                 in: {
-  //                   $cond: {
-  //                     if: { $isArray: '$$color' },
-  //                     then: '$$color',
-  //                     else: ['$$color'],
-  //                   },
-  //                 },
-  //               },
-  //             },
-  //             initialValue: [],
-  //             in: { $setUnion: ['$$value', '$$this'] },
-  //           },
-  //         },
-  //         sexes: {
-  //           $reduce: {
-  //             input: {
-  //               $map: {
-  //                 input: '$sexes',
-  //                 as: 'sex',
-  //                 in: {
-  //                   $cond: {
-  //                     if: { $isArray: '$$sex' },
-  //                     then: '$$sex',
-  //                     else: ['$$sex'],
-  //                   },
-  //                 },
-  //               },
-  //             },
-  //             initialValue: [],
-  //             in: { $setUnion: ['$$value', '$$this'] },
-  //           },
-  //         },
-  //       },
-  //     },
-  //     {
-  //       $project: {
-  //         minPrice: 1,
-  //         maxPrice: 1,
-  //         states: {
-  //           $filter: {
-  //             input: '$states',
-  //             as: 'state',
-  //             cond: { $ne: ['$$state', ''] },
-  //           },
-  //         },
-  //         sizes: {
-  //           $filter: {
-  //             input: '$sizes',
-  //             as: 'size',
-  //             cond: { $ne: ['$$size', ''] },
-  //           },
-  //         },
-  //         colors: {
-  //           $filter: {
-  //             input: '$colors',
-  //             as: 'color',
-  //             cond: { $ne: ['$$color', ''] },
-  //           },
-  //         },
-  //         sexes: {
-  //           $filter: {
-  //             input: '$sexes',
-  //             as: 'sex',
-  //             cond: { $ne: ['$$sex', ''] },
-  //           },
-  //         },
-  //       },
-  //     },
-  //   ]);
-  //   return products;
-  // }
 }

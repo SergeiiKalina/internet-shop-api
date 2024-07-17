@@ -10,59 +10,12 @@ import {
   Length,
   MinLength,
 } from 'class-validator';
-
-const CategoryEnum = [
-  'Подарункові товари',
-  'Одяг',
-  'Аксесуари',
-  'Взуття з натуральних матеріалів',
-  'Натуральна косметика',
-  'Товари з перероблених матеріалів',
-  'Подарую',
-] as const;
-
-const SubCategoryEnum = [
-  'Сувеніри',
-  'Подарункові набори',
-  'Святкова тематика',
-  'Сорочки',
-  'Плаття',
-  'Блузки',
-  'Сумки',
-  'Пояси',
-  'Портмоне',
-  'Хустки',
-  'Окуляри',
-  'Зимове',
-  'Літнє',
-  'Мило',
-  'Парфюмерія',
-  'Перероблений денім',
-  'Востановленний секонд хэнд',
-  'Вишивка',
-  null,
-] as const;
-
-const sizeEmbroidery = [
-  'Без розміру',
-  'XS',
-  'S',
-  'M',
-  'L',
-  'XL',
-  'XXL',
-  'XXXL',
-  'EU 36',
-  'EU 37',
-  'EU 38',
-  'EU 39',
-  'EU 40',
-  'EU 41',
-  'EU 42',
-  'EU 43',
-  'EU 44',
-  'EU 45',
-] as const;
+import {
+  CategoryEnum,
+  sex,
+  sizeEmbroidery,
+  SubCategoryEnum,
+} from '../enum/enumForProducts';
 
 export class CreateProductDto {
   constructor() {}
@@ -161,6 +114,13 @@ export class CreateProductDto {
   @IsString()
   @IsOptional()
   brand?: string;
+  @ApiProperty({ type: String, description: '' })
+  @IsString()
+  @IsOptional()
+  @IsEnum(sex, {
+    message: `sex not correct, must be (${SubCategoryEnum.map((el) => ' ' + el)})`,
+  })
+  sex?: string;
   @ApiProperty({ type: String, description: 'Description of the product' })
   @IsString()
   @MinLength(30)

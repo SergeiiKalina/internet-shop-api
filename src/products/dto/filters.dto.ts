@@ -8,12 +8,6 @@ interface IPrice {
 
 export class FiltersDto {
   @ApiProperty({
-    type: String,
-    description: 'Name of the category or subcategory',
-  })
-  @IsString()
-  nameCategoryOrSubcategory: string;
-  @ApiProperty({
     type: {
       max: { type: Number },
       min: { type: Number },
@@ -57,5 +51,5 @@ export class FiltersDto {
     description: 'array of booleans',
   })
   @IsArray()
-  IsUkraine: boolean[];
+  isUkraine: boolean[];
 }

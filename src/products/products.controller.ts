@@ -31,28 +31,12 @@ import { UpdateProductDto } from './dto/update-product.dto';
 import { SharpPipe } from './pipes/sharpForFewFile.pipe';
 import { Product } from './product.model';
 import { FiltersDto } from './dto/filters.dto';
+import { SortField, SortOrder } from './enum/enumForProducts';
 @ApiTags('product')
 @Controller('products')
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
-  @ApiOperation({
-    summary: 'Get filtered products',
-  })
-  @ApiConsumes('application/json')
-  @ApiBody({
-    type: FiltersDto,
-  })
-  @ApiResponse({ status: 200, description: 'return products' })
-  @ApiOperation({ summary: 'Get filtered products' })
-  @ApiResponse({
-    status: 400,
-    description: 'Такої Категорії або підкатегорії не існує',
-  })
-  @Post('filter')
-  async filterProduct(@Body() filters: FiltersDto) {
-    return await this.productsService.filterProduct(filters);
-  }
   @Get('search')
   async searchProductsByFirstLetter(
     @Query('title') title: string,
@@ -205,45 +189,115 @@ export class ProductsController {
   }
 
   @ApiParam({
-    name: 'subCategory',
+    name: 'category or subcategory',
     required: true,
     type: String,
-    description: 'product subcategory in eng',
+    description: 'product category or subcategory in eng',
+  })
+  @ApiQuery({
+    name: 'sortField',
+    required: false,
+    type: String,
+    enum: SortField,
+    description: 'Field to sort by (createDate,price,visit)',
+  })
+  @ApiQuery({
+    name: 'sortOrder',
+    required: false,
+    type: String,
+    enum: SortOrder,
+    description: 'Sort order (asc or desc)',
+  })
+  @ApiQuery({
+    name: 'colors',
+    required: false,
+    type: [String],
+    description: 'Array of Id colors',
+  })
+  @ApiQuery({
+    name: 'sizes',
+    required: false,
+    type: [String],
+    description: 'Array of sizes',
+  })
+  @ApiQuery({
+    name: 'minPrice',
+    required: false,
+    type: String,
+    description: 'Min price',
+  })
+  @ApiQuery({
+    name: 'maxPrice',
+    required: false,
+    type: String,
+    description: 'Max price',
+  })
+  @ApiQuery({
+    name: 'states',
+    required: false,
+    type: [String],
+    description: 'Array of states',
+  })
+  @ApiQuery({
+    name: 'brands',
+    required: false,
+    type: [String],
+    description: 'Array of brands',
+  })
+  @ApiQuery({
+    name: 'eco',
+    required: false,
+    type: [Boolean],
+    description: 'Array of eco',
+  })
+  @ApiQuery({
+    name: 'IsUkraine',
+    required: false,
+    type: [Boolean],
+    description: 'Array of IsUkraine',
   })
   @ApiResponse({
     status: 200,
-    description: 'return all product with this subcategory and filters',
+    description:
+      'return all product with this subcategory or category and filters and sorted',
   })
   @ApiOperation({
-    summary: 'return all product with this subcategory and filters',
+    summary: 'return all product with this subcategory or category and filters',
   })
   @ApiResponse({
     status: 404,
-    description: 'Not Found. this subcategory not found.',
+    description: 'Not Found. this subcategory or category not found.',
   })
-  @Get('filterBySubcategory/:subCategory')
-  async filterBySubcategory(@Param('subCategory') subCategory: string) {
-    return this.productsService.filterBySubcategory(subCategory);
-  }
-
-  @ApiParam({
-    name: 'category',
-    required: true,
-    type: String,
-    description: 'product category in eng',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'return all products with this category',
-  })
-  @ApiOperation({ summary: 'return all products with this category' })
-  @ApiResponse({
-    status: 404,
-    description: 'Not Found. this category not found.',
-  })
-  @Get('filterByCategory/:category')
-  async filterByCategory(@Param('category') category: string) {
-    return this.productsService.filterByCategory(category);
+  @Get('filterAndSortedProducts/:subCategoryOrCategory')
+  async filterAndSortedProducts(
+    @Param('subCategoryOrCategory') subCategoryOrCategory: string,
+    @Query('sortField') sortField: SortField = SortField.CREATE,
+    @Query('sortOrder') sortOrder: SortOrder = SortOrder.ASC,
+    @Query('minPrice') minPrice: number = 0,
+    @Query('maxPrice') maxPrice: number = Number.MAX_SAFE_INTEGER,
+    @Query('colors') colors: string[] = [],
+    @Query('sizes') sizes: string[] = [],
+    @Query('states') states: string[] = [],
+    @Query('brands') brands: string[] = [],
+    @Query('eco') eco: boolean[] = [],
+    @Query('isUkraine') isUkraine: boolean[] = [],
+  ) {
+    return this.productsService.filterAndSortedProducts(
+      subCategoryOrCategory,
+      sortField,
+      sortOrder,
+      {
+        price: { min: +minPrice, max: +maxPrice },
+        colors: Array.isArray(colors) ? colors : [colors],
+        sizes: Array.isArray(sizes) ? sizes : [sizes],
+        states: Array.isArray(states) ? states : [states],
+        brands: Array.isArray(brands) ? brands : [brands],
+        eco: Array.isArray(eco) ? eco : [eco === 'false' ? false : true],
+        isUkraine: Array.isArray(isUkraine)
+          ? isUkraine
+          : [isUkraine === 'false' ? false : true],
+      },
+    );
   }
 
   @ApiResponse({

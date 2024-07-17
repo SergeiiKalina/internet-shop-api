@@ -65,6 +65,7 @@ export class ProductFilterService {
           colorMap.set(colorObj.colorName, colorObj);
         }
       });
+
       return Array.from(colorMap.values());
     } else if (key === 'size') {
       return [
@@ -90,7 +91,7 @@ export class ProductFilterService {
       return [
         ...new Set(
           values.filter(
-            (sex) =>
+            (sex: string) =>
               sex !== '' && sex !== '-' && sex !== null && sex !== undefined,
           ),
         ),
