@@ -188,12 +188,6 @@ export class ProductsController {
     return this.productsService.delete(id);
   }
 
-  @ApiParam({
-    name: 'category or subcategory',
-    required: true,
-    type: String,
-    description: 'product category or subcategory in eng',
-  })
   @ApiQuery({
     name: 'sortField',
     required: false,
@@ -251,10 +245,10 @@ export class ProductsController {
     description: 'Array of eco',
   })
   @ApiQuery({
-    name: 'IsUkraine',
+    name: 'isUkraine',
     required: false,
     type: [Boolean],
-    description: 'Array of IsUkraine',
+    description: 'Array of isUkraine',
   })
   @ApiQuery({
     name: 'page',
