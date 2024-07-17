@@ -20,7 +20,10 @@ import { ColorService } from 'src/color/color.service';
 import { TransformImageService } from './images-service/transform-image.sevice';
 import { ProductFilterService } from './filter/filter.service';
 import { FiltersDto } from './dto/filters.dto';
-import { aggregateForFiltersAndSortedProducts } from './aggregates/aggregates';
+import {
+  aggregateForAllProductsInThisCategory,
+  aggregateForFiltersAndSortedProducts,
+} from './aggregates/aggregates';
 
 @Injectable()
 export class ProductsService {
@@ -274,7 +277,10 @@ export class ProductsService {
     sortField: string,
     sortOrder: string,
     filtersDto: FiltersDto,
+    page: number,
+    limit: number,
   ) {
+    const startIndex = (page - 1) * limit;
     const sortOptions: { [key: string]: SortOrder } = sortField
       ? { [sortField]: sortOrder === 'asc' ? 1 : -1 }
       : {};
@@ -328,20 +334,7 @@ export class ProductsService {
             $or: [{ category: categoryId }, { subCategory: subcategoryId }],
           },
         },
-        {
-          $lookup: {
-            from: 'colors',
-            localField: 'parameters.color',
-            foreignField: '_id',
-            as: 'parameters.color',
-          },
-        },
-        {
-          $unwind: {
-            path: '$parameters.color',
-            preserveNullAndEmptyArrays: true,
-          },
-        },
+        ...aggregateForAllProductsInThisCategory,
       ])
       .exec();
 
@@ -351,6 +344,8 @@ export class ProductsService {
         ...aggregateForFiltersAndSortedProducts,
       ])
       .sort(sortOptions)
+      .skip(startIndex)
+      .limit(limit)
       .exec();
 
     const [allProductsWithThisSubCategory, allProductWithAllFiltersAndSorted] =

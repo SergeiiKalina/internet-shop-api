@@ -91,3 +91,20 @@ export const aggregateForFiltersAndSortedProducts = [
     },
   },
 ];
+
+export const aggregateForAllProductsInThisCategory = [
+  {
+    $lookup: {
+      from: 'colors',
+      localField: 'parameters.color',
+      foreignField: '_id',
+      as: 'parameters.color',
+    },
+  },
+  {
+    $unwind: {
+      path: '$parameters.color',
+      preserveNullAndEmptyArrays: true,
+    },
+  },
+];

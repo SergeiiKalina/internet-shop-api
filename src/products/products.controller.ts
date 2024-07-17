@@ -256,6 +256,18 @@ export class ProductsController {
     type: [Boolean],
     description: 'Array of IsUkraine',
   })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+    description: 'Page number',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    description: 'Items per page',
+  })
   @ApiResponse({
     status: 200,
     description:
@@ -281,6 +293,8 @@ export class ProductsController {
     @Query('brands') brands: string[] = [],
     @Query('eco') eco: boolean[] = [],
     @Query('isUkraine') isUkraine: boolean[] = [],
+    @Query('page') page: string = '1',
+    @Query('limit') limit: string = '20',
   ) {
     return this.productsService.filterAndSortedProducts(
       subCategoryOrCategory,
@@ -297,6 +311,8 @@ export class ProductsController {
           ? isUkraine
           : [isUkraine === 'false' ? false : true],
       },
+      +page,
+      +limit,
     );
   }
 
