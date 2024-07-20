@@ -31,7 +31,7 @@ import { UpdateProductDto } from './dto/update-product.dto';
 import { SharpPipe } from './pipes/sharpForFewFile.pipe';
 import { Product } from './product.model';
 import { FiltersDto } from './dto/filters.dto';
-import { SortField, SortOrder } from './enum/enumForProducts';
+import { SortField, SortOrder,sexEnum } from './enum/enumForProducts';
 @ApiTags('product')
 @Controller('products')
 export class ProductsController {
@@ -230,7 +230,7 @@ export class ProductsController {
     name: 'states',
     required: false,
     type: [String],
-    description: 'Array of states',
+    description: 'Array of states (Нове, Уживаний товар)',
   })
   @ApiQuery({
     name: 'brands',
@@ -262,6 +262,18 @@ export class ProductsController {
     type: Number,
     description: 'Items per page',
   })
+  @ApiQuery({
+    name: 'discount',
+    required: false,
+    type: Boolean,
+    description: 'product with discount or not',
+  })
+  @ApiQuery({
+    name: 'sex',
+    required: false,
+    type: [String],
+    description: 'for which  sex is the product (unsex, male, female)',
+  })
   @ApiResponse({
     status: 200,
     description:
@@ -285,11 +297,14 @@ export class ProductsController {
     @Query('sizes') sizes: string[] = [],
     @Query('states') states: string[] = [],
     @Query('brands') brands: string[] = [],
-    @Query('eco') eco: boolean[] = [],
-    @Query('isUkraine') isUkraine: boolean[] = [],
+    @Query('eco') eco: string[] = [],
+    @Query('isUkraine') isUkraine: string[] = [],
     @Query('page') page: string = '1',
     @Query('limit') limit: string = '20',
+    @Query('discount') discount: string[] = [],
+    @Query('sex') sex: string[] = []
   ) {
+
     return this.productsService.filterAndSortedProducts(
       subCategoryOrCategory,
       sortField,
@@ -300,15 +315,20 @@ export class ProductsController {
         sizes: Array.isArray(sizes) ? sizes : [sizes],
         states: Array.isArray(states) ? states : [states],
         brands: Array.isArray(brands) ? brands : [brands],
-        eco: Array.isArray(eco) ? eco : [eco === 'false' ? false : true],
+        eco: Array.isArray(eco) ? eco.map(el => el === 'false' ? false : true) : [eco === 'false' ? false : true],
         isUkraine: Array.isArray(isUkraine)
-          ? isUkraine
+          ? isUkraine.map(el => el === 'false' ? false : true)
           : [isUkraine === 'false' ? false : true],
+          discount: Array.isArray(discount) ? discount.map(el => el === 'false' ? false : true): [discount === "false" ? false :true],
+          sex: Array.isArray(sex) ? sex : [sex]
       },
       +page,
       +limit,
+      
     );
   }
+
+
 
   @ApiResponse({
     status: 200,

@@ -9,6 +9,7 @@ export enum SortOrder {
   DESC = 'desc',
 }
 
+
 export const CategoryEnum = [
   'Подарункові товари',
   'Одяг',
@@ -61,4 +62,6 @@ export const sizeEmbroidery = [
   'EU 44',
   'EU 45',
 ] as const;
-export const sex = ['unsex', 'male', 'female'] as const;
+
+
+export const sexEnum = ['unsex', 'male', 'female'] as const;

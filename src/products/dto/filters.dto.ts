@@ -52,4 +52,17 @@ export class FiltersDto {
   })
   @IsArray()
   isUkraine: boolean[];
+  @IsArray()
+  @ApiProperty({
+    type: [Boolean],
+    description: 'array of booleans',
+  })
+  discount: boolean[]
+  @ApiProperty({
+    type: [String],
+    description: 'array of String',
+  })
+  @IsArray()
+  @IsString({each:true})
+  sex: string[]
 }

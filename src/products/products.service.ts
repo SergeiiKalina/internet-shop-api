@@ -281,6 +281,8 @@ export class ProductsService {
     limit: number,
   ) {
     const startIndex = (page - 1) * limit;
+    
+
     const sortOptions: { [key: string]: SortOrder } = sortField
       ? { [sortField]: sortOrder === 'asc' ? 1 : -1 }
       : {};
@@ -295,8 +297,7 @@ export class ProductsService {
       promiseCategory,
       promiseSubcategory,
     ]);
-
-    if (!category && !subcategory) {
+    if (!category && !subcategory && subCategoryOrCategory !== 'all') {
       throw new BadRequestException(
         'Такої Категорії або підкатегорії не існує',
       );
@@ -304,10 +305,16 @@ export class ProductsService {
     const categoryId = category ? category.id : '';
     const subcategoryId = subcategory ? subcategory.id : '';
 
-    const filterOptions = {
-      $or: [{ category: categoryId }, { subCategory: subcategoryId }],
-      price: { $gte: filtersDto.price.min, $lte: filtersDto.price.max },
 
+
+    const filterOptions = {
+      ...(subCategoryOrCategory === 'all' ? {} : {
+        $or: [
+          { category: categoryId },
+          { subCategory: subcategoryId }
+        ]
+      }),
+      price: { $gte: filtersDto.price.min, $lte: filtersDto.price.max },
       'parameters.size': {
         $in: filtersDto.sizes.length ? filtersDto.sizes : [/.*/],
       },
@@ -320,6 +327,12 @@ export class ProductsService {
       'parameters.isUkraine': {
         $in: filtersDto.isUkraine.length ? filtersDto.isUkraine : [true, false],
       },
+      'discount': {
+        $in: filtersDto.discount.length ? filtersDto.discount : [true, false],
+      },
+      'parameters.sex': {
+        $in: filtersDto.sex.length ? filtersDto.sex : ['unsex', "female", 'male'],
+      },
     };
     if (filtersDto.colors.length > 0) {
       filterOptions['parameters.color'] = {
@@ -331,13 +344,18 @@ export class ProductsService {
       .aggregate([
         {
           $match: {
-            $or: [{ category: categoryId }, { subCategory: subcategoryId }],
+            ...(subCategoryOrCategory === 'all' ? {} : {
+              $or: [
+                { category: categoryId },
+                { subCategory: subcategoryId }
+              ]
+            })
           },
         },
         ...aggregateForAllProductsInThisCategory,
       ])
       .exec();
-
+     
     const promiseAllProductWithAllFiltersAndSorted = this.productModel
       .aggregate([
         { $match: filterOptions },
@@ -358,11 +376,13 @@ export class ProductsService {
       allProductsWithThisSubCategory,
     );
 
+const quatityAllProducts = allProductsWithThisSubCategory.length
+
     return {
       products: allProductWithAllFiltersAndSorted,
       filters,
       totalItems: allProductsWithThisSubCategory.length,
-      totalPages: allProductWithAllFiltersAndSorted.length ? 1 : 0,
+      totalPages: quatityAllProducts ? quatityAllProducts / limit < 1 ? 1 : Math.ceil(quatityAllProducts / limit): 0,
     };
   }
 

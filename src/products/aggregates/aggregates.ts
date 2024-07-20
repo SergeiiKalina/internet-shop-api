@@ -1,3 +1,4 @@
+
 export const aggregateForFiltersAndSortedProducts = [
   {
     $addFields: {
@@ -106,5 +107,17 @@ export const aggregateForAllProductsInThisCategory = [
       path: '$parameters.color',
       preserveNullAndEmptyArrays: true,
     },
+  },
+  {
+    $group: {
+      _id: '$_id',
+       title: { $first: '$title' },
+      category: { $first: '$category' },
+      subCategory: { $first: '$subCategory' },
+      parameters: { $first: '$parameters' },
+      price: {$first: '$price'},
+      discount: {$first: '$discount'},
+      discountPrice: {$first: '$discountPrice'}
+    }
   },
 ];

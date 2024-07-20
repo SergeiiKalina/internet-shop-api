@@ -12,7 +12,7 @@ import {
 } from 'class-validator';
 import {
   CategoryEnum,
-  sex,
+  sexEnum,
   sizeEmbroidery,
   SubCategoryEnum,
 } from '../enum/enumForProducts';
@@ -117,8 +117,8 @@ export class CreateProductDto {
   @ApiProperty({ type: String, description: '' })
   @IsString()
   @IsOptional()
-  @IsEnum(sex, {
-    message: `sex not correct, must be (${SubCategoryEnum.map((el) => ' ' + el)})`,
+  @IsEnum(sexEnum, {
+    message: `sex not correct, must be (${sexEnum.map((el) => ' ' + el)})`,
   })
   sex?: string;
   @ApiProperty({ type: String, description: 'Description of the product' })

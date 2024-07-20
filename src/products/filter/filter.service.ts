@@ -37,10 +37,18 @@ export class ProductFilterService {
 
     products.forEach((el) => {
       if (el.price > price.max) {
-        price.max = el.price;
+        if(el.discount){
+          price.max = el.discountPrice
+        }else{
+          price.max = el.price;
+        }
       }
       if (el.price < price.min) {
-        price.min = el.price;
+        if(el.discount){
+          price.min = el.discountPrice
+        }else{
+          price.min = el.price;
+        }
       }
     });
 
