@@ -132,9 +132,11 @@ export class CommentService {
   async getAllFullCommentForProduct(id: string) {
     const allCommentMainComments = this.commentModel
       .find({ product: id, parent: null })
+      .populate('author', '_id firstName')
       .sort({ createDate: -1 });
     const allAnswersPromise = this.commentModel
       .find({ product: id, parent: { $ne: null } })
+      .populate('author', '_id firstName')
       .sort({ createDate: -1 });
 
     const [allComment, allAnswers] = await Promise.all([
