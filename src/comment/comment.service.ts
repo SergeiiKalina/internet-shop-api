@@ -144,31 +144,35 @@ export class CommentService {
       allAnswersPromise,
     ]);
 
-    const commentsMap = new Map();
+    const mapMainComments = new Map();
+    const mapAnswers = new Map();
 
     allComment.forEach((comment) => {
-      const commentObj = { ...comment.toObject(), answers: [] };
-      commentsMap.set(comment.id.toString(), commentObj);
+      const commentObj = { ...comment.toObject(), comments: [] };
+      mapMainComments.set(comment.id, commentObj);
     });
 
     allAnswers.forEach((answer) => {
-      const answerObj = { ...answer.toObject(), answers: [] };
-      commentsMap.set(answer.id.toString(), answerObj);
+      const answerObj = { ...answer.toObject(), comments: [] };
+      mapAnswers.set(answer.id, answerObj);
     });
 
-    allAnswers.forEach((answer) => {
-      const parentKey = answer.parent.toString();
-      if (commentsMap.has(parentKey)) {
-        commentsMap
-          .get(parentKey)
-          .answers.push(commentsMap.get(answer.id.toString()));
+    for (const [key, value] of mapAnswers) {
+      const parentKey = value.parent.toString();
+      if (mapAnswers.has(parentKey)) {
+        mapAnswers.get(parentKey).comments.push(value);
+        mapAnswers.delete(key);
       }
-    });
+    }
 
-    allAnswers.forEach((answer) => {
-      commentsMap.delete(answer.id.toString());
-    });
+    for (const [key, value] of mapAnswers) {
+      const parentKey = value.parent.toString();
+      if (mapMainComments.has(parentKey)) {
+        mapMainComments.get(parentKey).comments.push(value);
+        mapAnswers.delete(key);
+      }
+    }
 
-    return Array.from(commentsMap.values());
+    return Array.from(mapMainComments.values());
   }
 }
