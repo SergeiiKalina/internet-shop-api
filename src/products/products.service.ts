@@ -216,7 +216,7 @@ export class ProductsService {
       }
 
       const allComment = await this.commentService.getAllFullCommentForProduct(
-        product.comments,
+        product.id,
       );
 
       const returnProduct = {
@@ -247,7 +247,7 @@ export class ProductsService {
 
   async delete(id: string) {
     const deleteProduct = this.productModel.findByIdAndDelete(id);
-
+    await this.cacheManager.del(id.toString());
     return deleteProduct;
   }
 
@@ -281,7 +281,6 @@ export class ProductsService {
     limit: number,
   ) {
     const startIndex = (page - 1) * limit;
-    
 
     const sortOptions: { [key: string]: SortOrder } = sortField
       ? { [sortField]: sortOrder === 'asc' ? 1 : -1 }
@@ -305,15 +304,12 @@ export class ProductsService {
     const categoryId = category ? category.id : '';
     const subcategoryId = subcategory ? subcategory.id : '';
 
-
-
     const filterOptions = {
-      ...(subCategoryOrCategory === 'all' ? {} : {
-        $or: [
-          { category: categoryId },
-          { subCategory: subcategoryId }
-        ]
-      }),
+      ...(subCategoryOrCategory === 'all'
+        ? {}
+        : {
+            $or: [{ category: categoryId }, { subCategory: subcategoryId }],
+          }),
       price: { $gte: filtersDto.price.min, $lte: filtersDto.price.max },
       'parameters.size': {
         $in: filtersDto.sizes.length ? filtersDto.sizes : [/.*/],
@@ -327,11 +323,13 @@ export class ProductsService {
       'parameters.isUkraine': {
         $in: filtersDto.isUkraine.length ? filtersDto.isUkraine : [true, false],
       },
-      'discount': {
+      discount: {
         $in: filtersDto.discount.length ? filtersDto.discount : [true, false],
       },
       'parameters.sex': {
-        $in: filtersDto.sex.length ? filtersDto.sex : ['unsex', "female", 'male'],
+        $in: filtersDto.sex.length
+          ? filtersDto.sex
+          : ['unsex', 'female', 'male'],
       },
     };
     if (filtersDto.colors.length > 0) {
@@ -344,18 +342,20 @@ export class ProductsService {
       .aggregate([
         {
           $match: {
-            ...(subCategoryOrCategory === 'all' ? {} : {
-              $or: [
-                { category: categoryId },
-                { subCategory: subcategoryId }
-              ]
-            })
+            ...(subCategoryOrCategory === 'all'
+              ? {}
+              : {
+                  $or: [
+                    { category: categoryId },
+                    { subCategory: subcategoryId },
+                  ],
+                }),
           },
         },
         ...aggregateForAllProductsInThisCategory,
       ])
       .exec();
-     
+
     const promiseAllProductWithAllFiltersAndSorted = this.productModel
       .aggregate([
         { $match: filterOptions },
@@ -376,13 +376,17 @@ export class ProductsService {
       allProductsWithThisSubCategory,
     );
 
-const quatityAllProducts = allProductsWithThisSubCategory.length
+    const quatityAllProducts = allProductsWithThisSubCategory.length;
 
     return {
       products: allProductWithAllFiltersAndSorted,
       filters,
       totalItems: allProductsWithThisSubCategory.length,
-      totalPages: quatityAllProducts ? quatityAllProducts / limit < 1 ? 1 : Math.ceil(quatityAllProducts / limit): 0,
+      totalPages: quatityAllProducts
+        ? quatityAllProducts / limit < 1
+          ? 1
+          : Math.ceil(quatityAllProducts / limit)
+        : 0,
     };
   }
 

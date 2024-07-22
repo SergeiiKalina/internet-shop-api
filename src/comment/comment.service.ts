@@ -94,8 +94,8 @@ export class CommentService {
     await comment.save();
 
     const product = await this.productModel.findById(comment.product);
-    const allComment = await this.getAllFullCommentForProduct(product.comments);
-
+    const allComment = await this.getAllFullCommentForProduct(product.id);
+    await this.cacheManager.del(comment.product.toString());
     return allComment;
   }
 
@@ -124,74 +124,49 @@ export class CommentService {
     await comment.save();
 
     const product = await this.productModel.findById(comment.product);
-    const allComment = await this.getAllFullCommentForProduct(product.comments);
-
+    const allComment = await this.getAllFullCommentForProduct(product.id);
+    await this.cacheManager.del(comment.product.toString());
     return allComment;
   }
 
-  async getAllFullCommentForProductAlt(id: string) {
+  async getAllFullCommentForProduct(id: string) {
     const allCommentMainComments = this.commentModel
       .find({ product: id, parent: null })
       .sort({ createDate: -1 });
     const allAnswersPromise = this.commentModel
       .find({ product: id, parent: { $ne: null } })
       .sort({ createDate: -1 });
+
     const [allComment, allAnswers] = await Promise.all([
       allCommentMainComments,
       allAnswersPromise,
     ]);
 
-    const mapMainComments = new Map();
-    const mapAnswers = new Map();
+    const commentsMap = new Map();
 
     allComment.forEach((comment) => {
       const commentObj = { ...comment.toObject(), answers: [] };
-      delete commentObj.comments;
-      mapMainComments.set(comment.id, commentObj);
+      commentsMap.set(comment.id.toString(), commentObj);
     });
 
     allAnswers.forEach((answer) => {
       const answerObj = { ...answer.toObject(), answers: [] };
-      delete answerObj.comments;
-      mapAnswers.set(answer.id, answerObj);
+      commentsMap.set(answer.id.toString(), answerObj);
     });
 
-    for (const [key, value] of mapAnswers) {
-      const parentKey = value.parent.toString();
-      if (mapAnswers.has(parentKey)) {
-        mapAnswers.get(parentKey).answers.push(value);
+    allAnswers.forEach((answer) => {
+      const parentKey = answer.parent.toString();
+      if (commentsMap.has(parentKey)) {
+        commentsMap
+          .get(parentKey)
+          .answers.push(commentsMap.get(answer.id.toString()));
       }
-    }
+    });
 
-    for (const [key, value] of mapAnswers) {
-      const parentKey = value.parent.toString();
-      if (mapMainComments.has(parentKey)) {
-        mapMainComments.get(parentKey).answers.push(value);
-      }
-    }
+    allAnswers.forEach((answer) => {
+      commentsMap.delete(answer.id.toString());
+    });
 
-    return Array.from(mapMainComments.values());
-  }
-
-  async getAllFullCommentForProduct(
-    comments: string | string[],
-  ): Promise<any[]> {
-    const idsArray = Array.isArray(comments) ? comments : [comments];
-
-    const allComment = await this.commentModel
-      .find({ _id: { $in: idsArray } })
-      .populate('author', '_id firstName')
-      .sort({ createDate: -1 })
-      .lean();
-
-    for (const comment of allComment) {
-      if (comment.comments && comment.comments.length > 0) {
-        comment.comments = await this.getAllFullCommentForProduct(
-          comment.comments,
-        );
-      }
-    }
-
-    return allComment;
+    return Array.from(commentsMap.values());
   }
 }
