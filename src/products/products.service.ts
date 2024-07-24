@@ -353,7 +353,7 @@ export class ProductsService {
     const quatityAllProducts = allProductsWithThisSubCategory.length;
 
     return {
-      products: allProductWithAllFiltersAndSorted.length,
+      products: allProductWithAllFiltersAndSorted,
       filters,
       totalItems: allProductsWithThisSubCategory.length,
       totalPages: quatityAllProducts
