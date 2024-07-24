@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Product } from '../product.model';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
+import { FiltersDto } from '../dto/filters.dto';
 
 @Injectable()
 export class ProductFilterService {
@@ -37,16 +38,16 @@ export class ProductFilterService {
 
     products.forEach((el) => {
       if (el.price > price.max) {
-        if(el.discount){
-          price.max = el.discountPrice
-        }else{
+        if (el.discount) {
+          price.max = el.discountPrice;
+        } else {
           price.max = el.price;
         }
       }
       if (el.price < price.min) {
-        if(el.discount){
-          price.min = el.discountPrice
-        }else{
+        if (el.discount) {
+          price.min = el.discountPrice;
+        } else {
           price.min = el.price;
         }
       }
@@ -111,5 +112,57 @@ export class ProductFilterService {
         ),
       ];
     }
+  }
+
+  createObjectForFilteredProducts(
+    subCategoryOrCategory: string,
+    filtersDto: FiltersDto,
+    categoryId: string,
+    subcategoryId: string,
+  ) {
+    const filterOptions = {
+      ...(subCategoryOrCategory === 'all'
+        ? []
+        : {
+            $or: [
+              { category: categoryId },
+              { subCategory: subcategoryId || null },
+            ],
+          }),
+      price: { $gte: filtersDto.price.min, $lte: filtersDto.price.max },
+      ...(filtersDto.sizes.length > 0
+        ? { 'parameters.size': { $in: filtersDto.sizes } }
+        : {}),
+      ...(filtersDto.states.length > 0
+        ? { 'parameters.state': { $in: filtersDto.states } }
+        : {}),
+      ...(filtersDto.eco.length > 0
+        ? { 'parameters.eco': { $in: filtersDto.eco } }
+        : {}),
+      ...(filtersDto.isUkraine.length > 0
+        ? { 'parameters.isUkraine': { $in: filtersDto.isUkraine } }
+        : {}),
+      ...(filtersDto.discount.length > 0
+        ? { discount: { $in: filtersDto.discount } }
+        : {}),
+      ...(filtersDto.sex.length > 0
+        ? { 'parameters.sex': { $in: filtersDto.sex } }
+        : {}),
+      ...(filtersDto.colors.length > 0
+        ? {
+            'parameters.color': {
+              $in: filtersDto.colors.map(
+                (colorId) => new Types.ObjectId(colorId),
+              ),
+            },
+          }
+        : {}),
+    };
+    if (filtersDto.colors.length > 0) {
+      filterOptions['parameters.color'] = {
+        $in: filtersDto.colors.map((colorId) => new Types.ObjectId(colorId)),
+      };
+    }
+    return filterOptions;
   }
 }

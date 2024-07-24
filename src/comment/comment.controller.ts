@@ -22,13 +22,13 @@ export class CommentController {
   constructor(private readonly commentService: CommentService) {}
 
   @Post()
-  // @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
   async create(
     @Body(new ValidationPipe()) createCommentDto: CreateCommentDto,
-    // @Req() req,
+    @Req() req,
   ) {
-    const userID = '663fcb0ce3002ec4c010b748';
-    return await this.commentService.create(createCommentDto, userID);
+    const userId = req.user.id;
+    return await this.commentService.create(createCommentDto, userId);
   }
 
   @Post('like')

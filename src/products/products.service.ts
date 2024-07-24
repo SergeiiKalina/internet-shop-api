@@ -304,39 +304,13 @@ export class ProductsService {
     const categoryId = category ? category.id : '';
     const subcategoryId = subcategory ? subcategory.id : '';
 
-    const filterOptions = {
-      ...(subCategoryOrCategory === 'all'
-        ? {}
-        : {
-            $or: [{ category: categoryId }, { subCategory: subcategoryId }],
-          }),
-      price: { $gte: filtersDto.price.min, $lte: filtersDto.price.max },
-      'parameters.size': {
-        $in: filtersDto.sizes.length ? filtersDto.sizes : [/.*/],
-      },
-      'parameters.state': {
-        $in: filtersDto.states.length ? filtersDto.states : [/.*/],
-      },
-      'parameters.eco': {
-        $in: filtersDto.eco.length ? filtersDto.eco : [true, false],
-      },
-      'parameters.isUkraine': {
-        $in: filtersDto.isUkraine.length ? filtersDto.isUkraine : [true, false],
-      },
-      discount: {
-        $in: filtersDto.discount.length ? filtersDto.discount : [true, false],
-      },
-      'parameters.sex': {
-        $in: filtersDto.sex.length
-          ? filtersDto.sex
-          : ['unsex', 'female', 'male'],
-      },
-    };
-    if (filtersDto.colors.length > 0) {
-      filterOptions['parameters.color'] = {
-        $in: filtersDto.colors.map((colorId) => new Types.ObjectId(colorId)),
-      };
-    }
+    const filterOptions =
+      this.productFilterService.createObjectForFilteredProducts(
+        subCategoryOrCategory,
+        filtersDto,
+        categoryId,
+        subcategoryId,
+      );
 
     const promiseAllProductsWithThisSubCategory = this.productModel
       .aggregate([
@@ -379,7 +353,7 @@ export class ProductsService {
     const quatityAllProducts = allProductsWithThisSubCategory.length;
 
     return {
-      products: allProductWithAllFiltersAndSorted,
+      products: allProductWithAllFiltersAndSorted.length,
       filters,
       totalItems: allProductsWithThisSubCategory.length,
       totalPages: quatityAllProducts
