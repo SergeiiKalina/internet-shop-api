@@ -340,26 +340,37 @@ export class ProductsService {
       .limit(limit)
       .exec();
 
-    const [allProductsWithThisSubCategory, allProductWithAllFiltersAndSorted] =
+      const promiseCountAggregation =  this.productModel
+      .aggregate([
+        { $match: filterOptions },
+        { $count: "totalCount" }
+      ])
+      .exec();
+
+  
+
+
+    const [allProductsWithThisSubCategory, allProductWithAllFiltersAndSorted,countAggregation] =
       await Promise.all([
         promiseAllProductsWithThisSubCategory,
         promiseAllProductWithAllFiltersAndSorted,
+        promiseCountAggregation
       ]);
 
     const filters = await this.productFilterService.createFiltersData(
       allProductsWithThisSubCategory,
     );
 
-    const quatityAllProducts = allProductsWithThisSubCategory.length;
+    const totalDocuments = countAggregation.length > 0 ? countAggregation[0].totalCount : 0;
 
     return {
       products: allProductWithAllFiltersAndSorted,
       filters,
-      totalItems: allProductsWithThisSubCategory.length,
-      totalPages: quatityAllProducts
-        ? quatityAllProducts / limit < 1
+      totalItems: totalDocuments,
+      totalPages: totalDocuments
+        ? totalDocuments / limit < 1
           ? 1
-          : Math.ceil(quatityAllProducts / limit)
+          : Math.ceil(totalDocuments / limit)
         : 0,
     };
   }
