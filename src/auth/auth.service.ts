@@ -19,6 +19,7 @@ import { ForgotPasswordDto } from './dto/forgotPassword.dto';
 import { ConfigService } from '@nestjs/config';
 import { ChangePasswordDto } from './dto/changePassword.dto';
 import { randomBytes } from 'crypto';
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -75,7 +76,7 @@ export class AuthService {
     if (!user) {
       throw new NotFoundException('Такого користувача не знайденно');
     }
-    const payload = { email: user.email, sub: user.id }; // Using user ID as subject
+    const payload = { email: user.email, id: user.id }; // Using user ID as subject
 
     const isPasswordMatches = await bcrypt.compare(password, user.password);
 
@@ -84,7 +85,11 @@ export class AuthService {
         'Неправильний електронна адресса або пароль',
       );
     }
-
+    const refreshToken = await this.jwtService.signAsync(payload, {
+      expiresIn: '7d',
+      secret: process.env.JWT_REFRESH_SECRET_KEY,
+    });
+    await this.tokenService.safeJwt(user.id, refreshToken);
     return {
       user,
       backend_tokens: {
@@ -96,40 +101,34 @@ export class AuthService {
             secret: process.env.JWT_SECRET,
           },
         ), // Change expiresIn value as needed
-        refresh_token: await this.jwtService.signAsync(payload, {
-          expiresIn: '7d',
-          secret: process.env.JWT_REFRESH_TOKEN,
-        }),
+        refresh_token: refreshToken,
       },
     };
   }
 
   async refreshJwt(refreshJwt: string) {
-    try {
-      if (!refreshJwt) {
-        throw new Error('Користувачь не залогінився');
-      }
-
-      const userData = await this.tokenService.validateRefreshToken(refreshJwt);
-
-      const tokenFromDb = await this.tokenService.findJwt(refreshJwt);
-      if (!userData || !tokenFromDb) {
-        throw new Error('Користувачь не залогінився');
-      }
-
-      const user = await this.userModel.findById(userData._id);
-
-      if (!user) {
-        throw new Error('Користувача не знайденно ');
-      }
-
-      const tokens = await this.tokenService.generationJwt({ ...user });
-
-      await this.tokenService.safeJwt(user.id, tokens.refreshJwt);
-      return { ...tokens, user };
-    } catch (error) {
-      console.error(error);
+    if (!refreshJwt) {
+      throw new Error('Користувачь не залогінився');
     }
+
+    const userData = await this.tokenService.validateRefreshToken(refreshJwt);
+
+    const tokenFromDb = await this.tokenService.findJwt(refreshJwt);
+
+    if (!userData || !tokenFromDb) {
+      throw new Error('Користувачь не залогінився');
+    }
+
+    const user = await this.userModel.findById(userData.id);
+
+    if (!user) {
+      throw new Error('Користувача не знайденно ');
+    }
+    const payload = { email: user.email, id: user.id };
+    const tokens = await this.tokenService.generationJwt(payload);
+
+    await this.tokenService.safeJwt(user.id, tokens.refreshJwt);
+    return tokens;
   }
 
   async activate(link: string) {

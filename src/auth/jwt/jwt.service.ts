@@ -13,7 +13,10 @@ export class TokenService {
 
   async generationJwt(payload) {
     try {
-      const accessJwt = await this.jwtService.signAsync(payload);
+      const accessJwt = await this.jwtService.signAsync(payload, {
+        expiresIn: '1d',
+        secret: process.env.JWT_SECRET,
+      });
       const refreshJwt = await this.jwtService.signAsync(payload, {
         secret: process.env.JWT_REFRESH_SECRET_KEY,
         expiresIn: '30d',
@@ -52,24 +55,20 @@ export class TokenService {
       const userData = await this.jwtService.verifyAsync(token, {
         secret: process.env.JWT_REFRESH_SECRET_KEY,
       });
-
       if (typeof userData !== 'string') {
-        return userData._doc;
+        return userData;
       }
     } catch (error) {
       return null;
     }
   }
   async findJwt(refreshJwt: string) {
-    try {
-      const tokenData = await this.jwtModel.findOne({ refreshJwt });
-      if (!tokenData) {
-        throw new NotFoundException('Токен не знайдено');
-      }
-      return tokenData;
-    } catch (error) {
-      return null;
+    const tokenData = await this.jwtModel.findOne({ refreshJwt });
+
+    if (!tokenData) {
+      throw new NotFoundException('Токен не знайдено');
     }
+    return tokenData;
   }
 
   async validateFacebookToken(token: string) {

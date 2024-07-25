@@ -63,8 +63,22 @@ export class AuthController {
     },
   })
   @Post('login')
-  async login(@Body(new CustomValidationPipe()) dto: AuthEmailLoginDto) {
-    return this.authService.login(dto);
+  async login(
+    @Body(new CustomValidationPipe()) dto: AuthEmailLoginDto,
+    @Res() res: Response,
+  ) {
+    try {
+      const user = await this.authService.login(dto);
+      res.cookie('refreshToken', user.backend_tokens.refresh_token, {
+        maxAge: 30 * 24 * 60 * 60 * 1000,
+        httpOnly: true,
+        sameSite: 'none',
+        secure: true,
+      });
+      return res.status(200).json(user);
+    } catch (error) {
+      return res.status(400).json({ message: error.message });
+    }
   }
 
   @ApiBearerAuth()
@@ -78,16 +92,17 @@ export class AuthController {
 
   @Get('refresh')
   async refreshJwt(@Req() req: Request, @Res() res: Response) {
-    const refreshJwt = req.cookies.refreshToken;
+    const refreshToken = req.cookies.refreshToken;
 
-    const userData = await this.authService.refreshJwt(refreshJwt);
-    res.cookie('refreshToken', userData.refreshJwt, {
+    const { accessJwt, refreshJwt } =
+      await this.authService.refreshJwt(refreshToken);
+    res.cookie('refreshToken', refreshJwt, {
       maxAge: 30 * 24 * 60 * 60 * 1000,
       httpOnly: true,
       sameSite: 'none',
       secure: true,
     });
-    return res.json(userData);
+    return res.json(accessJwt);
   }
 
   @Get('activate/:link')

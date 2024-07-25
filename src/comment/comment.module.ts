@@ -22,6 +22,8 @@ import { PurchaseService } from 'src/purchase/purchase.service';
 import { PurchaseModule } from 'src/purchase/purchase.module';
 import Purchase, { PurchaseSchema } from 'src/purchase/purchase.model';
 import { Mailer } from 'src/auth/mailer/mailer.service';
+import { TokenService } from 'src/auth/jwt/jwt.service';
+import { Jwt, JwtSchema } from 'src/auth/jwt/jwt.model';
 
 @Module({
   imports: [
@@ -33,6 +35,7 @@ import { Mailer } from 'src/auth/mailer/mailer.service';
       { name: SubCategory.name, schema: SubcategorySchema },
       { name: Color.name, schema: ColorSchema },
       { name: Purchase.name, schema: PurchaseSchema },
+      { name: Jwt.name, schema: JwtSchema },
     ]),
     ColorModule,
   ],
@@ -48,6 +51,7 @@ import { Mailer } from 'src/auth/mailer/mailer.service';
     TransformImageService,
     PurchaseService,
     Mailer,
+    TokenService,
   ],
   exports: [CommentService],
 })
