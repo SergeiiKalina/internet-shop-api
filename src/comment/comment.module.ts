@@ -35,7 +35,6 @@ import { Jwt, JwtSchema } from 'src/auth/jwt/jwt.model';
       { name: SubCategory.name, schema: SubcategorySchema },
       { name: Color.name, schema: ColorSchema },
       { name: Purchase.name, schema: PurchaseSchema },
-      { name: Jwt.name, schema: JwtSchema },
     ]),
     ColorModule,
   ],
@@ -51,7 +50,6 @@ import { Jwt, JwtSchema } from 'src/auth/jwt/jwt.model';
     TransformImageService,
     PurchaseService,
     Mailer,
-    TokenService,
   ],
   exports: [CommentService],
 })

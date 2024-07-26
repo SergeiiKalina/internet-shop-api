@@ -20,10 +20,7 @@ import { TokenService } from 'src/auth/jwt/jwt.service';
 @ApiTags('comment')
 @Controller('comment')
 export class CommentController {
-  constructor(
-    private readonly commentService: CommentService,
-    private readonly jwtService: TokenService,
-  ) {}
+  constructor(private readonly commentService: CommentService) {}
 
   @Post()
   @UseGuards(JwtAuthGuard)
