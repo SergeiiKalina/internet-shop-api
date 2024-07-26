@@ -10,13 +10,13 @@ import { Product } from './product.model';
 import { Model, SortOrder, Types } from 'mongoose';
 import { ImageService } from './images-service/images.service';
 import { UpdateProductDto } from './dto/update-product.dto';
-import { Category } from 'src/category/categoty.model';
-import { SubCategory } from 'src/category/subCategory.model';
-import { CommentService } from 'src/comment/comment.service';
+import { Category } from '../category/categoty.model';
+import { SubCategory } from '../category/subCategory.model';
+import { CommentService } from '../comment/comment.service';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
-import { CategoryService } from 'src/category/category.service';
-import { ColorService } from 'src/color/color.service';
+import { CategoryService } from '../category/category.service';
+import { ColorService } from '../color/color.service';
 import { TransformImageService } from './images-service/transform-image.sevice';
 import { ProductFilterService } from './filter/filter.service';
 import { FiltersDto } from './dto/filters.dto';
@@ -340,28 +340,26 @@ export class ProductsService {
       .limit(limit)
       .exec();
 
-      const promiseCountAggregation =  this.productModel
-      .aggregate([
-        { $match: filterOptions },
-        { $count: "totalCount" }
-      ])
+    const promiseCountAggregation = this.productModel
+      .aggregate([{ $match: filterOptions }, { $count: 'totalCount' }])
       .exec();
 
-  
-
-
-    const [allProductsWithThisSubCategory, allProductWithAllFiltersAndSorted,countAggregation] =
-      await Promise.all([
-        promiseAllProductsWithThisSubCategory,
-        promiseAllProductWithAllFiltersAndSorted,
-        promiseCountAggregation
-      ]);
+    const [
+      allProductsWithThisSubCategory,
+      allProductWithAllFiltersAndSorted,
+      countAggregation,
+    ] = await Promise.all([
+      promiseAllProductsWithThisSubCategory,
+      promiseAllProductWithAllFiltersAndSorted,
+      promiseCountAggregation,
+    ]);
 
     const filters = await this.productFilterService.createFiltersData(
       allProductsWithThisSubCategory,
     );
 
-    const totalDocuments = countAggregation.length > 0 ? countAggregation[0].totalCount : 0;
+    const totalDocuments =
+      countAggregation.length > 0 ? countAggregation[0].totalCount : 0;
 
     return {
       products: allProductWithAllFiltersAndSorted,

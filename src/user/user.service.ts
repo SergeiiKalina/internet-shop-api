@@ -3,12 +3,10 @@ import {
   HttpException,
   HttpStatus,
   Injectable,
-  NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { isValidObjectId, Model } from 'mongoose';
+import { ClientSession, isValidObjectId, Model } from 'mongoose';
 import { User } from 'src/auth/user.model';
-import { Product } from 'src/products/product.model';
 import { ProductsService } from 'src/products/products.service';
 import { PurchaseService } from 'src/purchase/purchase.service';
 
@@ -24,6 +22,14 @@ export class UserService {
   }
   async findOne(id: string): Promise<User> {
     const user = await this.userModel.findById(id).exec();
+    if (!user) {
+      throw new BadRequestException('Такого користувача не знайденно');
+    }
+    return user;
+  }
+
+  async findOneWithSession(id: string, session: ClientSession) {
+    const user = await this.userModel.findById(id).session(session);
     if (!user) {
       throw new BadRequestException('Такого користувача не знайденно');
     }

@@ -9,7 +9,7 @@ import { Category } from './categoty.model';
 import { Model } from 'mongoose';
 import { CreateSubcategoryDto } from './dto/create-subCategory.dto';
 import { SubCategory } from './subCategory.model';
-import { ImageService } from 'src/products/images-service/images.service';
+import { ImageService } from '../products/images-service/images.service';
 
 @Injectable()
 export class CategoryService {

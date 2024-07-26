@@ -16,7 +16,7 @@ import {
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { FilesInterceptor } from '@nestjs/platform-express';
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import {
   ApiBearerAuth,
   ApiBody,
@@ -31,7 +31,7 @@ import { UpdateProductDto } from './dto/update-product.dto';
 import { SharpPipe } from './pipes/sharpForFewFile.pipe';
 import { Product } from './product.model';
 import { FiltersDto } from './dto/filters.dto';
-import { SortField, SortOrder,sexEnum } from './enum/enumForProducts';
+import { SortField, SortOrder, sexEnum } from './enum/enumForProducts';
 @ApiTags('product')
 @Controller('products')
 export class ProductsController {
@@ -302,9 +302,8 @@ export class ProductsController {
     @Query('page') page: string = '1',
     @Query('limit') limit: string = '20',
     @Query('discount') discount: string[] = [],
-    @Query('sex') sex: string[] = []
+    @Query('sex') sex: string[] = [],
   ) {
-
     return this.productsService.filterAndSortedProducts(
       subCategoryOrCategory,
       sortField,
@@ -315,20 +314,21 @@ export class ProductsController {
         sizes: Array.isArray(sizes) ? sizes : [sizes],
         states: Array.isArray(states) ? states : [states],
         brands: Array.isArray(brands) ? brands : [brands],
-        eco: Array.isArray(eco) ? eco.map(el => el === 'false' ? false : true) : [eco === 'false' ? false : true],
+        eco: Array.isArray(eco)
+          ? eco.map((el) => (el === 'false' ? false : true))
+          : [eco === 'false' ? false : true],
         isUkraine: Array.isArray(isUkraine)
-          ? isUkraine.map(el => el === 'false' ? false : true)
+          ? isUkraine.map((el) => (el === 'false' ? false : true))
           : [isUkraine === 'false' ? false : true],
-          discount: Array.isArray(discount) ? discount.map(el => el === 'false' ? false : true): [discount === "false" ? false :true],
-          sex: Array.isArray(sex) ? sex : [sex]
+        discount: Array.isArray(discount)
+          ? discount.map((el) => (el === 'false' ? false : true))
+          : [discount === 'false' ? false : true],
+        sex: Array.isArray(sex) ? sex : [sex],
       },
       +page,
       +limit,
-      
     );
   }
-
-
 
   @ApiResponse({
     status: 200,

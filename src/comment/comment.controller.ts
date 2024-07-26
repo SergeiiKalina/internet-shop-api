@@ -12,10 +12,8 @@ import {
 } from '@nestjs/common';
 import { CommentService } from './comment.service';
 import { CreateCommentDto } from './dto/create-comment.dto';
-import { UpdateCommentDto } from './dto/update-comment.dto';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { ApiTags } from '@nestjs/swagger';
-import { TokenService } from 'src/auth/jwt/jwt.service';
 
 @ApiTags('comment')
 @Controller('comment')
@@ -29,7 +27,10 @@ export class CommentController {
     @Req() req,
   ) {
     const userId = req.user.id;
-    return await this.commentService.create(createCommentDto, userId);
+    return await this.commentService.processCommentCreation(
+      createCommentDto,
+      userId,
+    );
   }
 
   @Post('like')

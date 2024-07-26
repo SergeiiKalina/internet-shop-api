@@ -1,13 +1,20 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  forwardRef,
+  Inject,
+  Injectable,
+} from '@nestjs/common';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Comment } from './comment.model';
-import { Model } from 'mongoose';
-import { Product } from 'src/products/product.model';
-import { User } from 'src/auth/user.model';
-import { UserService } from 'src/user/user.service';
+import { Model, ClientSession } from 'mongoose';
+import { Product } from '../products/product.model';
+import { User } from '../auth/user.model';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
+import { InjectConnection } from '@nestjs/mongoose';
+import * as mongoose from 'mongoose';
+import { UserService } from '../user/user.service';
 
 @Injectable()
 export class CommentService {
@@ -16,56 +23,115 @@ export class CommentService {
     @InjectModel(Product.name) private readonly productModel: Model<Product>,
     @InjectModel(User.name) private readonly userModel: Model<User>,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
+    @Inject(forwardRef(() => UserService))
+    private readonly userService: UserService,
+    @InjectConnection() private readonly connection: mongoose.Connection,
   ) {}
-  async create(createCommentDto: CreateCommentDto, id: string) {
-    const commentInstance = await this.commentModel.create({
-      ...createCommentDto,
-      rating:
-        createCommentDto.parent === null ||
-        !createCommentDto.parent ||
-        createCommentDto.rating === 0
-          ? createCommentDto.rating
-          : null,
-      author: id,
-    });
-
-    const user = await this.userModel.findById(id);
-    const { _id, firstName } = user;
-
-    if (createCommentDto.parent) {
-      const parent = await this.commentModel.findById({
-        _id: createCommentDto.parent,
-      });
-
-      if (!parent) {
-        throw new BadRequestException('Цього коментаря не існує');
-      }
-
-      await parent.comments.push(commentInstance.id);
-      await parent.save();
-      await this.cacheManager.del(parent.product.toString());
-      return { ...commentInstance.toObject(), author: { _id, firstName } };
-    } else {
-      const product = await this.productModel.findById(
-        createCommentDto.product,
+  async processCommentCreation(createCommentDto: CreateCommentDto, id: string) {
+    const session: ClientSession = await this.connection.startSession();
+    session.startTransaction();
+    try {
+      const commentInstance = await this.createInstanceComment(
+        createCommentDto,
+        id,
+        session,
       );
-      if (!product) {
-        throw new Error('Продукт не знайдений');
+      const user = await this.userService.findOneWithSession(id, session);
+
+      if (createCommentDto.parent) {
+        await this.handleParentComment(
+          createCommentDto,
+          commentInstance,
+          session,
+        );
+      } else {
+        await this.handleProductComment(
+          createCommentDto,
+          commentInstance,
+          session,
+        );
       }
 
-      const author = await this.userModel.findById(product.producer);
-      author.rating.sum = (author.rating.sum || 0) + createCommentDto.rating;
-      author.rating.count = (author.rating.count || 0) + 1;
-
-      await author.save();
-
-      await this.cacheManager.del(product.id.toString());
-
-      await product.comments.push(commentInstance.id);
-      product.save();
-
-      return { ...commentInstance.toObject(), author: { _id, firstName } };
+      await session.commitTransaction();
+      return {
+        ...commentInstance[0].toObject(),
+        author: { _id: user._id, firstName: user.firstName },
+      };
+    } catch (error) {
+      await session.abortTransaction();
+      throw error;
+    } finally {
+      await session.endSession();
     }
+  }
+
+  async handleParentComment(
+    createCommentDto: CreateCommentDto,
+    commentInstance: any,
+    session: ClientSession,
+  ) {
+    const parent = await this.commentModel
+      .findById({
+        _id: createCommentDto.parent,
+      })
+      .session(session);
+
+    if (!parent) {
+      throw new BadRequestException('Цього коментаря не існує');
+    }
+
+    parent.comments.push(commentInstance[0].id);
+
+    await parent.save({ session });
+
+    await this.cacheManager.del(parent.product.toString());
+  }
+
+  async handleProductComment(
+    createCommentDto: CreateCommentDto,
+    commentInstance: any,
+    session: ClientSession,
+  ) {
+    const product = await this.productModel
+      .findById(createCommentDto.product)
+      .session(session);
+    if (!product) {
+      throw new Error('Продукт не знайдений');
+    }
+
+    product.comments.push(commentInstance[0].id);
+    await product.save({ session });
+
+    const author = await this.userModel
+      .findById(product.producer)
+      .session(session);
+    author.rating.sum = (author.rating.sum || 0) + createCommentDto.rating;
+    author.rating.count = (author.rating.count || 0) + 1;
+
+    await author.save({ session });
+    await this.cacheManager.del(product.id.toString());
+  }
+
+  async createInstanceComment(
+    createCommentDto: CreateCommentDto,
+    authorId: string,
+    session: ClientSession,
+  ) {
+    return await this.commentModel.create(
+      [
+        {
+          ...createCommentDto,
+          rating:
+            createCommentDto.parent === null ||
+            !createCommentDto.parent ||
+            createCommentDto.rating === 0
+              ? createCommentDto.rating
+              : null,
+          author: authorId,
+        },
+      ],
+      { session },
+    );
   }
 
   async like(commentId: string, userId: string) {
