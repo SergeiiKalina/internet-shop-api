@@ -1,13 +1,10 @@
 import { Module } from '@nestjs/common';
 import { ColorService } from './color.service';
 import { ColorController } from './color.controller';
-import { MongooseModule } from '@nestjs/mongoose';
-import { Color, ColorSchema } from './color.model';
+import CommonModule from 'src/common.module';
 
 @Module({
-  imports: [
-    MongooseModule.forFeature([{ name: Color.name, schema: ColorSchema }]),
-  ],
+  imports: [CommonModule],
   controllers: [ColorController],
   providers: [ColorService],
 })

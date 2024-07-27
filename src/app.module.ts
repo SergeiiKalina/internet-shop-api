@@ -33,10 +33,6 @@ import { PurchaseModule } from './purchase/purchase.module';
     MulterModule.register({
       storage: memoryStorage(),
     }),
-    MongooseModule.forFeature([
-      { name: User.name, schema: UserSchema },
-      { name: Jwt.name, schema: JwtSchema },
-    ]),
     MailerModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: () => ({
@@ -63,7 +59,6 @@ import { PurchaseModule } from './purchase/purchase.module';
     }),
     AuthModule,
     UserModule,
-    User,
     ProductsModule,
     CommentModule,
     BasketModule,
