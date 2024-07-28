@@ -35,7 +35,7 @@ export class CategoryService {
     const newCategory = await this.categoryModel.create({
       ...createCategoryDto,
       mainCategory: { en: createCategoryDto.en, ua: createCategoryDto.ua },
-      img: image.data.url,
+      img: image,
     });
 
     await newCategory.save();
@@ -64,7 +64,7 @@ export class CategoryService {
     const newSubcategory = await this.subCategoryModel.create({
       mainCategory: createSubcategoryDto.mainCategory,
       subCategory: { en: createSubcategoryDto.en, ua: createSubcategoryDto.ua },
-      img: image.data.url,
+      img: image,
     });
     await newSubcategory.save();
 

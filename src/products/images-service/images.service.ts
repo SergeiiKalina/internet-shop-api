@@ -5,7 +5,7 @@ import axios from 'axios';
 export class ImageService {
   constructor() {}
 
-  async uploadPhoto(files: Express.Multer.File) {
+  async uploadPhoto(files: Express.Multer.File): Promise<string> {
     try {
       if (!files || !files.buffer) {
         throw new Error(

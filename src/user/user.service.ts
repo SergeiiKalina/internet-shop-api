@@ -9,6 +9,9 @@ import { ClientSession, isValidObjectId, Model } from 'mongoose';
 import { User } from 'src/auth/user.model';
 import { ProductsService } from 'src/products/products.service';
 import { PurchaseService } from 'src/purchase/purchase.service';
+import { UpdateUserDto } from './dto/update-user.dto';
+import { ImageService } from 'src/products/images-service/images.service';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UserService {
@@ -16,6 +19,7 @@ export class UserService {
     @InjectModel(User.name) private userModel: Model<User>,
     private readonly productService: ProductsService,
     private readonly purchaseService: PurchaseService,
+    private readonly imageService: ImageService,
   ) {}
   async getAllUsers() {
     return this.userModel.find().exec();
@@ -93,5 +97,35 @@ export class UserService {
       .find({ _id: { $in: idsArray } })
       .select(fields.join(' '))
       .exec();
+  }
+
+  async updateUser(
+    userId: string,
+    updateUserDto: UpdateUserDto,
+    file: Express.Multer.File,
+  ) {
+    const user = await this.userModel
+      .findById(userId)
+      .select(
+        '-isActivated -activationLink -lastLogout -registrationDate -__v -favorites -basket -purchasedGoods -soldGoods ',
+      );
+
+    if (!user) {
+      throw new BadRequestException('User not found');
+    }
+    let profilePictureSrc;
+    if (file) {
+      profilePictureSrc = await this.imageService.uploadPhoto(file);
+    }
+    let newPassword;
+    if (updateUserDto.password) {
+      newPassword = await bcrypt.hash(updateUserDto.password, 10);
+    }
+
+    Object.assign(user, updateUserDto);
+    user.profilePictureSrc = profilePictureSrc ? profilePictureSrc : '';
+    user.password = updateUserDto.password ? newPassword : user.password;
+    await user.save();
+    return user;
   }
 }

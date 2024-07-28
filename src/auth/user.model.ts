@@ -34,6 +34,12 @@ export class User {
   firstName: string;
   @Prop()
   lastName: string;
+  @Prop({ required: false })
+  surName?: string;
+  @Prop({ required: false })
+  gender?: string;
+  @Prop({ required: false })
+  profilePictureSrc?: string;
   @Prop()
   numberPhone: string;
   @Prop()
