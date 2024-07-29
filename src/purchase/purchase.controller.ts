@@ -6,10 +6,17 @@ import {
   Req,
   Body,
   ValidationPipe,
+  Delete,
 } from '@nestjs/common';
 import { PurchaseService } from './purchase.service';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
-import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBody,
+  ApiOperation,
+  ApiParam,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { CreatePurchaseDto } from './dto/create-purchase.dto';
 import ChangeStatusDto from './dto/change-status.dto';
 
@@ -38,22 +45,19 @@ export class PurchaseController {
     status: 400,
     description: 'Продавця не знайденно',
   })
-  @ApiResponse({
-    status: 401,
-    description: 'Ви не авторизовані',
-  })
   @ApiBody({
     type: CreatePurchaseDto,
   })
+  @ApiParam({
+    name: 'id',
+    description: 'id product',
+  })
   @Post(':id')
-  @UseGuards(JwtAuthGuard)
   async add(
     @Param('id') id: string,
     @Body(new ValidationPipe()) data: CreatePurchaseDto,
-    @Req() req,
   ) {
-    const userId = req.user.id;
-    return this.purchaseService.add(id, userId, data);
+    return this.purchaseService.add(id, data, data.userId);
   }
 
   @ApiOperation({
@@ -76,5 +80,10 @@ export class PurchaseController {
   ) {
     const userId = req.user.id;
     return this.purchaseService.changeStatus(idPurchase, status.status, userId);
+  }
+  @Delete(':id')
+  @UseGuards(JwtAuthGuard)
+  async delete(@Param('id') id: string) {
+    return this.purchaseService.delete(id);
   }
 }

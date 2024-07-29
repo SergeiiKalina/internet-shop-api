@@ -15,12 +15,16 @@ export class PurchaseService {
     private readonly mailerService: Mailer,
     private readonly productService: ProductsService,
   ) {}
-  async add(productId: string, userId: string, data: CreatePurchaseDto) {
-    const promiseUser = this.userModel.findById(userId);
+  async add(productId: string, data: CreatePurchaseDto, userId?: string) {
+    let promiseUser = Promise.resolve(null);
+    if (userId) {
+      promiseUser = this.userModel.findById(userId);
+    }
+
     const promiseProduct = this.productService.findProductById(productId);
     const [user, product] = await Promise.all([promiseUser, promiseProduct]);
 
-    if (!user || !product) {
+    if (!product) {
       throw new BadRequestException('Щось пішло не так');
     }
 
@@ -35,17 +39,16 @@ export class PurchaseService {
       producer: salesman.id,
     });
 
-    user.purchasedGoods.push(purchase.id);
-    await user.save();
+    if (user) {
+      user.purchasedGoods.push(purchase.id);
+      await user.save();
+    }
+
     salesman.soldGoods.push(purchase.id);
     await salesman.save();
-
-    const { password, activationLink, lastLogout, ...restUser } =
-      user.toObject();
-
     await this.mailerService.orderGood(salesman.email, data, product);
 
-    return restUser;
+    return purchase;
   }
 
   async changeStatus(idPurchase: string, status: string, producerId: string) {
@@ -71,5 +74,9 @@ export class PurchaseService {
     const purchases = await this.purchaseModel.find({ _id: { $in: ids } });
 
     return purchases;
+  }
+
+  async delete(id: string) {
+    return await this.purchaseModel.findByIdAndDelete(id);
   }
 }

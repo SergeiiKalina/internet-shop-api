@@ -4,7 +4,6 @@ import {
   Length,
   Matches,
   IsNotEmpty,
-  ValidationError,
   IsOptional,
   IsBoolean,
 } from 'class-validator';
