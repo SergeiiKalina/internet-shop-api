@@ -33,6 +33,8 @@ export default class Purchase {
   createDate: Date;
   @Prop({ required: true, type: Types.ObjectId, ref: 'User' })
   producer: string;
+  @Prop({ default: 1, required: true, type: Number })
+  quantity: number;
 }
 
 export const PurchaseSchema = SchemaFactory.createForClass(Purchase);

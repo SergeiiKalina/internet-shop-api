@@ -2,10 +2,12 @@ import { ApiProperty } from '@nestjs/swagger';
 import {
   IsEmail,
   IsNotEmpty,
+  IsNumber,
   IsOptional,
   IsString,
   Length,
   Matches,
+  Min,
 } from 'class-validator';
 
 export class CreatePurchaseDto {
@@ -102,4 +104,12 @@ export class CreatePurchaseDto {
     required: true,
   })
   building?: string;
+  @IsNumber()
+  @ApiProperty({
+    description: 'Quantity products',
+    type: Number,
+    required: true,
+  })
+  @Min(1)
+  quantity: number;
 }
