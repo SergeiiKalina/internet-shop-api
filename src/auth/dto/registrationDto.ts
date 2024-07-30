@@ -29,7 +29,7 @@ export class RegistrationDto {
     description:
       'First name (2-20 characters) and must contain only Cyrillic, Latin characters, and dashes.',
   })
-  @Matches(/^[а-яА-ЯёЁa-zA-ZіІїЇєЄґҐ\-]+$/, {
+  @Matches(/^[а-яА-ЯёЁa-zA-ZіІїЇєЄґҐ\-']+$/, {
     message:
       "Ім'я повинне мати латиські або кирилічні символи а довжина від 2 до 20 символів",
   })
@@ -42,7 +42,7 @@ export class RegistrationDto {
     description:
       'Last name (2-20 characters) and must contain only Cyrillic, Latin characters, and dashes.',
   })
-  @Matches(/^[а-яА-ЯёЁa-zA-ZіІїЇєЄґҐ\-]+$/, {
+  @Matches(/^[а-яА-ЯёЁa-zA-ZіІїЇєЄґҐ\-']+$/, {
     message:
       'Прізвище повинне мати латиські або кирилічні символи а довжина від 2 до 20 символів',
   })
@@ -61,7 +61,7 @@ export class RegistrationDto {
   @IsString()
   @Length(6, 20)
   @Matches(
-    /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&()^{}#+._=;:'",<>/])[A-Za-z\d@$!%*?&()^{}#+._=;:'",<>/]{6,}$/,
+    /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&()^{}#+._=;:'",<>/№~\-|`])[A-Za-z\d@$!%*?&()^{}#+._=;:'",<>/№~\-|]{6,}$/,
     {
       message:
         'Пароль повинен бути 6-20 символів: літери, цифри, і один спеціальний символ і одна велика літера.(@$!%*?&()^{}#+._=;:\'",<>/)',

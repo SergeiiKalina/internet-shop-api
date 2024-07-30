@@ -21,7 +21,7 @@ export class UpdateUserDto {
       'First name (2-20 characters) and must contain only Cyrillic, Latin characters, and dashes.',
     required: false,
   })
-  @Matches(/^[а-яА-ЯёЁa-zA-ZіІїЇєЄґҐ\-]+$/, {
+  @Matches(/^[а-яА-ЯёЁa-zA-ZіІїЇєЄґҐ\-']+$/, {
     message:
       "Ім'я повинне мати латиські або кирилічні символи а довжина від 2 до 20 символів",
   })
@@ -35,7 +35,7 @@ export class UpdateUserDto {
       'First name (2-20 characters) and must contain only Cyrillic, Latin characters, and dashes.',
     required: false,
   })
-  @Matches(/^[а-яА-ЯёЁa-zA-ZіІїЇєЄґҐ\-]+$/, {
+  @Matches(/^[а-яА-ЯёЁa-zA-ZіІїЇєЄґҐ\-']+$/, {
     message:
       'Прізвище повинне мати латиські або кирилічні символи а довжина від 2 до 20 символів',
   })
@@ -48,7 +48,7 @@ export class UpdateUserDto {
       'Sur name (2-20 characters) and must contain only Cyrillic, Latin characters, and dashes.',
     required: false,
   })
-  @Matches(/^[а-яА-ЯёЁa-zA-ZіІїЇєЄґҐ\-]+$/, {
+  @Matches(/^[а-яА-ЯёЁa-zA-ZіІїЇєЄґҐ\-']+$/, {
     message:
       'По батькові повинне мати латиські або кирилічні символи а довжина від 2 до 20 символів',
   })
