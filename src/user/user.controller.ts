@@ -5,7 +5,6 @@ import {
   Param,
   Post,
   Req,
-  Res,
   UploadedFile,
   UseGuards,
   UseInterceptors,
@@ -23,7 +22,6 @@ import { UserService } from './user.service';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { RequestWithUser } from 'src/auth/interface/interface';
-import { SharpPipe } from 'src/products/pipes/sharpForFewFile.pipe';
 import { FileInterceptor } from '@nestjs/platform-express';
 
 @ApiTags('Users')

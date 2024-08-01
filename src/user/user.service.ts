@@ -53,13 +53,16 @@ export class UserService {
     const promiseSoldGoods = this.purchaseService.getAllPurchase(
       user.soldGoods,
     );
+    const promiseProducts = this.productService.getProductByProducer(user.id);
 
-    const [favorites, basket, purchases, soldGoods] = await Promise.all([
-      promiseFavorites,
-      promiseBasket,
-      promisePurchases,
-      promiseSoldGoods,
-    ]);
+    const [favorites, basket, purchases, soldGoods, products] =
+      await Promise.all([
+        promiseFavorites,
+        promiseBasket,
+        promisePurchases,
+        promiseSoldGoods,
+        promiseProducts,
+      ]);
     const { password, isActivated, activationLink, lastLogout, ...restUser } =
       user.toObject();
     return {
@@ -67,7 +70,8 @@ export class UserService {
       basket: basket,
       favorites,
       purchasedGoods: purchases,
-      soldGoods: soldGoods,
+      soldGoods,
+      products,
     };
   }
   async getGuestsUserInfo(userId: string) {

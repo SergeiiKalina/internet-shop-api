@@ -379,4 +379,9 @@ export class ProductsService {
       .select('-comments');
     return favorites;
   }
+
+  async getProductByProducer(id: string) {
+    const products = await this.productModel.find({ producer: id });
+    return products;
+  }
 }
