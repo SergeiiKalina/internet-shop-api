@@ -87,7 +87,7 @@ export class UpdateUserDto {
     description: 'Phone number (+38XXXXXXXXXX)',
     required: false,
   })
-  phoneNumber?: string;
+  numberPhone?: string;
 
   @IsString()
   @Length(6, 20)
