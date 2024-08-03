@@ -5,3 +5,8 @@ export interface RequestWithUser extends Request {
     id: string;
   };
 }
+
+export interface ITokens {
+  accessJwt: string;
+  refreshJwt: string;
+}

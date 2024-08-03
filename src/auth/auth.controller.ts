@@ -38,7 +38,7 @@ export class AuthController {
   ) {
     try {
       const user = await this.authService.registration(newUser);
-      res.cookie('refreshToken', user.refreshJwt, {
+      res.cookie('refreshToken', user.tokens.refreshJwt, {
         maxAge: 30 * 24 * 60 * 60 * 1000,
         httpOnly: true,
         sameSite: 'none',
@@ -69,7 +69,7 @@ export class AuthController {
   ) {
     try {
       const user = await this.authService.login(dto);
-      res.cookie('refreshToken', user.backend_tokens.refresh_token, {
+      res.cookie('refreshToken', user.tokens.refreshJwt, {
         maxAge: 30 * 24 * 60 * 60 * 1000,
         httpOnly: true,
         sameSite: 'none',
@@ -86,8 +86,14 @@ export class AuthController {
   @ApiOperation({ summary: 'logout by user' })
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtAuthGuard)
-  async logout(@Req() req) {
-    req.logout;
+  async logout(@Res() res: Response) {
+    res.clearCookie('refreshToken', {
+      httpOnly: true,
+      sameSite: 'none',
+      secure: true,
+    });
+
+    return res.status(HttpStatus.OK).json({ message: 'Logout successful' });
   }
 
   @Get('refresh')

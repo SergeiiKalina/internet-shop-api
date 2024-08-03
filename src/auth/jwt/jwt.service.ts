@@ -3,6 +3,7 @@ import { Model } from 'mongoose';
 import { Jwt } from './jwt.model';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { ITokens } from '../interface/interface';
 
 @Injectable()
 export class TokenService {
@@ -11,7 +12,10 @@ export class TokenService {
     private jwtService: JwtService,
   ) {}
 
-  async generationJwt(payload) {
+  async generationJwt(payload: {
+    email: string;
+    id: string;
+  }): Promise<ITokens> {
     try {
       const accessJwt = await this.jwtService.signAsync(payload, {
         expiresIn: '1d',

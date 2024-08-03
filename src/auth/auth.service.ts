@@ -58,14 +58,13 @@ export class AuthService {
       'Підтвердити адресу',
     );
     const tokens = await this.tokenService.generationJwt({
-      ...user,
       email: email.toLowerCase(),
-      id: user._id,
+      id: user.id,
     });
 
     await this.tokenService.safeJwt(user.id, tokens.refreshJwt);
 
-    return { ...tokens, user };
+    return { user, tokens };
   }
 
   async login(loginDto: AuthEmailLoginDto) {
@@ -81,28 +80,16 @@ export class AuthService {
     const isPasswordMatches = await bcrypt.compare(password, user.password);
 
     if (!isPasswordMatches) {
-      throw new UnauthorizedException(
-        'Неправильний електронна адресса або пароль',
-      );
+      throw new UnauthorizedException('Невірний пароль');
     }
-    const refreshToken = await this.jwtService.signAsync(payload, {
-      expiresIn: '7d',
-      secret: process.env.JWT_REFRESH_SECRET_KEY,
-    });
-    await this.tokenService.safeJwt(user.id, refreshToken);
+
+    const tokens = await this.tokenService.generationJwt(payload);
+
+    await this.tokenService.safeJwt(user.id, tokens.refreshJwt);
+
     return {
       user,
-      backend_tokens: {
-        token: await this.jwtService.sign({ id: user._id }),
-        access_token: await this.jwtService.signAsync(
-          { ...payload, id: user._id },
-          {
-            expiresIn: '1d',
-            secret: process.env.JWT_SECRET,
-          },
-        ), // Change expiresIn value as needed
-        refresh_token: refreshToken,
-      },
+      tokens,
     };
   }
 
@@ -198,7 +185,7 @@ export class AuthService {
         userFromDb.toObject();
       const tokens = await this.tokenService.generationJwt({
         ...restUser,
-        id: restUser._id,
+        id: restUser._id.toString(),
       });
       return { ...tokens, user: { ...restUser, isActivated: true } };
     }
@@ -234,7 +221,7 @@ export class AuthService {
         userFromDb.toObject();
       const tokens = await this.tokenService.generationJwt({
         ...restUser,
-        id: restUser._id,
+        id: restUser._id.toString(),
       });
       return { ...tokens, user: restUser, isActivated: true };
     }
