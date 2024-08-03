@@ -25,12 +25,6 @@ export class FavoriteController {
     status: 401,
     description: 'Unauthorized. User needs to be authenticated.',
   })
-  @ApiQuery({
-    name: 'productId',
-    required: true,
-    type: String,
-    description: 'id product',
-  })
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   async addFavorite(@Param('productId') productId: string, @Req() req) {
@@ -47,12 +41,6 @@ export class FavoriteController {
   @ApiResponse({
     status: 401,
     description: 'Unauthorized. User needs to be authenticated.',
-  })
-  @ApiQuery({
-    name: 'productId',
-    required: true,
-    type: String,
-    description: 'id product',
   })
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)

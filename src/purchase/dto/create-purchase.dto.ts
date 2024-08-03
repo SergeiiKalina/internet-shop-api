@@ -50,12 +50,11 @@ export class CreatePurchaseDto {
   email?: string;
   @IsString()
   @ApiProperty({
-    description: 'User city',
-    type: String,
+    description: 'User town',
+    type: [String],
     required: true,
   })
-  @Length(3, 20)
-  city: string;
+  town: string[];
   @IsString()
   @ApiProperty({
     description: 'Number post office',

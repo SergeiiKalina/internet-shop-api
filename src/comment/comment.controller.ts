@@ -13,7 +13,7 @@ import {
 import { CommentService } from './comment.service';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
 @ApiTags('comment')
 @Controller('comment')
@@ -22,6 +22,7 @@ export class CommentController {
 
   @Post()
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   async create(
     @Body(new ValidationPipe()) createCommentDto: CreateCommentDto,
     @Req() req,
@@ -34,12 +35,14 @@ export class CommentController {
   }
 
   @Post('like')
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   async like(@Body() { commentId }: { commentId: string }, @Req() req) {
     const userId = req.user.id;
     return this.commentService.like(commentId, userId);
   }
   @Post('dislike')
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   async dislike(@Body() { commentId }: { commentId: string }, @Req() req) {
     const userId = req.user.id;

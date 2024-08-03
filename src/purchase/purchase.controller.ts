@@ -11,6 +11,7 @@ import {
 import { PurchaseService } from './purchase.service';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import {
+  ApiBearerAuth,
   ApiBody,
   ApiOperation,
   ApiParam,
@@ -52,6 +53,7 @@ export class PurchaseController {
     name: 'id',
     description: 'id product',
   })
+  @ApiBearerAuth()
   @Post(':id')
   async add(
     @Param('id') id: string,
@@ -72,6 +74,7 @@ export class PurchaseController {
     description: 'Ви не авторизовані',
   })
   @Post('changeStatus/:idPurchase')
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   async changeStatus(
     @Param('idPurchase') idPurchase: string,
@@ -82,6 +85,7 @@ export class PurchaseController {
     return this.purchaseService.changeStatus(idPurchase, status.status, userId);
   }
   @Delete(':id')
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   async delete(@Param('id') id: string) {
     return this.purchaseService.delete(id);

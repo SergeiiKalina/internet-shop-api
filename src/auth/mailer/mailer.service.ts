@@ -46,7 +46,7 @@ export class Mailer {
           <p>Ім'я: ${user.firstName} ${user.lastName}</p>
           <p> ${user.email ? 'Email:' + user.email : ''}</p>
           <p>Телефон: ${user.tel}</p>
-          <p>Місто: ${user.city}</p>
+          <p>Місто: ${user.town[0]}</p>
           <p>Відділення пошти: ${user.postOffice}</p>
           <p>${user.building ? 'Будівля:' + user.building : ''}</p>
           <p>Спосіб доставки: ${user.wayDelivery}</p>
