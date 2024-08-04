@@ -10,3 +10,10 @@ export interface ITokens {
   accessJwt: string;
   refreshJwt: string;
 }
+
+export interface IDataDefaultUser {
+  email: string;
+  name: string;
+  firstName?: string;
+  lastName?: string;
+}

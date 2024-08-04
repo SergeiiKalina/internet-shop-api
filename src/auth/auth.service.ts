@@ -19,6 +19,7 @@ import { ForgotPasswordDto } from './dto/forgotPassword.dto';
 import { ConfigService } from '@nestjs/config';
 import { ChangePasswordDto } from './dto/changePassword.dto';
 import { randomBytes } from 'crypto';
+import { IDataDefaultUser } from './interface/interface';
 
 @Injectable()
 export class AuthService {
@@ -135,10 +136,12 @@ export class AuthService {
     if (!user) {
       throw new BadRequestException('Користувачь з таким емайлом не знайдений');
     }
+
     const forgotPasswordToken = await this.jwtService.signAsync({
       id: user._id,
       email: user.email,
     });
+
     const forgotLink = `${this.configService.get('API_URL_GIT')}auth/activate?token=${forgotPasswordToken}`;
 
     await this.mailerService.sendMail(
@@ -160,70 +163,50 @@ export class AuthService {
     return user;
   }
 
-  async loginWithFacebook(user: { email: string; name: string }) {
+  async loginWithFacebook(user: IDataDefaultUser) {
     const userDb = await this.userService.findByEmail(user.email);
 
     if (!userDb) {
-      const newUser = await this.registration({
-        ...user,
-        firstName: user.name.split(' ')[0],
-        lastName: user.name.split(' ')[1],
-        numberPhone: '+380000000000',
-        isActivated: true,
-        password: randomBytes(8).toString('hex'),
-      });
-      const { password, activationLink, lastLogout, ...restUser } =
-        newUser.user.toObject();
-      return { ...newUser, user: { ...restUser } };
-    }
-
-    if (userDb) {
-      const userFromDb = await this.userService.findByEmail(user.email);
-      userFromDb.isActivated = true;
-      await userFromDb.save();
-      const { password, activationLink, lastLogout, ...restUser } =
-        userFromDb.toObject();
-      const tokens = await this.tokenService.generationJwt({
-        ...restUser,
-        id: restUser._id.toString(),
-      });
-      return { ...tokens, user: { ...restUser, isActivated: true } };
+      return this.createDefaultUser(user);
+    } else {
+      return this.fetchUserWithSocialCredentials(user);
     }
   }
 
-  async loginWithGoogle(user: {
-    email: string;
-    name: string;
-    firstName: string;
-    lastName: string;
-  }) {
+  async loginWithGoogle(user: IDataDefaultUser) {
     const userDb = await this.userService.findByEmail(user.email);
 
     if (!userDb) {
-      const newUser = await this.registration({
-        ...user,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        numberPhone: '+380000000000',
-        isActivated: true,
-        password: randomBytes(8).toString('hex'),
-      });
-      const { password, activationLink, lastLogout, ...restUser } =
-        newUser.user.toObject();
-      return { ...newUser, user: { ...restUser } };
+      return this.createDefaultUser(user);
+    } else {
+      return this.fetchUserWithSocialCredentials(user);
     }
+  }
 
-    if (userDb) {
-      const userFromDb = await this.userService.findByEmail(user.email);
-      userFromDb.isActivated = true;
-      await userFromDb.save();
-      const { password, activationLink, lastLogout, ...restUser } =
-        userFromDb.toObject();
-      const tokens = await this.tokenService.generationJwt({
-        ...restUser,
-        id: restUser._id.toString(),
-      });
-      return { ...tokens, user: restUser, isActivated: true };
-    }
+  async createDefaultUser(user: IDataDefaultUser) {
+    const newUser = await this.registration({
+      ...user,
+      firstName: user.firstName ? user.firstName : user.name.split(' ')[0],
+      lastName: user.lastName ? user.lastName : user.name.split(' ')[1],
+      numberPhone: '+380000000000',
+      isActivated: true,
+      password: randomBytes(8).toString('hex'),
+    });
+    const { password, activationLink, lastLogout, ...restUser } =
+      newUser.user.toObject();
+    return { ...newUser, user: { ...restUser } };
+  }
+
+  async fetchUserWithSocialCredentials(user: IDataDefaultUser) {
+    const userFromDb = await this.userService.findByEmail(user.email);
+    userFromDb.isActivated = true;
+    await userFromDb.save();
+    const { password, activationLink, lastLogout, ...restUser } =
+      userFromDb.toObject();
+    const tokens = await this.tokenService.generationJwt({
+      ...restUser,
+      id: restUser._id.toString(),
+    });
+    return { ...tokens, user: restUser, isActivated: true };
   }
 }
