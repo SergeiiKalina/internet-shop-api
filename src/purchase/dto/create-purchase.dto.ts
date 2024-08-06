@@ -48,7 +48,7 @@ export class CreatePurchaseDto {
     message: 'Email повинен мати латиньскі літери і спец символи  (. _  + -)',
   })
   email?: string;
-  @IsString()
+  @IsString({ each: true })
   @ApiProperty({
     description: 'User town',
     type: [String],
