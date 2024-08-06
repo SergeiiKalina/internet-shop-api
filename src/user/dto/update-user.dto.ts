@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
+  IsDate,
   IsEmail,
   IsEnum,
   IsNotEmpty,
@@ -105,7 +106,16 @@ export class UpdateUserDto {
     required: false,
   })
   password?: string;
-
+  @ApiProperty({
+    description: 'Дата народження користувача',
+    example: '1990-01-01',
+    required: false,
+    type: String,
+    format: 'date',
+  })
+  @IsOptional()
+  @IsDate({ message: 'Дата народження має бути дійсною датою' })
+  birthDate?: Date;
   @ApiProperty({
     type: 'Picture',
     items: {
