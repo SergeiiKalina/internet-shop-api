@@ -21,7 +21,7 @@ export class CreateProductDto {
   constructor() {}
   @ApiProperty({ type: String, description: 'Title of the product' })
   @IsString()
-  @Length(3, 50)
+  @Length(3, 100)
   title: string;
 
   @ApiProperty({ type: Number, description: 'Price of the product' })

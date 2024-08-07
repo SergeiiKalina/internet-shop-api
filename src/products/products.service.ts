@@ -166,12 +166,18 @@ export class ProductsService {
     product.subCategory = subCategory ? subCategory.id : product.subCategory;
     product.parameters = {
       ...product.parameters,
-      eco: updateProduct.eco,
-      size: updateProduct.size,
-      state: updateProduct.state,
-      brand: updateProduct.brand,
-      isUkraine: updateProduct.isUkraine,
-      color: allColor,
+      eco: updateProduct.eco ? updateProduct.eco : product.parameters.eco,
+      size: updateProduct.size ? updateProduct.size : product.parameters.size,
+      state: updateProduct.state
+        ? updateProduct.state
+        : product.parameters.state,
+      brand: updateProduct.brand
+        ? updateProduct.brand
+        : product.parameters.brand,
+      isUkraine: updateProduct.isUkraine
+        ? updateProduct.isUkraine
+        : product.parameters.isUkraine,
+      color: allColor ? allColor : product.parameters.color,
     };
 
     await product.save();
