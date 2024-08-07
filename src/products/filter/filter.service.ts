@@ -33,7 +33,7 @@ export class ProductFilterService {
 
     const price = {
       max: products.length ? Number.MIN_VALUE : 0,
-      min: products.length ? Number.MAX_VALUE : 0,
+      min: products.length ? 99999999 : 0,
     };
 
     products.forEach((el) => {
