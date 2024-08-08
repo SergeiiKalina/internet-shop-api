@@ -17,8 +17,8 @@ export default class Purchase {
   lastName: string;
   @Prop({ required: false, type: String })
   email?: string;
-  @Prop({ required: true, type: String })
-  city: string;
+  @Prop({ required: true, type: [String] })
+  town: string[];
   @Prop({ required: true, type: String })
   postOffice: string;
   @Prop({ required: true, type: String })
