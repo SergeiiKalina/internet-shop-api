@@ -41,13 +41,27 @@ export class PurchaseService {
 
     if (user) {
       user.purchasedGoods.push(purchase.id);
+
       await user.save();
     }
 
     salesman.soldGoods.push(purchase.id);
-    await salesman.save();
-    await this.mailerService.orderGood(salesman.email, data, product);
 
+    await salesman.save();
+
+    await this.mailerService.orderGood(
+      salesman.email,
+      data,
+      product._id.toString(),
+      product,
+    );
+    await this.mailerService.sendInfoAboutOrder(
+      data.email,
+      salesman.email,
+      salesman.numberPhone,
+      product,
+      data.quantity,
+    );
     return purchase;
   }
 

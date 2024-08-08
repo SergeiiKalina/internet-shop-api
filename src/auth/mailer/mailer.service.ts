@@ -2,6 +2,7 @@ require('dotenv').config();
 import { Injectable } from '@nestjs/common';
 import { MailerService } from '@nestjs-modules/mailer';
 import { CreatePurchaseDto } from 'src/purchase/dto/create-purchase.dto';
+import { Product } from 'src/products/product.model';
 
 @Injectable()
 export class Mailer {
@@ -32,16 +33,21 @@ export class Mailer {
         console.log(e);
       });
   }
-  public orderGood(to: string, user: CreatePurchaseDto, nameProduct) {
+  public orderGood(
+    to: string,
+    user: CreatePurchaseDto,
+    productId: string,
+    product: Product,
+  ) {
     this.mailerService
       .sendMail({
         to,
         from: 'Marketplace',
         subject: 'Order Confirmation',
         html: `
-        <p>Назва товару: ${nameProduct.title} </p>
-        <p>Айді товару: ${nameProduct.id.toString()} </p>
-        <p>Кількість: 1</p>
+        <p>Назва товару: ${product.title} </p>
+        <p>Айді товару: ${productId} </p>
+        <p>Кількість: ${user.quantity}</p>
           <p>Данні замовника:</p>
           <p>Ім'я: ${user.firstName} ${user.lastName}</p>
           <p> ${user.email ? 'Email:' + user.email : ''}</p>
@@ -58,26 +64,26 @@ export class Mailer {
       });
   }
 
-  public sendInfoAboutOrder(
+  public async sendInfoAboutOrder(
     to: string,
     emailProducer: string,
     numberPhoneProducer: string,
-    nameProduct,
+    product: Product,
+    quantity: number,
   ) {
-    this.mailerService
+    await this.mailerService
       .sendMail({
         to,
         from: 'Marketplace',
         subject: 'Order Confirmation',
         html: `
-      <p>Інформація про замовлення</p>
-      <p>Назва товару: ${nameProduct.title} </p>
-        <p>Кількість: 1</p>
-        <p>Інформація про продавцяЖ</p>
+          <p>Інформація про замовлення</p>
+          <p>Назва товару: ${product.title} </p> <!-- Перевірка правильності виклику -->
+          <p>Кількість: ${quantity}</p>
+          <p>Інформація про продавця:</p>
           <p>Емаіл: ${emailProducer} </p>
           <p>Номер телефону: ${numberPhoneProducer} </p>
-
-      `,
+        `,
       })
       .catch((e) => {
         console.log(e);
