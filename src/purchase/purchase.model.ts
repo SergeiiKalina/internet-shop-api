@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Mongoose, Types } from 'mongoose';
+import { Types } from 'mongoose';
 import { statusPurchase } from './dto/change-status.dto';
 import { Product } from 'src/products/product.model';
 
@@ -36,7 +36,7 @@ export default class Purchase {
   producer: string;
   @Prop({ default: 1, required: true, type: Number })
   quantity: number;
-  @Prop({ required: true, type: Types.ObjectId, ref: Product.name })
+  @Prop({ required: true, type: Types.ObjectId, ref: 'Product' })
   product: Product;
 }
 

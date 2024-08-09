@@ -6,6 +6,7 @@ import { Model } from 'mongoose';
 import { Mailer } from 'src/auth/mailer/mailer.service';
 import { CreatePurchaseDto } from './dto/create-purchase.dto';
 import Purchase from './purchase.model';
+import { aggregateForAllPurchases } from './aggregates/aggregates';
 
 @Injectable()
 export class PurchaseService {
@@ -86,11 +87,10 @@ export class PurchaseService {
   }
 
   async getAllPurchase(ids: string[]) {
-    const purchases = await this.purchaseModel
-      .find({ _id: { $in: ids } })
-      .populate({
-        path: 'productId',
-      });
+    const purchases = await this.purchaseModel.aggregate([
+      { $match: { _id: { $in: ids } } },
+      ...aggregateForAllPurchases,
+    ]);
 
     return purchases;
   }
