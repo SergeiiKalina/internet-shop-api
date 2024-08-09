@@ -37,6 +37,7 @@ export class PurchaseService {
     const purchase = await this.purchaseModel.create({
       ...data,
       producer: salesman.id,
+      product: product.id,
     });
 
     if (user) {
@@ -85,7 +86,11 @@ export class PurchaseService {
   }
 
   async getAllPurchase(ids: string[]) {
-    const purchases = await this.purchaseModel.find({ _id: { $in: ids } });
+    const purchases = await this.purchaseModel
+      .find({ _id: { $in: ids } })
+      .populate({
+        path: 'productId',
+      });
 
     return purchases;
   }
