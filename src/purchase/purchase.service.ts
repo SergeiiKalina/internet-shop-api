@@ -7,12 +7,15 @@ import { Mailer } from 'src/auth/mailer/mailer.service';
 import { CreatePurchaseDto } from './dto/create-purchase.dto';
 import Purchase from './purchase.model';
 import { aggregateForAllPurchases } from './aggregates/aggregates';
+import { CounterPurchase } from './counter.model';
 
 @Injectable()
 export class PurchaseService {
   constructor(
     @InjectModel(User.name) private userModel: Model<User>,
     @InjectModel(Purchase.name) private purchaseModel: Model<Purchase>,
+    @InjectModel(CounterPurchase.name)
+    private counterModel: Model<CounterPurchase>,
     private readonly mailerService: Mailer,
     private readonly productService: ProductsService,
   ) {}
@@ -24,6 +27,13 @@ export class PurchaseService {
 
     const promiseProduct = this.productService.findProductById(productId);
     const [user, product] = await Promise.all([promiseUser, promiseProduct]);
+    const counter = await this.counterModel
+      .findOneAndUpdate(
+        { _id: '66bc791485a8e27d76fa842a' },
+        { $inc: { counter: 1 } },
+        { new: true, upsert: true },
+      )
+      .exec();
 
     if (!product) {
       throw new BadRequestException('Щось пішло не так');
@@ -39,6 +49,7 @@ export class PurchaseService {
       ...data,
       producer: salesman.id,
       product: product.id,
+      count: counter.counter,
     });
 
     if (user) {

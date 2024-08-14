@@ -19,6 +19,7 @@ import { TransformImageService } from './products/images-service/transform-image
 import { UserService } from './user/user.service';
 import { PurchaseService } from './purchase/purchase.service';
 import { Mailer } from './auth/mailer/mailer.service';
+import { CounterPurchase, CounterSchema } from './purchase/counter.model';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { Mailer } from './auth/mailer/mailer.service';
       { name: Comment.name, schema: CommentSchema },
       { name: Purchase.name, schema: PurchaseSchema },
       { name: Size.name, schema: SizeSchema },
+      { name: CounterPurchase.name, schema: CounterSchema },
     ]),
   ],
   providers: [

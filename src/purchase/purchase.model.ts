@@ -38,6 +38,8 @@ export default class Purchase {
   quantity: number;
   @Prop({ required: true, type: Types.ObjectId, ref: 'Product' })
   product: Product;
+  @Prop({ required: true, type: Number })
+  count: number;
 }
 
 export const PurchaseSchema = SchemaFactory.createForClass(Purchase);
