@@ -97,7 +97,10 @@ export class CreateProductDto {
       ? value.split(',').map((item) => item.trim())
       : value,
   )
-  @IsEnum(sizeEmbroidery, { each: true })
+  @IsEnum(sizeEmbroidery, {
+    each: true,
+    message: `Each value in size must be one of the following values: (${sizeEmbroidery.map((el) => el + ' ')})`,
+  })
   size: string[];
 
   @ApiProperty({ description: 'Color of the product', type: [String] })
