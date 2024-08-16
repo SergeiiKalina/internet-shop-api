@@ -49,8 +49,8 @@ export class User {
   @Prop({ default: null }) // Example: Default value can be null if the user has never logged out
   lastLogout: Date;
 
-  @Prop({ required: false })
-  birthDate?: Date;
+  @Prop({ required: false, type: String })
+  birthDate?: string;
 
   @Prop({
     type: { count: { type: Number }, sum: { type: Number } },

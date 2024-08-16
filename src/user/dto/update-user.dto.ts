@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
-  IsDate,
+  IsDateString,
   IsEmail,
   IsEnum,
   IsNotEmpty,
@@ -27,6 +27,7 @@ export class UpdateUserDto {
       "Ім'я повинне мати латиські або кирилічні символи а довжина від 2 до 20 символів",
   })
   firstName?: string;
+
   @IsString()
   @Length(2, 20)
   @IsNotEmpty()
@@ -41,6 +42,7 @@ export class UpdateUserDto {
       'Прізвище повинне мати латиські або кирилічні символи а довжина від 2 до 20 символів',
   })
   lastName?: string;
+
   @IsString()
   @Length(2, 20)
   @IsOptional()
@@ -54,6 +56,7 @@ export class UpdateUserDto {
       'По батькові повинне мати латиські або кирилічні символи а довжина від 2 до 20 символів',
   })
   surName?: string;
+
   @ApiProperty({
     type: String,
     description: `Can be only ${sexEnum.map((el) => el)}`,
@@ -65,6 +68,7 @@ export class UpdateUserDto {
     message: `Стать має бути тільки ${sexEnum.map((el) => el)}`,
   })
   gender?: string;
+
   @IsString()
   @IsOptional()
   @IsEmail()
@@ -114,8 +118,12 @@ export class UpdateUserDto {
     format: 'date',
   })
   @IsOptional()
-  @IsDate({ message: 'Дата народження має бути дійсною датою' })
-  birthDate?: Date;
+  @IsDateString(
+    { strict: true },
+    { message: 'Дата народження має бути дійсною датою у форматі YYYY-MM-DD' },
+  )
+  birthDate?: string;
+
   @ApiProperty({
     type: 'Picture',
     items: {
