@@ -30,12 +30,42 @@ import {
 import { UpdateProductDto } from './dto/update-product.dto';
 import { SharpPipe } from './pipes/sharpForFewFile.pipe';
 import { Product } from './product.model';
-import { FiltersDto } from './dto/filters.dto';
+
 import { SortField, SortOrder, sexEnum } from './enum/enumForProducts';
+import { RequestWithUser } from 'src/auth/interface/interface';
+import { IStatusProduct } from './interfaces/interfaces';
+import { ChangeProductStatusDto } from './dto/change-product-status.dto';
 @ApiTags('product')
 @Controller('products')
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
+
+  @Post('changeStatus')
+  @ApiOperation({
+    summary: 'Only authorized users',
+  })
+  @ApiBody({
+    type: ChangeProductStatusDto,
+  })
+  @ApiResponse({ status: 200, description: 'return product' })
+  @ApiOperation({ summary: 'Change status product' })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad request. Invalid input data. That product not found',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized. User needs to be authenticated.',
+  })
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  async changeStatus(
+    @Req() req: RequestWithUser,
+    @Body() status: IStatusProduct,
+  ) {
+    const id = req.user.id;
+    return this.productsService.changeStatus(id, status);
+  }
 
   @Get('search')
   async searchProductsByFirstLetter(

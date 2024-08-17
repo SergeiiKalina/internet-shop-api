@@ -80,6 +80,10 @@ export class Product {
   parameters: IParameter;
   @Prop({ type: String })
   minImage: string;
+  @Prop({ required: true, type: Number })
+  count: number;
+  @Prop({ required: true, type: Object, default: { enable: 'Активне' } })
+  status: Object;
 }
 
 export const ProductSchema = SchemaFactory.createForClass(Product);

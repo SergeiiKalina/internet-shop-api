@@ -24,6 +24,8 @@ import {
   aggregateForAllProductsInThisCategory,
   aggregateForFiltersAndSortedProducts,
 } from './aggregates/aggregates';
+import { CounterProducts } from './counter.model';
+import { IStatusProduct } from './interfaces/interfaces';
 
 @Injectable()
 export class ProductsService {
@@ -31,6 +33,8 @@ export class ProductsService {
     @InjectModel(Product.name) private productModel: Model<Product>,
     @InjectModel(Category.name) private categoryModel: Model<Category>,
     @InjectModel(SubCategory.name) private subCategoryModel: Model<SubCategory>,
+    @InjectModel(CounterProducts.name)
+    private counterModel: Model<CounterProducts>,
     private readonly imageService: ImageService,
     private readonly commentService: CommentService,
     private readonly productFilterService: ProductFilterService,
@@ -88,6 +92,14 @@ export class ProductsService {
       ]);
     const minImage = await this.imageService.uploadPhoto(circle);
 
+    const counter = await this.counterModel
+      .findOneAndUpdate(
+        { _id: '66bc791485a8e27d76fa842a' },
+        { $inc: { counter: 1 } },
+        { new: true, upsert: true },
+      )
+      .exec();
+
     const product = await this.productModel.create({
       ...restProduct,
       price:
@@ -116,6 +128,7 @@ export class ProductsService {
         eco,
         isUkraine,
       },
+      count: counter.counter,
     });
     if (!product) {
       throw new BadRequestException(
@@ -253,6 +266,11 @@ export class ProductsService {
 
   async delete(id: string) {
     const deleteProduct = this.productModel.findByIdAndDelete(id);
+
+    if (!deleteProduct) {
+      throw new BadRequestException('Такого товару не знайшов');
+    }
+
     await this.cacheManager.del(id.toString());
     return deleteProduct;
   }
@@ -388,6 +406,16 @@ export class ProductsService {
 
   async getProductByProducer(id: string) {
     const products = await this.productModel.find({ producer: id });
+
     return products;
+  }
+
+  async changeStatus(id: string, status: IStatusProduct) {
+    const product = await this.productModel.findById(id);
+
+    if (!product) {
+      throw new BadRequestException('Такий товар не знайдено');
+    }
+    return product;
   }
 }

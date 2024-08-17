@@ -61,5 +61,9 @@ export const sizeEmbroidery = [
   '44',
   '45',
 ] as const;
+export const statusProduct = [
+  { disable: 'Деактивовене' },
+  { enable: 'Активне' },
+] as const;
 
 export const sexEnum = ['unsex', 'male', 'female'] as const;

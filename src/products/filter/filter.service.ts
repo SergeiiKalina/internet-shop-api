@@ -10,7 +10,7 @@ export class ProductFilterService {
     @InjectModel(Product.name) private productModel: Model<Product>,
   ) {}
 
-  async createFiltersData(products: Product[]) {
+  async createFiltersData(products) {
     const colors = await this.getUniqueValues(products, 'color');
     const sizes = await this.getUniqueValues(products, 'size');
     const states = await this.getUniqueValues(products, 'state');
@@ -33,7 +33,7 @@ export class ProductFilterService {
 
     const price = {
       max: products.length ? Number.MIN_VALUE : 0,
-      min: products.length ? 99999999 : 0,
+      min: products.length ? 9999 : 0,
     };
 
     products.forEach((el) => {
@@ -50,6 +50,10 @@ export class ProductFilterService {
         } else {
           price.min = el.price;
         }
+      }
+      if (el.category.en === 'forFree') {
+        price.max = 0;
+        price.min = 0;
       }
     });
 
