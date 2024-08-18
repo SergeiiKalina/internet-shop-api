@@ -102,10 +102,26 @@ export const aggregateForAllProductsInThisCategory = [
     },
   },
   {
+    $addFields: {
+      categoryId: { $toObjectId: '$category' },
+    },
+  },
+  {
+    $lookup: {
+      from: 'categories',
+      localField: 'categoryId',
+      foreignField: '_id',
+      as: 'category',
+    },
+  },
+  {
+    $unwind: '$category',
+  },
+  {
     $group: {
       _id: '$_id',
       title: { $first: '$title' },
-      category: { $first: '$category' },
+      category: { $first: '$category.mainCategory' },
       subCategory: { $first: '$subCategory' },
       parameters: { $first: '$parameters' },
       price: { $first: '$price' },

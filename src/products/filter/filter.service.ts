@@ -32,7 +32,7 @@ export class ProductFilterService {
     ];
 
     const price = {
-      max: products.length ? Number.MIN_VALUE : 0,
+      max: products.length ? 9999 : 0,
       min: products.length ? 9999 : 0,
     };
 
@@ -51,11 +51,12 @@ export class ProductFilterService {
           price.min = el.price;
         }
       }
-      if (el.category.en === 'forFree') {
-        price.max = 0;
-        price.min = 0;
-      }
     });
+
+    if (products.every((el) => el.category.en === 'forFree')) {
+      price.max = 0;
+      price.min = 0;
+    }
 
     return {
       price,
