@@ -134,7 +134,7 @@ export class ProductFilterService {
               { subCategory: subcategoryId || null },
             ],
           }),
-      price: { $gte: filtersDto.price.min, $lte: filtersDto.price.max },
+
       ...(filtersDto.sizes.length > 0
         ? { 'parameters.size': { $in: filtersDto.sizes } }
         : {}),

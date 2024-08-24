@@ -21,6 +21,7 @@ import { TransformImageService } from './images-service/transform-image.sevice';
 import { ProductFilterService } from './filter/filter.service';
 import { FiltersDto } from './dto/filters.dto';
 import {
+  addEffectivePrice,
   aggregateForAllProductsInThisCategory,
   aggregateForFiltersAndSortedProducts,
 } from './aggregates/aggregates';
@@ -307,7 +308,10 @@ export class ProductsService {
     const startIndex = (page - 1) * limit;
 
     const sortOptions: { [key: string]: SortOrder } = sortField
-      ? { [sortField]: sortOrder === 'asc' ? 1 : -1 }
+      ? {
+          [filtersDto.discount ? 'effectivePrice' : sortField]:
+            sortOrder === 'asc' ? 1 : -1,
+        }
       : {};
     const promiseCategory = this.categoryModel.findOne({
       'mainCategory.en': subCategoryOrCategory,
@@ -356,7 +360,16 @@ export class ProductsService {
 
     const promiseAllProductWithAllFiltersAndSorted = this.productModel
       .aggregate([
-        { $match: filterOptions },
+        ...addEffectivePrice,
+        {
+          $match: {
+            ...filterOptions,
+            effectivePrice: {
+              $gte: filtersDto.price.min,
+              $lte: filtersDto.price.max,
+            },
+          },
+        },
         ...aggregateForFiltersAndSortedProducts,
       ])
       .sort(sortOptions)

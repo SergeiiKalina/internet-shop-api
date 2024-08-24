@@ -1,3 +1,38 @@
+export const addEffectivePrice = [
+  {
+    $addFields: {
+      effectivePrice: {
+        $cond: {
+          if: { $eq: ['$discount', true] },
+          then: '$discountPrice',
+          else: '$price',
+        },
+      },
+    },
+  },
+
+  {
+    $project: {
+      title: 1,
+      price: 1,
+      discount: 1,
+      discountPrice: 1,
+      visit: 1,
+      category: 1,
+      subCategory: 1,
+      producer: 1,
+      img: 1,
+      describe: 1,
+      parameters: 1,
+      createDate: 1,
+      comments: 1,
+      __v: 1,
+      minImage: 1,
+      effectivePrice: 1,
+    },
+  },
+];
+
 export const aggregateForFiltersAndSortedProducts = [
   {
     $addFields: {
@@ -62,7 +97,6 @@ export const aggregateForFiltersAndSortedProducts = [
       'producer.registrationDate',
     ],
   },
-
   {
     $project: {
       title: 1,
@@ -70,11 +104,9 @@ export const aggregateForFiltersAndSortedProducts = [
       discount: 1,
       discountPrice: 1,
       visit: 1,
-      category: '$category.mainCategory',
-      subCategory: {
-        $ifNull: ['$subCategory.subCategory', 'No Subcategory'], // Заменяем null на дефолтное значение
-      },
-      producer: '$producer',
+      category: 1,
+      subCategory: 1,
+      producer: 1,
       img: 1,
       describe: 1,
       parameters: 1,
@@ -82,6 +114,7 @@ export const aggregateForFiltersAndSortedProducts = [
       comments: 1,
       __v: 1,
       minImage: 1,
+      effectivePrice: 1,
     },
   },
 ];
