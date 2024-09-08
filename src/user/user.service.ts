@@ -24,7 +24,7 @@ export class UserService {
   async getAllUsers() {
     return this.userModel.find().exec();
   }
-  async findOne(id: string): Promise<User> {
+  async findOne(id: string) {
     const user = await this.userModel.findById(id).exec();
     if (!user) {
       throw new BadRequestException('Такого користувача не знайденно');

@@ -16,6 +16,12 @@ export class FavoriteService {
     const user = await this.userModel.findById(userId);
     const product = await this.productService.findProductById(productId);
 
+    if (!user.isActivated) {
+      throw new BadRequestException(
+        'Ви не активували аккаунт, лист є на пошті',
+      );
+    }
+
     if (!product) {
       throw new BadRequestException('Продукт не знайдений');
     }

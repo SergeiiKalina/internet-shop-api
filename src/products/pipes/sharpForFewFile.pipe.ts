@@ -1,4 +1,5 @@
 import { BadRequestException, Injectable, PipeTransform } from '@nestjs/common';
+import * as convert from 'heic-convert';
 import * as sharp from 'sharp';
 
 @Injectable()
@@ -15,6 +16,17 @@ export class SharpPipe
         images.map(async (image) => {
           if (!image || !image.buffer) {
             throw new BadRequestException('Подано недійсний файл зображення');
+          }
+          if (
+            image.mimetype === 'image/heic' ||
+            image.mimetype === 'image/heif'
+          ) {
+            const outputBuffer = await convert({
+              buffer: image.buffer,
+              format: 'JPEG',
+              quality: 1,
+            });
+            image = { ...image, buffer: outputBuffer };
           }
 
           const resizedImageBuffer = await sharp(image.buffer)

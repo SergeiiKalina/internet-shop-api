@@ -131,10 +131,14 @@ export class AuthService {
   }
 
   async forgotPassword(forgotPassword: ForgotPasswordDto) {
-    const user = await this.userService.findByEmail(forgotPassword.email);
+    const user = await this.userService.findByEmail(
+      forgotPassword.email.toLowerCase(),
+    );
 
     if (!user) {
-      throw new BadRequestException('Користувачь з таким емайлом не знайдений');
+      throw new BadRequestException(
+        'Якщо введена електронна адреса існує в нашій системі, ви отримаєте лист з подальшими інструкціями',
+      );
     }
 
     const forgotPasswordToken = await this.jwtService.signAsync({
@@ -145,7 +149,7 @@ export class AuthService {
     const forgotLink = `${this.configService.get('API_URL_GIT')}auth/activate?token=${forgotPasswordToken}`;
 
     await this.mailerService.sendMail(
-      forgotPassword.email,
+      forgotPassword.email.toLowerCase(),
       forgotLink,
       user.firstName,
       'Щоб змінити пароль вам потрібно натиснути нижче!',

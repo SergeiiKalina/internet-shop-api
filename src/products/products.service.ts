@@ -1,8 +1,8 @@
 import {
   BadRequestException,
+  forwardRef,
   Inject,
   Injectable,
-  NotFoundException,
 } from '@nestjs/common';
 import { CreateProductDto } from './dto/create-product.dto';
 import { InjectModel } from '@nestjs/mongoose';
@@ -27,6 +27,7 @@ import {
 } from './aggregates/aggregates';
 import { CounterProducts } from './counter.model';
 import { IStatusProduct } from './interfaces/interfaces';
+import { UserService } from 'src/user/user.service';
 
 @Injectable()
 export class ProductsService {
@@ -43,6 +44,8 @@ export class ProductsService {
     private readonly categoryService: CategoryService,
     private readonly colorService: ColorService,
     private readonly transformImageService: TransformImageService,
+    @Inject(forwardRef(() => UserService))
+    private readonly userService: UserService,
   ) {}
 
   async searchProducts(title: string): Promise<Product[]> {
@@ -128,6 +131,7 @@ export class ProductsService {
         brand,
         eco,
         isUkraine,
+        sex: createProductDto.sex,
       },
       count: counter.counter,
     });
@@ -309,10 +313,11 @@ export class ProductsService {
 
     const sortOptions: { [key: string]: SortOrder } = sortField
       ? {
-          [filtersDto.discount ? 'effectivePrice' : sortField]:
+          [sortField === 'price' ? 'effectivePrice' : sortField]:
             sortOrder === 'asc' ? 1 : -1,
         }
       : {};
+
     const promiseCategory = this.categoryModel.findOne({
       'mainCategory.en': subCategoryOrCategory,
     });
@@ -331,6 +336,10 @@ export class ProductsService {
     }
     const categoryId = category ? category.id : '';
     const subcategoryId = subcategory ? subcategory.id : '';
+
+    if (filtersDto.price.min > filtersDto.price.max) {
+      throw new BadRequestException('Мінімальна ціна  більше Максимальної');
+    }
 
     const filterOptions =
       this.productFilterService.createObjectForFilteredProducts(
@@ -364,10 +373,6 @@ export class ProductsService {
         {
           $match: {
             ...filterOptions,
-            effectivePrice: {
-              $gte: filtersDto.price.min,
-              $lte: filtersDto.price.max,
-            },
           },
         },
         ...aggregateForFiltersAndSortedProducts,
@@ -423,12 +428,26 @@ export class ProductsService {
     return products;
   }
 
-  async changeStatus(id: string, status: IStatusProduct) {
-    const product = await this.productModel.findById(id);
-
-    if (!product) {
-      throw new BadRequestException('Такий товар не знайдено');
+  async changeStatus(
+    userId: string,
+    productId: string,
+    status: IStatusProduct,
+  ) {
+    const product = await this.productModel.findById(productId);
+    const user = await this.userService.findOne(userId);
+    if (!product && !user) {
+      throw new BadRequestException(
+        'Такий товар не знайдено або юзера не знайдено',
+      );
     }
+    const userProduct = user.id == product.producer;
+
+    if (!userProduct) {
+      throw new BadRequestException('Цей товар не ваш');
+    }
+    product.status = status;
+    await product.save();
+
     return product;
   }
 }

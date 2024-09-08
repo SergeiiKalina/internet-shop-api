@@ -40,7 +40,7 @@ import { ChangeProductStatusDto } from './dto/change-product-status.dto';
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
-  @Post('changeStatus')
+  @Post('changeStatus/:productId')
   @ApiOperation({
     summary: 'Only authorized users',
   })
@@ -51,7 +51,11 @@ export class ProductsController {
   @ApiOperation({ summary: 'Change status product' })
   @ApiResponse({
     status: 400,
-    description: 'Bad request. Invalid input data. That product not found',
+    description: 'Такий товар не знайдено або юзера не знайдено',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Цей товар не ваш',
   })
   @ApiResponse({
     status: 401,
@@ -62,9 +66,11 @@ export class ProductsController {
   async changeStatus(
     @Req() req: RequestWithUser,
     @Body() status: IStatusProduct,
+    @Param('productId') productId: string,
   ) {
-    const id = req.user.id;
-    return this.productsService.changeStatus(id, status);
+    const userId = req.user.id;
+
+    return this.productsService.changeStatus(userId, productId, status);
   }
 
   @Get('search')
@@ -191,8 +197,10 @@ export class ProductsController {
     @Param('id') id: string,
     @Req() req,
   ) {
-    const userId = req.user.id;
-    return this.productsService.updateProduct(newProducts, files, userId, id);
+    console.log('call');
+    console.log(files);
+    // const userId = req.user.id;
+    // return this.productsService.updateProduct(newProducts, files, userId, id);
   }
 
   @Delete(':id')

@@ -15,6 +15,7 @@ async function bootstrap() {
       'https://internet-shop-api-production.up.railway.app',
       'https://yevhenii-sulim.github.io',
       'http://localhost:3000',
+      'http://localhost:5173',
     ],
     methods: 'GET, POST, PUT, DELETE, PATCH',
     credentials: true,

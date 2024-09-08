@@ -125,6 +125,28 @@ export class ProductFilterService {
     categoryId: string,
     subcategoryId: string,
   ) {
+    const filterPriceObj =
+      filtersDto.discount.length === 0
+        ? {
+            effectivePrice: {
+              $gte: filtersDto.price.min,
+              $lte: filtersDto.price.max,
+            },
+          }
+        : filtersDto.discount.length === 1 && filtersDto.discount[0] === false
+          ? {
+              price: {
+                $gte: filtersDto.price.min,
+                $lte: filtersDto.price.max,
+              },
+            }
+          : {
+              effectivePrice: {
+                $gte: filtersDto.price.min,
+                $lte: filtersDto.price.max,
+              },
+            };
+
     const filterOptions = {
       ...(subCategoryOrCategory === 'all'
         ? []
@@ -134,7 +156,7 @@ export class ProductFilterService {
               { subCategory: subcategoryId || null },
             ],
           }),
-
+      ...filterPriceObj,
       ...(filtersDto.sizes.length > 0
         ? { 'parameters.size': { $in: filtersDto.sizes } }
         : {}),

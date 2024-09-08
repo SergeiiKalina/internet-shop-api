@@ -4,10 +4,12 @@ import { IsNotEmpty, IsString, Length, Matches } from 'class-validator';
 export class ChangePasswordDto {
   @IsString()
   @Length(6, 20)
-  @Matches(/^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&().])[A-Za-z\d@$!%*?&().]{6,}$/, {
-    message:
-      'Пароль повинен бути 6-20 символів: літери, цифри, і один спеціальний символ і одна велика літера.',
-  })
+  @Matches(
+    /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&()^{}#+._=;:'",<>/№~\-|`])[A-Za-z\d@$!%*?&()^{}#+._=;:'",<>/№~\-|]{6,}$/,
+    {
+      message: 'Пароль містить недопустимі символи',
+    },
+  )
   @IsNotEmpty()
   @ApiProperty({
     description:
