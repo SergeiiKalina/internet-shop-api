@@ -383,29 +383,20 @@ export class ProductsService {
       .limit(limit)
       .exec();
 
-    const promiseCountAggregation = this.productModel
-      .aggregate([
-        { $match: { $or: filterOptions['$or'] } },
-        { $count: 'totalCount' },
-      ])
-      .exec();
-
-    const [
-      allProductsWithThisSubCategory,
-      allProductWithAllFiltersAndSorted,
-      countAggregation,
-    ] = await Promise.all([
-      promiseAllProductsWithThisSubCategory,
-      promiseAllProductWithAllFiltersAndSorted,
-      promiseCountAggregation,
-    ]);
+    const [allProductsWithThisSubCategory, allProductWithAllFiltersAndSorted] =
+      await Promise.all([
+        promiseAllProductsWithThisSubCategory,
+        promiseAllProductWithAllFiltersAndSorted,
+      ]);
 
     const filters = await this.productFilterService.createFiltersData(
       allProductsWithThisSubCategory,
     );
 
     const totalDocuments =
-      countAggregation.length > 0 ? countAggregation[0].totalCount : 0;
+      allProductsWithThisSubCategory.length > 0
+        ? allProductsWithThisSubCategory.length
+        : 0;
 
     return {
       products: allProductWithAllFiltersAndSorted,

@@ -52,7 +52,18 @@ export const aggregateForFiltersAndSortedProducts = [
   },
   {
     $addFields: {
-      subcategoryId: { $toObjectId: '$subCategory' },
+      subcategoryId: {
+        $cond: {
+          if: {
+            $and: [
+              { $ne: ['$subCategory', null] },
+              { $eq: [{ $strLenBytes: '$subCategory' }, 24] },
+            ],
+          },
+          then: { $toObjectId: '$subCategory' },
+          else: null,
+        },
+      },
     },
   },
   {
