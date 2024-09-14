@@ -329,6 +329,7 @@ export class ProductsService {
       promiseCategory,
       promiseSubcategory,
     ]);
+
     if (!category && !subcategory && subCategoryOrCategory !== 'all') {
       throw new BadRequestException(
         'Такої Категорії або підкатегорії не існує',
@@ -383,7 +384,10 @@ export class ProductsService {
       .exec();
 
     const promiseCountAggregation = this.productModel
-      .aggregate([{ $match: filterOptions }, { $count: 'totalCount' }])
+      .aggregate([
+        { $match: { $or: filterOptions['$or'] } },
+        { $count: 'totalCount' },
+      ])
       .exec();
 
     const [

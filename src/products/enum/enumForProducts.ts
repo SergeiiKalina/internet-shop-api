@@ -38,7 +38,7 @@ export const SubCategoryEnum = [
   'Перероблений денім',
   'Востановленний секонд хэнд',
   'Вишивка',
-  null,
+  'null',
 ] as const;
 
 export const sizeEmbroidery = [

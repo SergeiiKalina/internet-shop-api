@@ -197,10 +197,8 @@ export class ProductsController {
     @Param('id') id: string,
     @Req() req,
   ) {
-    console.log('call');
-    console.log(files);
-    // const userId = req.user.id;
-    // return this.productsService.updateProduct(newProducts, files, userId, id);
+    const userId = req.user.id;
+    return this.productsService.updateProduct(newProducts, files, userId, id);
   }
 
   @Delete(':id')

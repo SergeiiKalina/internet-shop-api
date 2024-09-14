@@ -43,7 +43,7 @@ export class Mailer {
       .sendMail({
         to,
         from: 'Marketplace',
-        subject: 'Order Confirmation',
+        subject: 'Нове замовлення на DealOk',
         html: `
         <p>Назва товару: ${product.title} </p>
         <p>Айді товару: ${productId} </p>
@@ -75,7 +75,7 @@ export class Mailer {
       .sendMail({
         to,
         from: 'Marketplace',
-        subject: 'Order Confirmation',
+        subject: 'Нове замовлення на DealOk',
         html: `
           <p>Інформація про замовлення</p>
           <p>Назва товару: ${product.title} </p> <!-- Перевірка правильності виклику -->

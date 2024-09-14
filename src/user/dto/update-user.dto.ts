@@ -19,12 +19,12 @@ export class UpdateUserDto {
   @IsOptional()
   @ApiProperty({
     description:
-      'First name (2-20 characters) and must contain only Cyrillic, Latin characters, and dashes.',
+      "Ім'я може містити тільки літери латинського або кириличного алфавіту",
     required: false,
   })
   @Matches(/^[а-яА-ЯёЁa-zA-ZіІїЇєЄґҐ\-']+$/, {
     message:
-      "Ім'я повинне мати латиські або кирилічні символи а довжина від 2 до 20 символів",
+      "Ім'я може містити тільки літери латинського або кириличного алфавіту",
   })
   firstName?: string;
 
@@ -34,12 +34,12 @@ export class UpdateUserDto {
   @IsOptional()
   @ApiProperty({
     description:
-      'First name (2-20 characters) and must contain only Cyrillic, Latin characters, and dashes.',
+      'Прiзвище може містити тільки літери латинського або кириличного алфавіту',
     required: false,
   })
   @Matches(/^[а-яА-ЯёЁa-zA-ZіІїЇєЄґҐ\-']+$/, {
     message:
-      'Прізвище повинне мати латиські або кирилічні символи а довжина від 2 до 20 символів',
+      'Прiзвище може містити тільки літери латинського або кириличного алфавіту',
   })
   lastName?: string;
 

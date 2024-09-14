@@ -5,7 +5,6 @@ import {
   IsString,
   Length,
   Matches,
-  Validate,
 } from 'class-validator';
 
 export class AuthEmailLoginDto {
@@ -22,7 +21,7 @@ export class AuthEmailLoginDto {
   @IsString()
   @Length(6, 20)
   @Matches(
-    /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&()^{}#+._=;:'",<>/])[A-Za-z\d@$!%*?&()^{}#+._=;:'",<>/]{6,}$/,
+    /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&()^{}#+._=;:'",<>\/\[\]])[A-Za-z\d@$!%*?&()^{}#+._=;:'",<>\/\[\]]{6,}$/,
     {
       message: 'Пароль містить недопустимі символи',
     },
