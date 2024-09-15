@@ -40,8 +40,6 @@ export class AuthController {
       const user = await this.authService.registration(newUser);
       res.cookie('refreshToken', user.tokens.refreshJwt, {
         maxAge: 30 * 24 * 60 * 60 * 1000,
-        httpOnly: true,
-        sameSite: 'lax',
         secure: true,
       });
       return res.status(200).json(user);
@@ -71,8 +69,6 @@ export class AuthController {
       const user = await this.authService.login(dto);
       res.cookie('refreshToken', user.tokens.refreshJwt, {
         maxAge: 30 * 24 * 60 * 60 * 1000,
-        httpOnly: true,
-        sameSite: 'lax',
         secure: true,
       });
       return res.status(200).json(user);
@@ -88,8 +84,6 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   async logout(@Res() res: Response) {
     res.clearCookie('refreshToken', {
-      httpOnly: true,
-      sameSite: 'none',
       secure: true,
     });
 
@@ -99,13 +93,11 @@ export class AuthController {
   @Get('refresh')
   async refreshJwt(@Req() req: Request, @Res() res: Response) {
     const refreshToken = req.cookies.refreshToken;
-
     const { accessJwt, refreshJwt } =
       await this.authService.refreshJwt(refreshToken);
+    res.cookie;
     res.cookie('refreshToken', refreshJwt, {
       maxAge: 30 * 24 * 60 * 60 * 1000,
-      httpOnly: true,
-      sameSite: 'lax',
       secure: true,
     });
     return res.json(accessJwt);
