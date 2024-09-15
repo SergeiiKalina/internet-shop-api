@@ -41,7 +41,7 @@ export class AuthController {
       res.cookie('refreshToken', user.tokens.refreshJwt, {
         maxAge: 30 * 24 * 60 * 60 * 1000,
         httpOnly: true,
-        sameSite: 'none',
+        sameSite: 'lax',
         secure: true,
       });
       return res.status(200).json(user);
@@ -72,7 +72,7 @@ export class AuthController {
       res.cookie('refreshToken', user.tokens.refreshJwt, {
         maxAge: 30 * 24 * 60 * 60 * 1000,
         httpOnly: true,
-        sameSite: 'none',
+        sameSite: 'lax',
         secure: true,
       });
       return res.status(200).json(user);
@@ -105,7 +105,7 @@ export class AuthController {
     res.cookie('refreshToken', refreshJwt, {
       maxAge: 30 * 24 * 60 * 60 * 1000,
       httpOnly: true,
-      sameSite: 'none',
+      sameSite: 'lax',
       secure: true,
     });
     return res.json(accessJwt);
