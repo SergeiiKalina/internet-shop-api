@@ -196,6 +196,7 @@ export class ProductsService {
         ? updateProduct.isUkraine
         : product.parameters.isUkraine,
       color: allColor ? allColor : product.parameters.color,
+      sex: updateProduct.sex ? updateProduct.sex : product.parameters.sex,
     };
 
     await product.save();
@@ -362,6 +363,7 @@ export class ProductsService {
                     { subCategory: subcategoryId },
                   ],
                 }),
+            'status.enable': 'Активне',
           },
         },
         ...aggregateForAllProductsInThisCategory,
@@ -374,8 +376,10 @@ export class ProductsService {
         {
           $match: {
             ...filterOptions,
+            'status.enable': 'Активне',
           },
         },
+
         ...aggregateForFiltersAndSortedProducts,
       ])
       .sort(sortOptions)

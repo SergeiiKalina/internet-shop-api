@@ -29,6 +29,7 @@ export const addEffectivePrice = [
       __v: 1,
       minImage: 1,
       effectivePrice: 1,
+      status: 1,
     },
   },
 ];
@@ -126,6 +127,7 @@ export const aggregateForFiltersAndSortedProducts = [
       __v: 1,
       minImage: 1,
       effectivePrice: 1,
+      status: 1,
     },
   },
 ];
