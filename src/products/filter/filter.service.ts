@@ -32,22 +32,26 @@ export class ProductFilterService {
     ];
 
     const price = {
-      max: products.length ? 9999 : 0,
+      max: 0,
       min: products.length ? 9999 : 0,
     };
 
     products.forEach((el) => {
-      if (el.price > price.max) {
-        if (el.discount) {
+      if (el.discount) {
+        if (el.discountPrice > price.max) {
           price.max = el.discountPrice;
-        } else {
+        }
+      } else {
+        if (el.price > price.max) {
           price.max = el.price;
         }
       }
-      if (el.price < price.min) {
-        if (el.discount) {
+      if (el.discount) {
+        if (el.discountPrice < price.min) {
           price.min = el.discountPrice;
-        } else {
+        }
+      } else {
+        if (el.price < price.min) {
           price.min = el.price;
         }
       }
