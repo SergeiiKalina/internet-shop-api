@@ -55,15 +55,16 @@ export class PurchaseService {
     await this.mailerService.orderGood(
       salesman.email,
       data,
-      product._id.toString(),
+      salesman,
       product,
+      purchase,
     );
     await this.mailerService.sendInfoAboutOrder(
       data.email,
-      salesman.email,
-      salesman.numberPhone,
+      data,
+      salesman,
       product,
-      data.quantity,
+      purchase,
     );
     return purchase;
   }

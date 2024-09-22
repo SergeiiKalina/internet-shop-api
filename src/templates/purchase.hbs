@@ -1,0 +1,93 @@
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Jost:ital,wght@0,100..900;1,100..900&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&display=swap');
+   
+  .button_link{
+
+    font-family: Nunito Sans, sans-serif;
+    font-style: normal;
+    background: transparent;
+      color: hsl(126, 53%, 52%);
+margin: 0 auto;
+      padding: 12px 50px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid #43C550; 
+      border-radius: 12px;
+      text-decoration: none;
+     
+  
+  }
+  .button_wrapper{
+    display: flex;
+  }
+  
+  .footer_link{
+    font-family: Nunito Sans, sans-serif;
+    font-size: 18px;
+  margin-top: 48px;
+  }
+  .link{
+   
+    font-weight: 700;
+    color: #0670EB;
+  }
+  main {
+    width: 667px;
+  }
+  .price{
+font-size: 22px; font-weight: 700; font-family: Nunito Sans, sans-serif; display:flex; align-items: center;
+  }
+  .container{
+    width: 667px;
+  }
+    </style>
+<div class="container">
+      <div style="display: flex; align-items: center;  font-family: Jost, sans-serif; font-weight: 700;">
+        <div>
+          <img src="https://i.ibb.co/PwGySw5/Logo.png" alt="logo" width="60"/>
+        </div>
+        <h1 style="font-size: 32px; font-weight: 700; margin: 0 0 0 12px; ">DealOk</h1>
+      </div>
+    </header>
+    <main>
+      <p style="font-size: 32px; font-weight: 400;   font-family: Jost, sans-serif; margin-top: 26px;">Ваше замовлення підтверджено!</p>
+      <p style="font-size: 18px; font-weight: 400;   font-family: Nunito Sans, sans-serif; margin-top: 24px;">Вітаємо, {{firstName}}!</p>
+      <p style="font-size: 18px; font-weight: 400;   font-family: Nunito Sans, sans-serif; margin-top: 24px;">Дякуємо за ваш вибір і замовлення в нашому маркетплейсі. 
+        Ваше замовлення №{{count}} успішно підтверджено.</p>
+        <ul style="list-style: none; font-family: Nunito Sans, sans-serif; padding: 0;">
+            <li><span style="font-weight: 800;">Деталі замовлення</span></li>
+            <li><span style="font-weight: 800; margin-right: 5px;">Дата замовлення:</span>{{data}}</li>
+            <li><span style="font-weight: 800; margin-right: 5px;">Сумма замовлення:</span>{{sum}}</li>
+            <li><span style="font-weight: 800; margin-right: 5px;">Спосіб оплати:</span>{{pay}}</li>
+            <li><span style="font-weight: 800; margin-right: 5px;">Отримувач:</span>{{firstName}} {{lastName}}, {{tel}}</li>
+        </ul>
+        <header><h3 style="color: #FFC107; font-size: 18ox; font-family: Nunito Sans, sans-serif;">{{status}}</h3></header>
+      <section style="display: flex; justify-content: space-between; align-items: center; margin: 0; text-align: center;">
+    <div style="display: flex; align-items: center;">
+        <div style="width: 88px; height: 88px; border-radius: 50%; overflow: hidden; display: flex; justify-content: center; align-items: center;">
+            <img src="{{photo}}" alt="product photo" style="width: 100%; height: 100%; object-fit: cover;" />
+        </div>
+        <span style="font-size: 18px; font-weight: 400; font-family: Nunito Sans, sans-serif; text-align: center; margin-left: 12px; height: 88px; line-height: 88px;">
+            {{title}}
+        </span>
+    </div>
+    <div style="display: flex; height: 100%; margin: auto 0 auto auto; font-size: 22px; font-weight: 700; font-family: Nunito Sans, sans-serif;">
+        {{price}}₴
+    </div>
+</section>
+<section>
+    <h3 style="font-size: 18px; font-weight: 700;   font-family: Nunito Sans, sans-serif;">Зв'яжіться з продавцем</h3>
+    <p style="font-size: 18px; font-weight: 400;   font-family: Nunito Sans, sans-serif;">Якщо у вас є будь-які питання або 
+        вам потрібна допомога, ви можете зв’язатись з продавцем за телефоном {{salesmanPhone}}.</p>
+</section>
+   
+   <div class="button_wrapper"><a class="button_link"  href="https://yevhenii-sulim.github.io/marketplace/user_page/my_story_order">Мої Замовлення</a></div> 
+    <p class="footer_link">
+        З повагою, <br/>Команда DealOk 
+    </p>
+</main>
+    <footer style="display: flex; height: 64px; background-color: #BBEAC0; align-items: center;">
+    <p style="display:flex; align-items:center; margin-left: 16px; font-size: 16px; font-family: Jost, sans-serif;">© Розробка "Team Challenge" 2024. Усі права захищені.</p>
+    </footer></div>

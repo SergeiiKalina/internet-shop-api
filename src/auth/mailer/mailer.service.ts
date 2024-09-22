@@ -3,6 +3,8 @@ import { Injectable } from '@nestjs/common';
 import { MailerService } from '@nestjs-modules/mailer';
 import { CreatePurchaseDto } from 'src/purchase/dto/create-purchase.dto';
 import { Product } from 'src/products/product.model';
+import Purchase from 'src/purchase/purchase.model';
+import { User } from '../user.model';
 
 @Injectable()
 export class Mailer {
@@ -36,28 +38,35 @@ export class Mailer {
   public orderGood(
     to: string,
     user: CreatePurchaseDto,
-    productId: string,
+    salesman: User,
     product: Product,
+    purchase: Purchase,
   ) {
     this.mailerService
       .sendMail({
         to,
         from: 'Marketplace',
         subject: 'Нове замовлення на DealOk',
-        html: `
-        <p>Назва товару: ${product.title} </p>
-        <p>Айді товару: ${productId} </p>
-        <p>Кількість: ${user.quantity}</p>
-          <p>Данні замовника:</p>
-          <p>Ім'я: ${user.firstName} ${user.lastName}</p>
-          <p> ${user.email ? 'Email:' + user.email : ''}</p>
-          <p>Телефон: ${user.tel}</p>
-          <p>Місто: ${user.town[0]}</p>
-          <p>Відділення пошти: ${user.postOffice}</p>
-          <p>${user.building ? 'Будівля:' + user.building : ''}</p>
-          <p>Спосіб доставки: ${user.wayDelivery}</p>
-          <p>Спосіб оплати: ${user.pay}</p>
-        `,
+        template: './myOrder',
+        context: {
+          quantity: user.quantity,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          count: product.count,
+          data: purchase.createDate,
+          status: purchase.status,
+          photo: product.minImage,
+          sum: product.discount
+            ? product.discountPrice * purchase.quantity
+            : product.price * purchase.quantity,
+          title: product.title,
+          price: product.discount ? product.discountPrice : product.price,
+          salesmanPhone: salesman.numberPhone,
+          tel: user.tel,
+          pay: purchase.pay,
+          address: purchase.town[0] + ' ' + purchase.postOffice,
+          email: user.email ? user.email : 'нема',
+        },
       })
       .catch((e) => {
         console.log(e);
@@ -66,24 +75,34 @@ export class Mailer {
 
   public async sendInfoAboutOrder(
     to: string,
-    emailProducer: string,
-    numberPhoneProducer: string,
+    user: CreatePurchaseDto,
+    salesman: User,
     product: Product,
-    quantity: number,
+    purchase: Purchase,
   ) {
     await this.mailerService
       .sendMail({
         to,
         from: 'Marketplace',
         subject: 'Нове замовлення на DealOk',
-        html: `
-          <p>Інформація про замовлення</p>
-          <p>Назва товару: ${product.title} </p> <!-- Перевірка правильності виклику -->
-          <p>Кількість: ${quantity}</p>
-          <p>Інформація про продавця:</p>
-          <p>Емаіл: ${emailProducer} </p>
-          <p>Номер телефону: ${numberPhoneProducer} </p>
-        `,
+        template: './purchase',
+        context: {
+          quantity: user.quantity,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          count: product.count,
+          data: purchase.createDate,
+          status: purchase.status,
+          photo: product.minImage,
+          sum: product.discount
+            ? product.discountPrice * purchase.quantity
+            : product.price * purchase.quantity,
+          title: product.title,
+          price: product.discount ? product.discountPrice : product.price,
+          salesmanPhone: salesman.numberPhone,
+          tel: user.tel,
+          pay: purchase.pay,
+        },
       })
       .catch((e) => {
         console.log(e);
