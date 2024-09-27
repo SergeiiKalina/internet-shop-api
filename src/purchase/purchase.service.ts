@@ -51,7 +51,7 @@ export class PurchaseService {
     salesman.soldGoods.push(purchase.id);
 
     await salesman.save();
-
+    console.log(product);
     await this.mailerService.orderGood(
       salesman.email,
       data,

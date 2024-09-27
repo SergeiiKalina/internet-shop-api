@@ -5,10 +5,14 @@ import { CreatePurchaseDto } from 'src/purchase/dto/create-purchase.dto';
 import { Product } from 'src/products/product.model';
 import Purchase from 'src/purchase/purchase.model';
 import { User } from '../user.model';
+import { DateService } from 'src/date/date.service';
 
 @Injectable()
 export class Mailer {
-  constructor(private readonly mailerService: MailerService) {}
+  constructor(
+    private readonly mailerService: MailerService,
+    private readonly dateService: DateService,
+  ) {}
 
   public sendMail(
     to: string,
@@ -53,7 +57,9 @@ export class Mailer {
           firstName: user.firstName,
           lastName: user.lastName,
           count: product.count,
-          data: purchase.createDate,
+          data: this.dateService.getFormattedCreateDate(
+            new Date(purchase.createDate),
+          ),
           status: purchase.status,
           photo: product.minImage,
           sum: product.discount
@@ -91,7 +97,9 @@ export class Mailer {
           firstName: user.firstName,
           lastName: user.lastName,
           count: product.count,
-          data: purchase.createDate,
+          data: this.dateService.getFormattedCreateDate(
+            new Date(purchase.createDate),
+          ),
           status: purchase.status,
           photo: product.minImage,
           sum: product.discount

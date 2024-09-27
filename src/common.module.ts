@@ -20,6 +20,7 @@ import { UserService } from './user/user.service';
 import { PurchaseService } from './purchase/purchase.service';
 import { Mailer } from './auth/mailer/mailer.service';
 import { CounterProducts, CounterSchema } from './products/counter.model';
+import { DateService } from './date/date.service';
 
 @Module({
   imports: [
@@ -48,6 +49,7 @@ import { CounterProducts, CounterSchema } from './products/counter.model';
     UserService,
     PurchaseService,
     Mailer,
+    DateService,
   ],
   exports: [
     MongooseModule,
@@ -61,6 +63,7 @@ import { CounterProducts, CounterSchema } from './products/counter.model';
     UserService,
     PurchaseService,
     Mailer,
+    DateService,
   ],
 })
 export default class CommonModule {}
