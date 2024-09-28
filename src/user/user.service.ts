@@ -127,7 +127,7 @@ export class UserService {
     }
 
     Object.assign(user, updateUserDto);
-    user.profilePictureSrc = profilePictureSrc ? profilePictureSrc : '';
+    user.profilePictureSrc = file ? profilePictureSrc : user.profilePictureSrc;
     user.password = updateUserDto.password ? newPassword : user.password;
     await user.save();
     return user;

@@ -161,7 +161,10 @@ export const aggregateForAllProductsInThisCategory = [
     },
   },
   {
-    $unwind: '$category',
+    $unwind: {
+      path: '$category',
+      preserveNullAndEmptyArrays: true,
+    },
   },
   {
     $group: {
@@ -169,10 +172,30 @@ export const aggregateForAllProductsInThisCategory = [
       title: { $first: '$title' },
       category: { $first: '$category.mainCategory' },
       subCategory: { $first: '$subCategory' },
-      parameters: { $first: '$parameters' },
+      parameters: {
+        $first: {
+          size: '$parameters.size',
+          state: '$parameters.state',
+          brand: '$parameters.brand',
+          eco: '$parameters.eco',
+          isUkraine: '$parameters.isUkraine',
+          sex: '$parameters.sex',
+        },
+      },
+      colors: { $push: '$parameters.color' },
       price: { $first: '$price' },
       discount: { $first: '$discount' },
       discountPrice: { $first: '$discountPrice' },
+    },
+  },
+  {
+    $addFields: {
+      'parameters.color': '$colors',
+    },
+  },
+  {
+    $project: {
+      colors: 0,
     },
   },
 ];
