@@ -9,7 +9,7 @@ export default class Purchase {
     required: true,
     type: String,
     enum: statusPurchase,
-    default: 'Очікується відправки',
+    default: 'Очікується відправка',
   })
   status: string;
   @Prop({ required: true, type: String })

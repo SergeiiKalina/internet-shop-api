@@ -3,7 +3,7 @@ import { IsEnum, IsString } from 'class-validator';
 
 export const statusPurchase = [
   'Виконано',
-  'Очікується відправки',
+  'Очікується відправка',
   'Скасовано',
 ] as const;
 
@@ -12,7 +12,7 @@ export default class ChangeStatusDto {
     description: `Status must be only (${statusPurchase.map((el) => ' ' + el)})`,
     type: String,
     enum: statusPurchase,
-    default: 'Очікується відправки',
+    default: 'Очікується відправка',
   })
   @IsString()
   @IsEnum(statusPurchase, {
